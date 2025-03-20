@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Separator, Container, Theme } from '@radix-ui/themes';
-import { ArrowLeftIcon, EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
+import { EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAllMonitors, Monitor } from '../../api/monitors';
 import { getAllAgents, Agent } from '../../api/agents';
@@ -35,7 +34,6 @@ interface StatusConfigWithDetails {
 }
 
 const StatusPageConfig = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
