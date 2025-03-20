@@ -1,0 +1,26 @@
+name = "xugou-backend"
+main = "src/index.ts"
+compatibility_date = "2025-03-10"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+[env.production]
+vars = { NODE_ENV = "production" }
+
+# 添加定时触发器，每分钟执行一次监控检查
+[triggers]
+crons = ["* * * * *"]
+
+[env.development]
+vars = { NODE_ENV = "development" }
+
+[[d1_databases]]
+binding = "DB"
+database_name = "xugou_db"
+database_id = "32a2ca5f-3a77-4b08-965e-804612557880"
+preview_database_id = "ec71b62b-0775-4026-88be-15938a9e2745"
+
+[vars]
+JWT_SECRET = "your-secret-key-change-in-production" 

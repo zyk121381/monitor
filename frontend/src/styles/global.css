@@ -1,0 +1,184 @@
+/* 全局样式设置 */
+:root {
+  --max-content-width: 1200px;
+  --content-padding: 0 16px;
+  --header-height: 64px;
+  --footer-height: 56px;
+  --page-top-spacing: 24px;
+  --section-spacing: 16px;
+  
+  /* 基础字体设置 */
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 重置默认样式 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* 链接样式 */
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+/* 标题样式 */
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* 按钮基础样式 */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* 浅色主题设置 */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  
+  a:hover {
+    color: #747bff;
+  }
+  
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* App样式 */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+/* 页面容器样式 */
+.page-container {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--content-padding);
+}
+
+/* 主要内容区域样式 */
+.main-content {
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  width: 100%;
+}
+
+/* 详情页顶部间隙 */
+.detail-page {
+  padding-top: var(--page-top-spacing);
+}
+
+/* 详情页标题栏 */
+.detail-header {
+  margin-bottom: var(--section-spacing);
+}
+
+/* 详情页内容区域 */
+.detail-content {
+  margin-top: var(--section-spacing);
+}
+
+/* 表单输入样式 */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.text-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid var(--gray-7);
+  border-radius: 4px;
+  background-color: var(--color-panel);
+  color: var(--gray-12);
+  transition: border-color 0.2s ease;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent-8);
+  box-shadow: 0 0 0 1px var(--accent-8);
+}
+
+.text-input::placeholder {
+  color: var(--gray-9);
+}
+
+/* 通用卡片样式 */
+.card {
+  padding: 2em;
+}
+
+/* 响应式布局辅助类 */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+} 
