@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Button, Card, Badge, Tabs, Grid, Table, Avatar } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Button, Card, Badge, Tabs, Grid, Avatar } from '@radix-ui/themes';
 import { ArrowLeftIcon, Pencil1Icon, Cross2Icon, ReloadIcon, ClockIcon, InfoCircledIcon, LapTimerIcon, DesktopIcon, GlobeIcon, LaptopIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAgent, Agent, deleteAgent } from '../../api/agents';
-import ResourceBar from '../../components/ResourceBar';
 import ClientResourceSection from '../../components/ClientResourceSection';
 
 // 定义客户端状态颜色映射
@@ -13,14 +12,6 @@ const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
   inactive: "red",
   connecting: "yellow",
   unknown: "gray"
-};
-
-// 日志级别颜色映射
-const logLevelColors: Record<string, "red" | "green" | "yellow" | "gray" | "blue"> = {
-  error: "red",
-  warning: "yellow",
-  info: "blue",
-  debug: "gray"
 };
 
 // 客户端详情包含系统资源信息的扩展接口
@@ -110,21 +101,7 @@ const AgentDetail = () => {
     fetchAgentData();
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '未知';
-    
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(date);
-  };
-
-  const formatUptime = (seconds: number, agent: AgentWithResources) => {
+  const formatUptime = (agent: AgentWithResources) => {
     // 如果有最后活动时间，计算从创建到最后活动的时间差
     if (agent.updated_at) {
       const lastSeenDate = new Date(agent.updated_at);
@@ -288,7 +265,7 @@ const AgentDetail = () => {
               <Flex align="center" gap="2">
                 <LapTimerIcon />
                 <Text as="div" size="2" weight="bold">运行时间:</Text>
-                <Text as="div" size="2">{formatUptime(agent.uptime, agent)}</Text>
+                <Text as="div" size="2">{formatUptime(agent)}</Text>
               </Flex>
               
               <Flex align="center" gap="2">

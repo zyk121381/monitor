@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Card, Button, TextField, Switch, Checkbox, TextArea, Tabs, Separator, Container, Theme } from '@radix-ui/themes';
-import { ArrowLeftIcon, EyeOpenIcon, CopyIcon, CheckIcon, ExternalLinkIcon, PlusIcon } from '@radix-ui/react-icons';
+import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Separator, Container, Theme } from '@radix-ui/themes';
+import { ArrowLeftIcon, EyeOpenIcon, CopyIcon, CheckIcon, ExternalLinkIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAllMonitors, Monitor } from '../../api/monitors';
 import { getAllAgents, Agent } from '../../api/agents';

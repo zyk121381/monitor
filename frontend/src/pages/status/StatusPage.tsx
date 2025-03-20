@@ -1,30 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Flex, Heading, Text, Card, Grid, Badge, Tooltip } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, ExclamationTriangleIcon, ClockIcon, GlobeIcon } from '@radix-ui/react-icons';
-import { getStatusPageData, StatusPageData, StatusAgent } from '../../api/status';
-import { Monitor, MonitorStatusHistory } from '../../api/monitors';
+import { Box, Flex, Heading, Text, Card, Grid, Badge } from '@radix-ui/themes';
+import { getStatusPageData, StatusAgent } from '../../api/status';
+import { Monitor } from '../../api/monitors';
 import ClientResourceSection from '../../components/ClientResourceSection';
 import MonitorCard from '../../components/MonitorCard';
-
-// 定义CSS动画
-const pulseAnimation = `
-  @keyframes pulse {
-    0% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(var(--green-9-rgb), 0.7);
-    }
-    
-    70% {
-      transform: scale(1);
-      box-shadow: 0 0 0 10px rgba(var(--green-9-rgb), 0);
-    }
-    
-    100% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(var(--green-9-rgb), 0);
-    }
-  }
-`;
 
 // 定义一个样式常量用于卡片
 const cardStyles = {
@@ -50,7 +29,6 @@ const StatusPage = () => {
   const [pageTitle, setPageTitle] = useState<string>('系统状态');
   const [pageDescription, setPageDescription] = useState<string>('实时监控系统状态');
   const [error, setError] = useState<string | null>(null);
-  const dataFetchedRef = useRef(false);
   const requestInProgressRef = useRef(false); // 新增：跟踪请求是否正在进行中
   const fetchControllerRef = useRef<AbortController | null>(null); // 新增：用于取消重复请求
 
@@ -130,29 +108,6 @@ const StatusPage = () => {
       }
     };
   }, []); // 只在组件挂载时执行一次
-
-  // 状态徽章颜色映射
-  const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
-    up: 'green',
-    down: 'red',
-    active: 'green',
-    inactive: 'gray',
-  };
-
-  // 状态图标映射
-  const StatusIcon = ({ status }: { status: string }) => {
-    switch (status) {
-      case 'up':
-      case 'active':
-        return <CheckCircledIcon style={{ color: 'var(--green-9)' }} />;
-      case 'down':
-        return <CrossCircledIcon style={{ color: 'var(--red-9)' }} />;
-      case 'inactive':
-        return <ClockIcon style={{ color: 'var(--gray-9)' }} />;
-      default:
-        return <ClockIcon style={{ color: 'var(--gray-9)' }} />;
-    }
-  };
 
   // 错误显示
   if (error) {

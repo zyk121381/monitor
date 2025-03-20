@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Button, Card, Table, Badge, IconButton, Tooltip, Select } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Button, Card, Table, Badge, IconButton, Tooltip, Select, TextField } from '@radix-ui/themes';
 import { MagnifyingGlassIcon, Cross2Icon, InfoCircledIcon, ReloadIcon, BellIcon, CheckIcon } from '@radix-ui/react-icons';
-import * as TextField from '@radix-ui/themes/dist/esm/components/text-field';
 
 // 定义事件严重性颜色映射
 const severityColors: Record<string, "red" | "orange" | "yellow" | "blue" | "gray"> = {

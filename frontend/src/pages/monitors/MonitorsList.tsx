@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Table, Badge, Card, IconButton, Grid, Tabs } from '@radix-ui/themes';
 import { PlusIcon, Pencil1Icon, TrashIcon, CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon, LayoutIcon, ViewGridIcon, ReloadIcon, InfoCircledIcon } from '@radix-ui/react-icons';
-import { getAllMonitors, deleteMonitor, Monitor, MonitorStatusHistory } from '../../api/monitors';
-import HeartbeatGrid from '../../components/HeartbeatGrid';
+import { getAllMonitors, deleteMonitor, Monitor } from '../../api/monitors';
 import MonitorCard from '../../components/MonitorCard';
 
 const MonitorsList = () => {

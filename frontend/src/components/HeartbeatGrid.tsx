@@ -2,7 +2,7 @@ import { Box, Flex, Text } from '@radix-ui/themes';
 import { MonitorStatusHistory } from '../api/monitors';
 
 // 心跳网格组件 - 类似uptime-kuma的点阵网格
-const HeartbeatGrid = ({ status, uptime, history = [] }: { status: string, uptime: number, history?: (MonitorStatusHistory | string)[] }) => {
+const HeartbeatGrid = ({ uptime, history = [] }: { uptime: number, history?: (MonitorStatusHistory | string)[] }) => {
   // 根据状态确定颜色
   const getColor = (itemStatus: string) => {
     switch (itemStatus) {
@@ -40,9 +40,6 @@ const HeartbeatGrid = ({ status, uptime, history = [] }: { status: string, uptim
       return timestamp;
     }
   };
-
-  // 最多显示72个时间点
-  const maxPoints = 72;
   
   // 准备显示数据
   let displayHistory: { status: string, timestamp?: string }[] = [];
@@ -61,7 +58,7 @@ const HeartbeatGrid = ({ status, uptime, history = [] }: { status: string, uptim
   let emptyBoxes: any[] = [];
   if (displayHistory.length < 24) {
     // 至少显示24个点，不足的用空白点补充
-    emptyBoxes = Array.from({ length: 24 - displayHistory.length }, (_, i) => ({
+    emptyBoxes = Array.from({ length: 24 - displayHistory.length }, (_) => ({
       status: 'empty',
     }));
   }

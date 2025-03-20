@@ -1,4 +1,4 @@
-import { Box, Theme } from '@radix-ui/themes';
+import { Box } from '@radix-ui/themes';
 import '../styles/components.css';
 
 /**

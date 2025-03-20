@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Button, Card, Flex, Heading, Text, Box } from '@radix-ui/themes';
+import { Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { useAuth } from '../../contexts/AuthContext';
 import './auth.css';
 

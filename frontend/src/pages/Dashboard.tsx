@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Box, Flex, Heading, Text, Grid, Button, Container, Theme } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, ClockIcon, GlobeIcon, ExclamationTriangleIcon, ArrowRightIcon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, CrossCircledIcon, ClockIcon, GlobeIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Link } from 'react-router-dom';
 import { getAllMonitors, Monitor } from '../api/monitors';
 import { getAllAgents, Agent } from '../api/agents';

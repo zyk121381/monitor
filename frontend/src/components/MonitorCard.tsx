@@ -1,6 +1,6 @@
 import { Box, Card, Flex, Text, Badge } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, ClockIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
-import { Monitor, MonitorStatusHistory } from '../api/monitors';
+import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons';
+import { Monitor } from '../api/monitors';
 import HeartbeatGrid from './HeartbeatGrid';
 import '../styles/components.css';
 
@@ -57,7 +57,6 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
           
         <Box pt="2" style={{ width: '100%' }}>
           <HeartbeatGrid 
-            status={monitor.status} 
             uptime={monitor.uptime} 
             history={monitor.history} 
           />

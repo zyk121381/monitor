@@ -3,9 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2025-03-10"
 compatibility_flags = ["nodejs_compat"]
 
-[build]
-command = "npm run build"
-
 [env.production]
 vars = { NODE_ENV = "production" }
 

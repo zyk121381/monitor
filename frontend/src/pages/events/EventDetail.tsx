@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Button, Card, Badge, Tabs, Grid, TextArea, Avatar } from '@radix-ui/themes';
-import { ArrowLeftIcon, CheckIcon, Cross2Icon, ReloadIcon, ClockIcon, InfoCircledIcon, PersonIcon } from '@radix-ui/react-icons';
+import { Box, Flex, Heading, Text, Button, Card, Badge, Tabs, Grid, TextArea } from '@radix-ui/themes';
+import { ArrowLeftIcon, CheckIcon, ReloadIcon, ClockIcon, InfoCircledIcon, PersonIcon } from '@radix-ui/react-icons';
 
 // 定义事件严重性颜色映射
 const severityColors: Record<string, "red" | "orange" | "yellow" | "blue" | "gray"> = {
@@ -454,21 +454,20 @@ const EventDetail = () => {
                 </Flex>
               ) : (
                 <Flex direction="column" gap="3">
-                  {timeline.map((item, index) => (
-                    <Card key={item.id} variant="surface">
-                      <Flex gap="3">
-                        <Box style={{ color: `var(--${getTimelineColor(item.type)}-9)` }}>
+                  {timeline.map((item) => (
+                    <Box key={item.id} className="timeline-item">
+                      <Flex gap="2" align="center">
+                        <Box className="timeline-icon" style={{ backgroundColor: getTimelineColor(item.type) }}>
                           {getTimelineIcon(item.type)}
                         </Box>
-                        <Box style={{ flex: 1 }}>
-                          <Flex justify="between" align="center" mb="1">
-                            <Text size="2" weight="bold">{item.user}</Text>
-                            <Text size="1" color="gray">{formatDate(item.timestamp)}</Text>
-                          </Flex>
-                          <Text size="2">{item.message}</Text>
+                        <Box>
+                          <Text size="2" weight="bold">{item.message}</Text>
+                          <Text size="1" color="gray">
+                            {item.user} · {formatDate(item.timestamp)}
+                          </Text>
                         </Box>
                       </Flex>
-                    </Card>
+                    </Box>
                   ))}
                 </Flex>
               )}

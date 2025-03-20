@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Button, Card, Table, Badge, IconButton, Dialog, Tooltip, Grid, Tabs } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Button, Card, Table, Badge, IconButton, Dialog, Grid, Tabs } from '@radix-ui/themes';
 import { PlusIcon, Cross2Icon, Pencil1Icon, InfoCircledIcon, ReloadIcon, LayoutIcon, ViewGridIcon } from '@radix-ui/react-icons';
 import { getAllAgents, deleteAgent, Agent } from '../../api/agents';
 import AgentCard from '../../components/AgentCard';

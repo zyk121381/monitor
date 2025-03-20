@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Grid, Badge, Tabs, Table } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, ExclamationTriangleIcon, ArrowLeftIcon, Pencil1Icon, TrashIcon, ReloadIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, CrossCircledIcon, ArrowLeftIcon, Pencil1Icon, TrashIcon, ReloadIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
-import { getMonitor, deleteMonitor, checkMonitor, Monitor, MonitorCheck, MonitorStatusHistory } from '../../api/monitors';
+import { getMonitor, deleteMonitor, checkMonitor, Monitor, MonitorStatusHistory } from '../../api/monitors';
 
 // 状态条组件 - 时间轴格子展示
-const StatusBar = ({ status, uptime, history = [] }: { status: string, uptime: number, history?: MonitorStatusHistory[] }) => {
+const StatusBar = ({ status, history = [] }: { status: string, uptime: number, history?: MonitorStatusHistory[] }) => {
   // 根据状态确定颜色
   const getColor = (itemStatus: string) => {
     switch (itemStatus) {

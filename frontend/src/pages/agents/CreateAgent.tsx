@@ -44,14 +44,6 @@ const CreateAgent = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // 复制完整命令
-  const handleCopyCommand = () => {
-    const command = `curl -sSL ${serverUrl}/agent/install | sudo bash -s -- --token=${token} --server=${serverUrl}`;
-    navigator.clipboard.writeText(command);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   // 处理服务端地址变更
   const handleServerUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setServerUrl(e.target.value);
