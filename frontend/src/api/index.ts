@@ -8,6 +8,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Cloudflare Pages 访问 Cloudflare Workers 时的跨域设置
+  withCredentials: false, // 不发送 cookies
 });
 
 // 请求拦截器

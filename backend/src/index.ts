@@ -54,7 +54,11 @@ const app = new Hono<{ Bindings: Bindings }>();
 // 中间件
 app.use('*', logger());
 app.use('*', cors({
-  origin: ['http://localhost:5173', 'https://XUGOU.pages.dev'], // 允许前端开发服务器和生产环境
+  origin: ['http://localhost:5173', 'https://xugou.pages.dev', 'https://api.xugou.mdzz.uk', 'https://www.xugou.mdzz.uk', 'https://xugou.mdzz.uk'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  exposeHeaders: ['Content-Length', 'Content-Type'],
+  maxAge: 86400,
   credentials: true,
 }));
 app.use('*', prettyJSON());
