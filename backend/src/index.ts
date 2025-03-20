@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
-import { jwt } from 'hono/jwt';
 import { Bindings } from './models/db';
 import { prettyJSON } from 'hono/pretty-json';
+import { checkAndInitializeDatabase } from './setup/initCheck';
 
 // 声明环境变量类型
 declare global {
@@ -93,14 +93,49 @@ app.get('/api/trigger-check', async (c) => {
   return c.json({ success: true, message: '监控检查已触发' });
 });
 
+// 数据库状态标志，用于记录数据库初始化状态
+let dbInitialized = false;
+
 // 导出 fetch 函数供 Cloudflare Workers 使用
 export default {
   // 处理 HTTP 请求
-  fetch: app.fetch.bind(app),
+  async fetch(request: Request, env: any, ctx: any) {
+    try {
+      // 如果数据库尚未初始化，则进行初始化检查
+      if (!dbInitialized) {
+        console.log('首次请求，检查数据库状态...');
+        try {
+          const initResult = await checkAndInitializeDatabase(env);
+          dbInitialized = true;
+          console.log('数据库检查结果:', initResult.message);
+        } catch (error) {
+          console.error('数据库初始化检查失败:', error);
+          // 即使初始化失败，也设置标志位以避免重复检查
+          dbInitialized = true;
+        }
+      }
+      
+      // 处理请求
+      return app.fetch(request, env, ctx);
+    } catch (error) {
+      console.error('请求处理错误:', error);
+      return new Response(JSON.stringify({ error: '服务器内部错误' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  },
   
   // 添加定时任务，每分钟执行一次监控检查和客户端状态检查
   async scheduled(event: any, env: any, ctx: any) {
     try {
+      // 首先检查数据库状态
+      if (!dbInitialized) {
+        const initResult = await checkAndInitializeDatabase(env);
+        dbInitialized = true;
+        console.log('数据库检查结果:', initResult.message);
+      }
+      
       // 执行所有定时任务
       await runScheduledTasks(event, env, ctx);
     } catch (error) {
