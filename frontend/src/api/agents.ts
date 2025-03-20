@@ -23,7 +23,7 @@ export interface Agent {
 
 export const generateToken = async () => {
   try {
-    const response = await api.post('/agents/token/generate');
+    const response = await api.post('/api/agents/token/generate');
     return response.data;
   } catch (error) {
     console.error('生成客户端注册令牌失败:', error);
@@ -36,7 +36,7 @@ export const generateToken = async () => {
 
 export const getAllAgents = async () => {
   try {
-    const response = await api.get('/agents');
+    const response = await api.get('/api/agents');
     return response.data;
   } catch (error) {
     console.error('获取客户端列表失败:', error);
@@ -57,7 +57,7 @@ export const updateAgentStatus = async (id: number, metrics: {
   network_tx: number;
 }) => {
   try {
-    const response = await api.post(`/agents/${id}/status`, metrics);
+    const response = await api.post(`/api/agents/${id}/status`, metrics);
     return response.data;
   } catch (error) {
     console.error('更新客户端状态失败:', error);
@@ -70,7 +70,7 @@ export const updateAgentStatus = async (id: number, metrics: {
 
 export const getAgent = async (id: number) => {
   try {
-    const response = await api.get(`/agents/${id}`);
+    const response = await api.get(`/api/agents/${id}`);
     return response.data;
   } catch (error) {
     console.error(`获取客户端 ${id} 失败:`, error);
@@ -83,7 +83,7 @@ export const getAgent = async (id: number) => {
 
 export const deleteAgent = async (id: number) => {
   try {
-    const response = await api.delete(`/agents/${id}`);
+    const response = await api.delete(`/api/agents/${id}`);
     return response.data;
   } catch (error) {
     console.error(`删除客户端 ${id} 失败:`, error);
@@ -103,7 +103,7 @@ export const updateAgent = async (id: number, data: {
   status?: string;
 }) => {
   try {
-    const response = await api.put(`/agents/${id}`, data);
+    const response = await api.put(`/api/agents/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`更新客户端 ${id} 失败:`, error);

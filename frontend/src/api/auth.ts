@@ -27,19 +27,19 @@ export interface AuthResponse {
 
 // 登录
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', data);
+  const response = await api.post<AuthResponse>('/api/auth/login', data);
   return response.data;
 };
 
 // 注册
 export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/register', data);
+  const response = await api.post<AuthResponse>('/api/auth/register', data);
   return response.data;
 };
 
 // 获取当前用户信息
 export const getCurrentUser = async (): Promise<{ success: boolean; user?: User }> => {
-  const response = await api.get<{ success: boolean; user?: User }>('/auth/me');
+  const response = await api.get<{ success: boolean; user?: User }>('/api/auth/me');
   return response.data;
 };
 

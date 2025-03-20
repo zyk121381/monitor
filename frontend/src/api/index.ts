@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { ENV_API_BASE_URL, ENV_API_TIMEOUT } from '../config';
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: 'http://localhost:8787/api', // 本地开发环境
-  timeout: 10000,
+  baseURL: ENV_API_BASE_URL, // 从配置中获取API基础URL
+  timeout: ENV_API_TIMEOUT, // 从配置中获取超时设置
   headers: {
     'Content-Type': 'application/json',
   },

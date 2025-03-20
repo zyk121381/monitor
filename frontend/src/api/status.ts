@@ -67,7 +67,7 @@ export const getStatusPageConfig = async (): Promise<{
       success: boolean;
       message?: string;
       config?: StatusPageConfigResponse;
-    }>('/status/config');
+    }>('/api/status/config');
     return response.data;
   } catch (error) {
     console.error('获取状态页配置失败:', error);
@@ -89,7 +89,7 @@ export const saveStatusPageConfig = async (config: StatusPageConfig): Promise<{
     const response = await api.post<{
       success: boolean;
       message?: string;
-    }>('/status/config', config);
+    }>('/api/status/config', config);
     
     console.log('API响应 - 保存状态页配置：', response);
     
@@ -116,7 +116,7 @@ export const getStatusPageData = async (): Promise<{
 }> => {
   try {
     console.log('开始请求状态页数据...');
-    const response = await api.get('/status/data');
+    const response = await api.get('/api/status/data');
     console.log('状态页数据响应:', response.data);
     
     // 后端返回 { success: true, data: {...} } 格式
