@@ -268,7 +268,7 @@ const MonitorDetail = () => {
                         <Text>{monitor.status === 'up' ? '正常' : monitor.status === 'down' ? '故障' : '等待检查'}</Text>
                       </Flex>
                       <Text>正常运行时间:</Text>
-                      <Box gridColumn="2">
+                      <Box style={{ gridColumn: "2" }}>
                         <StatusBar status={monitor.status} uptime={monitor.uptime} history={monitor.history} />
                       </Box>
                       <Text>响应时间:</Text>

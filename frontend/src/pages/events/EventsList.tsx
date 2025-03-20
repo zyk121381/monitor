@@ -290,7 +290,7 @@ const EventsList = () => {
           
           <Box style={{ flex: 2 }}>
             <Text as="div" size="2" mb="1" weight="bold">搜索</Text>
-            <TextField.Root
+            <TextField.Input
               placeholder="搜索事件..." 
               value={filters.search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters(prev => ({ ...prev, search: e.target.value }))}
@@ -298,7 +298,7 @@ const EventsList = () => {
               <TextField.Slot>
                 <MagnifyingGlassIcon height="16" width="16" />
               </TextField.Slot>
-            </TextField.Root>
+            </TextField.Input>
           </Box>
         </Flex>
       </Card>

@@ -131,7 +131,7 @@ const EditAgent = () => {
                   <Text as="label" size="2" mb="1" weight="bold">
                     客户端名称 <Text size="2" color="red">*</Text>
                   </Text>
-                  <TextField.Root
+                  <TextField.Input
                     name="name"
                     value={formData.name}
                     onChange={handleChange}

@@ -381,8 +381,7 @@ const StatusPageConfig = () => {
                           <Text as="label" size="2" weight="medium" style={{ marginBottom: '6px', display: 'block' }}>
                             状态页标题
                           </Text>
-                          <TextField.Root
-                            name="title"
+                          <TextField.Input
                             value={config.title}
                             onChange={handleChange}
                             placeholder="输入状态页标题"
@@ -409,7 +408,7 @@ const StatusPageConfig = () => {
                             公共访问URL
                           </Text>
                           <Flex gap="2">
-                            <TextField.Root
+                            <TextField.Input
                               value={config.publicUrl}
                               readOnly
                               style={{ flex: 1 }}
@@ -505,7 +504,7 @@ const StatusPageConfig = () => {
                           <Text as="label" size="2" weight="medium" style={{ marginBottom: '6px', display: 'block' }}>
                             Logo URL (可选)
                           </Text>
-                          <TextField.Root
+                          <TextField.Input
                             name="logoUrl"
                             value={config.logoUrl}
                             onChange={handleChange}

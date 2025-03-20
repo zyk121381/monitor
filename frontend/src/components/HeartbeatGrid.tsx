@@ -69,14 +69,13 @@ const HeartbeatGrid = ({ uptime, history = [] }: { uptime: number, history?: (Mo
   
   // 每个点的大小
   const pointSize = 12;
-  const gap = 2;
 
   return (
     <Box>
       {/* 多行网格点 */}
-      <Flex direction="column" gap={gap + "px"}>
+      <Flex direction="column" gap="2">
         {Array.from({ length: rows }).map((_, rowIndex) => (
-          <Flex key={rowIndex} gap={gap + "px"}>
+          <Flex key={rowIndex} gap="2">
             {displayHistory.slice(rowIndex * pointsPerRow, (rowIndex + 1) * pointsPerRow).map((item, index) => (
               <Box
                 key={`${rowIndex}-${index}`}

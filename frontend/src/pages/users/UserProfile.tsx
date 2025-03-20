@@ -120,7 +120,7 @@ const UserProfile = () => {
                 <Flex direction="column" gap="3">
                   <Flex direction="column" gap="1">
                     <Text size="2" weight="medium">用户名</Text>
-                    <TextField.Root
+                    <TextField.Input
                       value={username}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
                       required
@@ -129,7 +129,7 @@ const UserProfile = () => {
                   
                   <Flex direction="column" gap="1">
                     <Text size="2" weight="medium">电子邮箱</Text>
-                    <TextField.Root
+                    <TextField.Input
                       type="email"
                       value={email}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
@@ -153,7 +153,7 @@ const UserProfile = () => {
                 <Flex direction="column" gap="3">
                   <Flex direction="column" gap="1">
                     <Text size="2" weight="medium">当前密码</Text>
-                    <TextField.Root
+                    <TextField.Input
                       type="password"
                       value={currentPassword}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)}
@@ -163,7 +163,7 @@ const UserProfile = () => {
                   
                   <Flex direction="column" gap="1">
                     <Text size="2" weight="medium">新密码</Text>
-                    <TextField.Root
+                    <TextField.Input
                       type="password"
                       value={newPassword}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
@@ -173,7 +173,7 @@ const UserProfile = () => {
                   
                   <Flex direction="column" gap="1">
                     <Text size="2" weight="medium">确认新密码</Text>
-                    <TextField.Root
+                    <TextField.Input
                       type="password"
                       value={confirmPassword}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}

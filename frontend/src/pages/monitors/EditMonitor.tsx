@@ -215,7 +215,7 @@ const EditMonitor = () => {
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
                       监控名称 *
                     </Text>
-                    <TextField.Root
+                    <TextField.Input
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
@@ -228,7 +228,7 @@ const EditMonitor = () => {
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
                       URL *
                     </Text>
-                    <TextField.Root
+                    <TextField.Input
                       name="url"
                       value={formData.url}
                       onChange={handleChange}
@@ -262,7 +262,7 @@ const EditMonitor = () => {
                       <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
                         检查间隔（分钟）*
                       </Text>
-                      <TextField.Root
+                      <TextField.Input
                         name="interval"
                         type="number"
                         value={formData.interval.toString()}
@@ -279,7 +279,7 @@ const EditMonitor = () => {
                       <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
                         超时时间（秒）*
                       </Text>
-                      <TextField.Root
+                      <TextField.Input
                         name="timeout"
                         type="number"
                         value={formData.timeout.toString()}
@@ -294,7 +294,7 @@ const EditMonitor = () => {
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
                       预期状态码 *
                     </Text>
-                    <TextField.Root
+                    <TextField.Input
                       name="expectedStatus"
                       type="number"
                       value={formData.expectedStatus.toString()}
@@ -322,14 +322,14 @@ const EditMonitor = () => {
                           {headers.map((header, index) => (
                             <Table.Row key={index}>
                               <Table.Cell>
-                                <TextField.Root
+                                <TextField.Input
                                   placeholder="Header Name"
                                   value={header.key}
                                   onChange={(e) => handleHeaderChange(index, 'key', e.target.value)}
                                 />
                               </Table.Cell>
                               <Table.Cell>
-                                <TextField.Root
+                                <TextField.Input
                                   placeholder="Header Value"
                                   value={header.value}
                                   onChange={(e) => handleHeaderChange(index, 'value', e.target.value)}
