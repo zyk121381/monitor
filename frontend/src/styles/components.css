@@ -159,7 +159,7 @@
 
 /* 服务项样式 */
 .service-item {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 8px;
   transition: all 0.2s ease;
   margin-bottom: 6px;
@@ -171,7 +171,7 @@
 .service-item:hover {
   background-color: var(--gray-3);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
 /* 自定义复选框样式 */
@@ -194,12 +194,13 @@
   position: relative;
   cursor: pointer;
   display: inline-block;
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--gray-7);
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--gray-6);
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-sizing: border-box;
+  background-color: var(--gray-1);
 }
 
 /* 选中状态的样式 */
@@ -207,7 +208,7 @@
 .custom-checkbox label.checked {
   background-color: var(--blue-9);
   border-color: var(--blue-9);
-  box-shadow: 0 0 0 2px rgba(0, 120, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(0, 120, 255, 0.1);
 }
 
 /* 选中状态的勾选图标 */
@@ -215,21 +216,23 @@
 .custom-checkbox label.checked:after {
   content: '';
   position: absolute;
-  left: 8px;
-  top: 4px;
-  width: 6px;
-  height: 11px;
+  left: 7px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+  transition: all 0.2s ease;
 }
 
 .custom-checkbox input[type="checkbox"]:focus + label {
-  box-shadow: 0 0 0 3px rgba(0, 120, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 120, 255, 0.15);
 }
 
 .custom-checkbox input[type="checkbox"]:hover:not(:checked) + label {
-  background-color: var(--gray-4);
+  background-color: var(--gray-3);
+  border-color: var(--gray-7);
   transform: scale(1.05);
 }
 
@@ -251,10 +254,21 @@
   top: 0;
   z-index: 100;
   width: 100%;
-  backdrop-filter: blur(8px);
-  background-color: rgba(255, 255, 255, 0.85);
-  border-bottom: 1px solid var(--gray-4);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: rgb(255, 255, 255);
+  border-bottom: 1px solid var(--gray-3);
+  transition: all 0.3s ease;
+}
+
+.navbar-wrapper.scrolled {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(230, 230, 230, 0.7);
+}
+
+.navbar-wrapper:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .navbar-container {
@@ -262,17 +276,27 @@
 }
 
 .navbar-content {
-  height: 64px;
+  height: 60px;
+  transition: height 0.3s ease;
+}
+
+.scrolled .navbar-content {
+  height: 54px;
 }
 
 .navbar-logo-link {
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .navbar-logo-link:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
+}
+
+.navbar-logo-link:active {
+  transform: scale(0.98);
 }
 
 .navbar-logo {
@@ -280,49 +304,395 @@
   align-items: center;
   justify-content: center;
   color: var(--blue-9);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.navbar-logo-link:hover .navbar-logo {
+  color: var(--blue-10);
+  transform: rotate(-5deg);
 }
 
 .navbar-links {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 .nav-link {
   text-decoration: none;
   color: inherit;
+  position: relative;
+  overflow: hidden;
 }
 
 .nav-button {
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  border-radius: 6px;
   position: relative;
+  color: var(--gray-10);
+  font-weight: 500;
+  padding: 8px 12px;
 }
 
 .nav-button:hover {
+  background-color: var(--gray-2);
+  color: var(--gray-12);
   transform: translateY(-1px);
 }
 
-.nav-link.active .nav-button::after {
+.nav-button:active {
+  transform: translateY(0);
+}
+
+/* 删除激活状态的下划线，改为背景色变化 */
+.nav-link.active .nav-button {
+  background-color: var(--gray-2);
+  color: var(--blue-9);
+  font-weight: 600;
+}
+
+/* 添加底部滑入动画效果 */
+.nav-link::after {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: -2px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 3px;
-  border-radius: 3px;
+  width: 0;
+  height: 2px;
   background-color: var(--blue-9);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 20px;
+  left: calc(50% - 10px);
+  opacity: 1;
+}
+
+/* 添加点击波纹效果 */
+.nav-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+  z-index: -1;
+}
+
+.nav-button:active::before {
+  width: 120%;
+  height: 300%;
+  opacity: 1;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0s;
+}
+
+/* 配置页按钮样式 */
+.config-button {
+  min-width: 110px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  gap: 8px;
+  border-radius: 6px;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  margin: 0;
+  line-height: 1;
+  position: relative;
+  vertical-align: middle;
+}
+
+.config-button:hover {
+  transform: translateY(-1px);
+}
+
+.config-button:active {
+  transform: translateY(0);
+}
+
+.config-button [data-size="2"] {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.config-button svg {
+  display: inline-flex;
+  vertical-align: middle;
+  flex-shrink: 0;
+  position: relative;
+  top: 0;
+}
+
+.copy-button {
+  min-width: 80px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .user-menu-button {
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
+  border-radius: 8px;
+  padding: 6px 8px;
 }
 
 .user-menu-button:hover {
-  background-color: var(--gray-3);
+  background-color: var(--gray-2);
+  transform: translateY(-1px);
+}
+
+.user-menu-button:active {
+  transform: translateY(0);
 }
 
 .user-dropdown {
   min-width: 220px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--gray-3);
+  animation: dropdown-fade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+  overflow: hidden;
+}
+
+/* 下拉菜单项动画 */
+[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item] {
+  transition: all 0.2s ease;
+  position: relative;
+  margin: 2px 4px;
+  border-radius: 6px;
+  background: transparent;
+}
+
+[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item]:hover {
+  background-color: var(--gray-2);
+  transform: translateX(2px);
+}
+
+[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item][data-accent-color="red"]:hover {
+  background-color: var(--red-2);
+}
+
+/* 菜单分隔线动画 */
+[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-separator] {
+  margin: 6px 0;
+  transition: opacity 0.2s ease;
+}
+
+/* 菜单内容动画 */
+[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item] [data-size="2"] {
+  font-size: 13px;
+  transition: transform 0.2s ease;
+}
+
+[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item]:hover [data-size="2"] {
+  transform: translateX(2px);
+}
+
+@keyframes dropdown-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 页面切换过渡动画 */
+.main-content {
+  animation: page-fade-in 0.4s ease;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 标签页样式 */
+/* 配置页标签样式 */
+.config-tabs {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.config-tabs-list {
+  border-bottom: 1px solid var(--gray-4) !important;
+  padding: 0 8px 0 4px;
+  margin-bottom: 0;
+  gap: 4px;
+}
+
+.tab-trigger {
+  transition: all 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  margin: 0 2px;
+  font-size: 14px;
+  position: relative;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 10px 14px;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  letter-spacing: 0.01em;
+  color: var(--gray-11);
+}
+
+.tab-trigger:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background-color: var(--gray-2);
+}
+
+.tab-trigger[data-state="active"] {
+  color: var(--blue-9);
+  font-weight: 600;
+  background-color: transparent;
+}
+
+.tab-trigger[data-state="active"]::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--blue-9);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: scaleX(0.45);
+  transform-origin: center;
+}
+
+.tab-trigger:hover {
+  color: var(--blue-10);
+  background-color: var(--gray-3);
+}
+
+.tab-trigger:not([data-state="active"]):hover::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--gray-5);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: scaleX(0.3);
+  transform-origin: center;
+}
+
+/* 添加点击效果 */
+.tab-trigger:active {
+  transform: scale(0.97);
+  background-color: var(--gray-4);
+}
+
+/* 标签内容区样式 */
+[data-radix-tabs-content] {
+  padding-top: 24px !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* CSS重置，删除不必要的边框 */
+[role="tablist"],
+[role="tab"],
+[role="tabpanel"] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[role="tabpanel"] {
+  animation: tab-content-fade-in 0.3s ease;
+}
+
+.tab-content-container {
+  border-top: none !important;
+}
+
+.tab-content {
+  outline: none !important;
+  border: none !important;
+}
+
+@keyframes tab-content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 标签列表样式 */
+[data-orientation="horizontal"] {
+  border-bottom: 1px solid var(--gray-4) !important;
+  padding-bottom: 0 !important;
+}
+
+/* 表单输入字段样式 */
+[data-radix-text-field-input] {
+  transition: all 0.2s ease;
+  border-color: var(--gray-5);
+  font-size: 14px !important;
+  box-sizing: border-box;
+  padding-right: 8px;
+}
+
+[data-radix-text-field-input]:hover {
+  border-color: var(--gray-7);
+}
+
+[data-radix-text-field-input]:focus {
+  border-color: var(--blue-8);
+  box-shadow: 0 0 0 1px var(--blue-5);
+}
+
+[data-radix-text-field-input][readonly] {
+  background-color: var(--gray-1);
+  color: var(--gray-11);
+  cursor: default;
+}
+
+textarea {
+  transition: all 0.2s ease;
+  border-color: var(--gray-5) !important;
+  resize: vertical;
+}
+
+textarea:hover {
+  border-color: var(--gray-7) !important;
+}
+
+textarea:focus {
+  border-color: var(--blue-8) !important;
+  box-shadow: 0 0 0 1px var(--blue-5);
 }
 
 /* 布局样式 */

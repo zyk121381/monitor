@@ -3,7 +3,7 @@
  */
 
 // 优先从环境变量获取API基础URL
-export const ENV_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.xugou.mdzz.uk';
+export const ENV_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787';
 
 // 优先从环境变量获取API请求超时时间
 export const ENV_API_TIMEOUT = import.meta.env.VITE_API_TIMEOUT || 10000;

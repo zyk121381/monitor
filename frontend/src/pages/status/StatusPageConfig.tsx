@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Separator, Container, Theme } from '@radix-ui/themes';
-import { ArrowLeftIcon, EyeOpenIcon, CopyIcon, CheckIcon, ExternalLinkIcon } from '@radix-ui/react-icons';
+import { ArrowLeftIcon, EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAllMonitors, Monitor } from '../../api/monitors';
 import { getAllAgents, Agent } from '../../api/agents';
@@ -315,7 +315,7 @@ const StatusPageConfig = () => {
         <div className="page-container detail-page">
           <Flex justify="center" align="center" style={{ minHeight: '50vh' }}>
             <Text size="3" style={{ color: 'var(--red-9)' }}>{error}</Text>
-            <Button variant="soft" onClick={() => window.location.reload()} ml="2">
+            <Button variant="ghost" size="2" className="nav-button config-button" onClick={() => window.location.reload()} ml="2">
               重试
             </Button>
           </Flex>
@@ -342,22 +342,34 @@ const StatusPageConfig = () => {
         <Container>
           <div className="page-container detail-page">
             {/* 美化顶部导航栏 */}
-            <Box mb="6">
-              <Flex justify="between" align="center" className="detail-header" py="4">
-                <Flex align="center" gap="3">
-                  <Button variant="soft" size="2" radius="full" onClick={() => navigate('/dashboard')}>
-                    <ArrowLeftIcon width="18" height="18" />
-                  </Button>
-                  <Heading size="6" weight="medium">状态页配置</Heading>
+            <Box mb="5">
+              <Flex justify="between" align="center" className="detail-header" py="3">
+                <Flex align="center" gap="2">
+                  <Heading size="5" weight="medium">状态页配置</Heading>
                 </Flex>
-                <Flex gap="3">
-                  <Button variant="soft" size="3" highContrast onClick={handlePreview}>
+                <Flex gap="3" align="center">
+                  <Button variant="ghost" size="2" className="nav-button config-button" onClick={handlePreview}>
                     <EyeOpenIcon width="16" height="16" />
-                    <Text ml="2">预览状态页</Text>
-                    <ExternalLinkIcon width="14" height="14" style={{ marginLeft: '4px' }} />
+                    <Text size="2">预览状态页</Text>
                   </Button>
-                  <Button size="3" variant="solid" onClick={handleSave} disabled={saving}>
-                    {saving ? '保存中...' : '保存配置'}
+                  <Button variant="soft" size="2" className="nav-button config-button" onClick={handleSave} disabled={saving}>
+                    {saving ? (
+                      <>
+                        <span style={{ width: '16px', height: '16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z" fill="currentColor">
+                              <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite" />
+                            </path>
+                          </svg>
+                        </span>
+                        <Text size="2">保存中...</Text>
+                      </>
+                    ) : (
+                      <>
+                        <CheckIcon width="16" height="16" />
+                        <Text size="2">保存配置</Text>
+                      </>
+                    )}
                   </Button>
                 </Flex>
               </Flex>
@@ -366,16 +378,16 @@ const StatusPageConfig = () => {
 
             <div className="detail-content">
               <Card size="2">
-                <Tabs.Root defaultValue="general">
-                  <Tabs.List>
-                    <Tabs.Trigger value="general">基本设置</Tabs.Trigger>
-                    <Tabs.Trigger value="services">API服务设置</Tabs.Trigger>
-                    <Tabs.Trigger value="agents">客户端设置</Tabs.Trigger>
-                    <Tabs.Trigger value="appearance">外观设置</Tabs.Trigger>
+                <Tabs.Root defaultValue="general" className="config-tabs">
+                  <Tabs.List className="config-tabs-list">
+                    <Tabs.Trigger value="general" className="tab-trigger">基本设置</Tabs.Trigger>
+                    <Tabs.Trigger value="services" className="tab-trigger">API服务设置</Tabs.Trigger>
+                    <Tabs.Trigger value="agents" className="tab-trigger">客户端设置</Tabs.Trigger>
+                    <Tabs.Trigger value="appearance" className="tab-trigger">外观设置</Tabs.Trigger>
                   </Tabs.List>
 
-                  <Box pt="6" px="1">
-                    <Tabs.Content value="general">
+                  <Box pt="5" px="2" className="tab-content-container">
+                    <Tabs.Content value="general" className="tab-content">
                       <Flex direction="column" gap="5">
                         <Box>
                           <Text as="label" size="2" weight="medium" style={{ marginBottom: '6px', display: 'block' }}>
@@ -408,31 +420,48 @@ const StatusPageConfig = () => {
                             公共访问URL
                           </Text>
                           <Flex gap="2">
-                            <TextField.Input
-                              value={config.publicUrl}
-                              readOnly
-                              style={{ flex: 1 }}
-                              size="3"
-                            />
-                            <Button variant="soft" size="3" onClick={handleCopyUrl}>
-                              {copied ? <CheckIcon /> : <CopyIcon />}
-                              <Text ml="2">{copied ? '已复制' : '复制'}</Text>
+                            <Box style={{ flex: 1, position: 'relative' }}>
+                              <TextField.Input
+                                value={config.publicUrl}
+                                readOnly
+                                style={{ 
+                                  width: '100%', 
+                                  overflow: 'hidden', 
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  paddingRight: '16px'
+                                }}
+                                size="3"
+                              />
+                            </Box>
+                            <Button variant="ghost" size="2" className="nav-button copy-button" onClick={handleCopyUrl}>
+                              {copied ? (
+                                <>
+                                  <CheckIcon width="16" height="16" />
+                                  <Text size="2">已复制</Text>
+                                </>
+                              ) : (
+                                <>
+                                  <CopyIcon width="16" height="16" />
+                                  <Text size="2">复制</Text>
+                                </>
+                              )}
                             </Button>
                           </Flex>
-                          <Text size="1" color="gray" style={{ marginTop: '8px' }}>
+                          <Text size="1" color="gray" style={{ marginTop: '6px', display: 'block', lineHeight: '1.5' }}>
                             此URL可以公开分享，无需登录即可访问
                           </Text>
                         </Box>
 
-                        <Box style={{ background: 'var(--blue-2)', padding: '12px', borderRadius: '6px' }}>
-                          <Text as="div" size="2" color="blue">
+                        <Box style={{ background: 'var(--gray-2)', padding: '12px 14px', borderRadius: '8px', marginTop: '4px' }}>
+                          <Text as="div" size="2" color="gray" style={{ lineHeight: '1.5' }}>
                             注意：如果您没有选择任何API服务或客户端，对应的部分将不会在状态页上显示。
                           </Text>
                         </Box>
                       </Flex>
                     </Tabs.Content>
 
-                    <Tabs.Content value="services">
+                    <Tabs.Content value="services" className="tab-content">
                       <Flex direction="column" gap="5">
                         <Text size="2" color="gray" mb="3">选择要在状态页上显示的API服务</Text>
                         
@@ -465,7 +494,7 @@ const StatusPageConfig = () => {
                       </Flex>
                     </Tabs.Content>
                     
-                    <Tabs.Content value="agents">
+                    <Tabs.Content value="agents" className="tab-content">
                       <Flex direction="column" gap="5">
                         <Text size="2" color="gray" mb="3">选择要在状态页上显示的客户端</Text>
                         
@@ -498,7 +527,7 @@ const StatusPageConfig = () => {
                       </Flex>
                     </Tabs.Content>
 
-                    <Tabs.Content value="appearance">
+                    <Tabs.Content value="appearance" className="tab-content">
                       <Flex direction="column" gap="5">
                         <Box>
                           <Text as="label" size="2" weight="medium" style={{ marginBottom: '6px', display: 'block' }}>
