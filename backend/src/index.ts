@@ -51,10 +51,10 @@ import { monitorTask, runScheduledTasks } from './tasks';
 // 创建Hono应用
 const app = new Hono<{ Bindings: Bindings }>();
 
-// 中间件
+// 中间件，需要作为服务端接收所有来源客户端的请求
 app.use('*', logger());
 app.use('*', cors({
-  origin: ['http://localhost:5173', 'https://xugou.pages.dev', 'https://api.xugou.mdzz.uk', 'https://www.xugou.mdzz.uk', 'https://xugou.mdzz.uk'],
+  origin: (origin) => origin || '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length', 'Content-Type'],
@@ -62,6 +62,13 @@ app.use('*', cors({
   credentials: true,
 }));
 app.use('*', prettyJSON());
+
+// 在 Workers 环境中，您可能需要设置这些响应头
+app.use('*', async (c, next) => {
+  await next();
+  c.header('Access-Control-Allow-Origin', c.req.header('origin') || '*');
+  c.header('Access-Control-Allow-Credentials', 'true');
+});
 
 // 公共路由
 app.get('/', (c) => c.json({ message: 'XUGOU API 服务正在运行' }));
