@@ -5,10 +5,43 @@ import { generateToken } from '../utils/jwt';
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
 
+// 清理30天以前的历史记录
+async function cleanupOldRecords(c: any) {
+  try {
+    console.log('开始清理30天以前的历史记录...');
+    
+    // 清理监控状态历史记录
+    const deleteStatusHistoryResult = await c.env.DB.prepare(`
+      DELETE FROM monitor_status_history 
+      WHERE timestamp < datetime('now', '-30 days')
+    `).run();
+    
+    // 清理监控检查记录
+    const deleteChecksResult = await c.env.DB.prepare(`
+      DELETE FROM monitor_checks 
+      WHERE checked_at < datetime('now', '-30 days')
+    `).run();
+    
+    console.log(`清理完成：删除了 ${deleteStatusHistoryResult.meta?.changes || 0} 条状态历史记录，${deleteChecksResult.meta?.changes || 0} 条检查记录`);
+    
+    return {
+      success: true,
+      statusHistoryDeleted: deleteStatusHistoryResult.meta?.changes || 0,
+      checksDeleted: deleteChecksResult.meta?.changes || 0
+    };
+  } catch (error) {
+    console.error('清理历史记录出错:', error);
+    return { success: false, error: String(error) };
+  }
+}
+
 // 监控检查的主要函数
 async function checkMonitors(c: any) {
   try {
     console.log('开始执行监控检查...');
+    
+    // 清理30天以前的历史记录
+    await cleanupOldRecords(c);
     
     // 获取当前时间
     const now = new Date();
@@ -94,11 +127,18 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
        VALUES (?, ?, datetime('now'))`
     ).bind(monitor.id, status).run();
     
+    // 记录检查详情
+    await c.env.DB.prepare(
+      `INSERT INTO monitor_checks (monitor_id, status, response_time, status_code, checked_at) 
+       VALUES (?, ?, ?, ?, datetime('now'))`
+    ).bind(monitor.id, status, responseTime, response.status).run();
+    
     // 更新监控项状态
     await c.env.DB.prepare(
       `UPDATE monitors 
-       SET status = 'down', 
+       SET status = ?, 
            last_checked = datetime('now'),
+           response_time = ?,
            uptime = (
              SELECT ROUND((COUNT(CASE WHEN status = 'up' THEN 1 ELSE NULL END) * 100.0 / COUNT(*)), 2)
              FROM monitor_status_history
@@ -107,7 +147,7 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
              LIMIT 100
            )
        WHERE id = ?`
-    ).bind(monitor.id, monitor.id).run();
+    ).bind(status, responseTime, monitor.id, monitor.id).run();
     
     console.log(`监控项检查完成: ${monitor.name}, 状态: ${status}, 响应时间: ${responseTime}ms`);
     
@@ -125,11 +165,18 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
        VALUES (?, ?, datetime('now'))`
     ).bind(monitor.id, 'down').run();
     
+    // 记录检查详情
+    await c.env.DB.prepare(
+      `INSERT INTO monitor_checks (monitor_id, status, response_time, status_code, error, checked_at) 
+       VALUES (?, ?, ?, ?, ?, datetime('now'))`
+    ).bind(monitor.id, 'down', 0, 0, error.message).run();
+    
     // 更新监控项状态
     await c.env.DB.prepare(
       `UPDATE monitors 
        SET status = 'down', 
            last_checked = datetime('now'),
+           response_time = 0,
            uptime = (
              SELECT ROUND((COUNT(CASE WHEN status = 'up' THEN 1 ELSE NULL END) * 100.0 / COUNT(*)), 2)
              FROM monitor_status_history
