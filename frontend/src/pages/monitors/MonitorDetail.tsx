@@ -4,9 +4,12 @@ import { Box, Flex, Heading, Text, Button, Card, Grid, Badge, Tabs, Table } from
 import { CheckCircledIcon, CrossCircledIcon, ArrowLeftIcon, Pencil1Icon, TrashIcon, ReloadIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getMonitor, deleteMonitor, checkMonitor, Monitor, MonitorStatusHistory } from '../../api/monitors';
+import { useTranslation } from 'react-i18next';
 
 // 状态条组件 - 时间轴格子展示
 const StatusBar = ({ status, history = [] }: { status: string, uptime: number, history?: MonitorStatusHistory[] }) => {
+  const { t } = useTranslation();
+  
   // 根据状态确定颜色
   const getColor = (itemStatus: string) => {
     switch (itemStatus) {
@@ -69,7 +72,7 @@ const StatusBar = ({ status, history = [] }: { status: string, uptime: number, h
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = getColor(item.status);
           }}
-          title={`状态: ${item.status === 'up' ? '正常' : item.status === 'down' ? '故障' : '未知'}\n时间: ${new Date(item.timestamp).toLocaleString()}`}
+          title={`${t('common.status')}: ${item.status === 'up' ? t('monitor.status.normal') : item.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}\n${t('monitor.history.time')}: ${new Date(item.timestamp).toLocaleString()}`}
         />
       ))}
     </Flex>
@@ -85,6 +88,7 @@ const MonitorDetail = () => {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const { t } = useTranslation();
 
   // 获取监控详情数据
   const fetchMonitorData = async () => {
@@ -97,11 +101,11 @@ const MonitorDetail = () => {
       if (response.success && response.monitor) {
         setMonitor(response.monitor);
       } else {
-        setError(response.message || '获取监控详情失败');
+        setError(response.message || t('common.error.fetch'));
       }
     } catch (err) {
-      console.error('获取监控详情错误:', err);
-      setError('获取监控详情失败');
+      console.error(t('common.error.fetch'), err);
+      setError(t('common.error.fetch'));
     } finally {
       setLoading(false);
     }
@@ -132,17 +136,17 @@ const MonitorDetail = () => {
       if (response.success) {
         // 重新获取监控数据以显示最新状态
         await fetchMonitorData();
-        setToastMessage('监控检查已完成');
+        setToastMessage(t('monitor.checkCompleted'));
         setToastType('success');
         setToastOpen(true);
       } else {
-        setToastMessage(response.message || '检查失败');
+        setToastMessage(response.message || t('monitor.checkFailed'));
         setToastType('error');
         setToastOpen(true);
       }
     } catch (err) {
-      console.error('检查监控错误:', err);
-      setToastMessage('检查监控失败');
+      console.error(t('monitor.checkFailed'), err);
+      setToastMessage(t('monitor.checkFailed'));
       setToastType('error');
       setToastOpen(true);
     } finally {
@@ -152,13 +156,13 @@ const MonitorDetail = () => {
 
   // 删除监控
   const handleDelete = async () => {
-    if (!id || !window.confirm('确定要删除此监控吗？')) return;
+    if (!id || !window.confirm(t('monitors.delete.confirm'))) return;
     
     try {
       const response = await deleteMonitor(parseInt(id));
       
       if (response.success) {
-        setToastMessage('监控已成功删除');
+        setToastMessage(t('monitor.deleteSuccess'));
         setToastType('success');
         setToastOpen(true);
         
@@ -167,13 +171,13 @@ const MonitorDetail = () => {
           navigate('/monitors');
         }, 1500);
       } else {
-        setToastMessage(response.message || '删除监控失败');
+        setToastMessage(response.message || t('monitor.deleteFailed'));
         setToastType('error');
         setToastOpen(true);
       }
     } catch (err) {
-      console.error('删除监控错误:', err);
-      setToastMessage('删除监控失败');
+      console.error(t('monitor.deleteFailed'), err);
+      setToastMessage(t('monitor.deleteFailed'));
       setToastType('error');
       setToastOpen(true);
     }
@@ -202,7 +206,7 @@ const MonitorDetail = () => {
   if (loading) {
     return (
       <Box className="monitor-detail" p="4">
-        <Text>加载中...</Text>
+        <Text>{t('common.loading')}</Text>
       </Box>
     );
   }
@@ -211,9 +215,9 @@ const MonitorDetail = () => {
   if (error || !monitor) {
     return (
       <Box className="monitor-detail" p="4">
-        <Text style={{ color: 'var(--red-9)' }}>{error || '监控不存在'}</Text>
+        <Text style={{ color: 'var(--red-9)' }}>{error || t('monitor.notExist')}</Text>
         <Button variant="soft" onClick={() => navigate('/monitors')} mt="2">
-          返回监控列表
+          {t('monitor.returnToList')}
         </Button>
       </Box>
     );
@@ -229,30 +233,30 @@ const MonitorDetail = () => {
             </Button>
             <Heading size="6">{monitor.name}</Heading>
             <Badge color={statusColors[monitor.status]}>
-              {monitor.status === 'up' ? '正常' : monitor.status === 'down' ? '故障' : '等待检查'}
+              {monitor.status === 'up' ? t('monitor.status.normal') : monitor.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}
             </Badge>
           </Flex>
           <Flex gap="2">
             <Button variant="soft" onClick={handleCheck}>
               <ReloadIcon />
-              手动检查
+              {t('monitor.manualCheck')}
             </Button>
             <Button variant="soft" onClick={() => navigate(`/monitors/edit/${id}`)}>
               <Pencil1Icon />
-              编辑
+              {t('monitor.edit')}
             </Button>
             <Button variant="soft" color="red" onClick={handleDelete}>
               <TrashIcon />
-              删除
+              {t('monitor.delete')}
             </Button>
           </Flex>
         </Flex>
 
         <Tabs.Root defaultValue="overview">
           <Tabs.List>
-            <Tabs.Trigger value="overview">概览</Tabs.Trigger>
-            <Tabs.Trigger value="history">检查历史</Tabs.Trigger>
-            <Tabs.Trigger value="settings">配置详情</Tabs.Trigger>
+            <Tabs.Trigger value="overview">{t('monitor.tabs.overview')}</Tabs.Trigger>
+            <Tabs.Trigger value="history">{t('monitor.tabs.history')}</Tabs.Trigger>
+            <Tabs.Trigger value="settings">{t('monitor.tabs.settings')}</Tabs.Trigger>
           </Tabs.List>
 
           <Box pt="4" className="detail-content">
@@ -260,40 +264,40 @@ const MonitorDetail = () => {
               <Grid columns={{ initial: '1', sm: '2' }} gap="4">
                 <Card>
                   <Flex direction="column" gap="3">
-                    <Heading size="4">状态信息</Heading>
+                    <Heading size="4">{t('monitor.status.info')}</Heading>
                     <Grid columns="2" gap="3">
-                      <Text>状态:</Text>
+                      <Text>{t('common.status')}:</Text>
                       <Flex align="center" gap="1">
                         <StatusIcon status={monitor.status} />
-                        <Text>{monitor.status === 'up' ? '正常' : monitor.status === 'down' ? '故障' : '等待检查'}</Text>
+                        <Text>{monitor.status === 'up' ? t('monitor.status.normal') : monitor.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}</Text>
                       </Flex>
-                      <Text>正常运行时间:</Text>
+                      <Text>{t('monitor.uptime')}:</Text>
                       <Box style={{ gridColumn: "2" }}>
                         <StatusBar status={monitor.status} uptime={monitor.uptime} history={monitor.history} />
                       </Box>
-                      <Text>响应时间:</Text>
+                      <Text>{t('monitor.responseTime')}:</Text>
                       <Text>{monitor.response_time}ms</Text>
-                      <Text>最后检查:</Text>
-                      <Text>{monitor.last_checked || '尚未检查'}</Text>
+                      <Text>{t('monitor.lastCheck')}:</Text>
+                      <Text>{monitor.last_checked || t('monitor.notChecked')}</Text>
                     </Grid>
                   </Flex>
                 </Card>
 
                 <Card>
                   <Flex direction="column" gap="3">
-                    <Heading size="4">基本信息</Heading>
+                    <Heading size="4">{t('monitor.basicInfo')}</Heading>
                     <Grid columns="2" gap="3">
                       <Text>URL:</Text>
                       <Text>{monitor.url}</Text>
-                      <Text>方法:</Text>
+                      <Text>{t('monitor.method')}:</Text>
                       <Text>{monitor.method}</Text>
-                      <Text>检查间隔:</Text>
-                      <Text>{monitor.interval}秒</Text>
-                      <Text>超时时间:</Text>
-                      <Text>{monitor.timeout}秒</Text>
-                      <Text>预期状态码:</Text>
+                      <Text>{t('monitor.interval')}:</Text>
+                      <Text>{monitor.interval} {t('common.seconds')}</Text>
+                      <Text>{t('monitor.timeout')}:</Text>
+                      <Text>{monitor.timeout} {t('common.seconds')}</Text>
+                      <Text>{t('monitor.expectedStatus')}:</Text>
                       <Text>{monitor.expected_status}</Text>
-                      <Text>创建时间:</Text>
+                      <Text>{t('monitor.createTime')}:</Text>
                       <Text>{new Date(monitor.created_at).toLocaleString()}</Text>
                     </Grid>
                   </Flex>
@@ -303,16 +307,16 @@ const MonitorDetail = () => {
 
             <Tabs.Content value="history">
               <Card>
-                <Heading size="4" mb="3">检查历史</Heading>
+                <Heading size="4" mb="3">{t('monitor.checkHistory')}</Heading>
                 {monitor.checks && monitor.checks.length > 0 ? (
                   <Table.Root>
                     <Table.Header>
                       <Table.Row>
-                        <Table.ColumnHeaderCell>时间</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>状态</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>响应时间</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>状态码</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>错误</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>{t('monitor.history.time')}</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>{t('monitor.history.status')}</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>{t('monitor.history.responseTime')}</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>{t('monitor.history.statusCode')}</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>{t('monitor.history.error')}</Table.ColumnHeaderCell>
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
@@ -323,7 +327,7 @@ const MonitorDetail = () => {
                             <Flex align="center" gap="1">
                               <StatusIcon status={check.status} />
                               <Badge color={statusColors[check.status]}>
-                                {check.status === 'up' ? '正常' : '故障'}
+                                {check.status === 'up' ? t('monitor.status.normal') : t('monitor.status.failure')}
                               </Badge>
                             </Flex>
                           </Table.Cell>
@@ -335,35 +339,35 @@ const MonitorDetail = () => {
                     </Table.Body>
                   </Table.Root>
                 ) : (
-                  <Text>暂无检查历史记录</Text>
+                  <Text>{t('monitor.noCheckHistory')}</Text>
                 )}
               </Card>
             </Tabs.Content>
 
             <Tabs.Content value="settings">
               <Card>
-                <Heading size="4" mb="3">配置详情</Heading>
+                <Heading size="4" mb="3">{t('monitor.configDetails')}</Heading>
                 <Grid columns="2" gap="3">
-                  <Text>名称:</Text>
+                  <Text>{t('common.name')}:</Text>
                   <Text>{monitor.name}</Text>
                   <Text>URL:</Text>
                   <Text>{monitor.url}</Text>
-                  <Text>请求方法:</Text>
+                  <Text>{t('monitor.method')}:</Text>
                   <Text>{monitor.method}</Text>
-                  <Text>检查间隔:</Text>
-                  <Text>{monitor.interval}秒</Text>
-                  <Text>超时时间:</Text>
-                  <Text>{monitor.timeout}秒</Text>
-                  <Text>预期状态码:</Text>
+                  <Text>{t('monitor.interval')}:</Text>
+                  <Text>{monitor.interval} {t('common.seconds')}</Text>
+                  <Text>{t('monitor.timeout')}:</Text>
+                  <Text>{monitor.timeout} {t('common.seconds')}</Text>
+                  <Text>{t('monitor.expectedStatus')}:</Text>
                   <Text>{monitor.expected_status}</Text>
-                  <Text>请求头:</Text>
+                  <Text>{t('monitor.headers')}:</Text>
                   <Text style={{ overflowWrap: 'break-word' }}>
                     {typeof monitor.headers === 'string' ? monitor.headers : JSON.stringify(monitor.headers)}
                   </Text>
-                  <Text>请求体:</Text>
+                  <Text>{t('monitor.body')}:</Text>
                   <Text style={{ overflowWrap: 'break-word' }}>{monitor.body || '-'}</Text>
-                  <Text>状态:</Text>
-                  <Text>{monitor.active ? '激活' : '未激活'}</Text>
+                  <Text>{t('common.status')}:</Text>
+                  <Text>{monitor.active ? t('monitor.active') : t('monitor.inactive')}</Text>
                 </Grid>
               </Card>
             </Tabs.Content>
@@ -382,7 +386,7 @@ const MonitorDetail = () => {
             }}
           >
             <Toast.Title className="ToastTitle">
-              {toastType === 'success' ? '成功' : '错误'}
+              {toastType === 'success' ? t('common.success') : t('common.error')}
             </Toast.Title>
             <Toast.Description className="ToastDescription">
               {toastMessage}

@@ -4,6 +4,7 @@ import { Box, Flex, Heading, Text, Button, Card, TextField, Select, TextArea, Ta
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { createMonitor } from '../../api/monitors';
 import StatusCodeSelect from '../../components/StatusCodeSelect';
+import { useTranslation } from 'react-i18next';
 
 const CreateMonitor = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const CreateMonitor = () => {
     expectedStatus: 200,
     body: ''
   });
+  const { t } = useTranslation();
   
   // 请求头部分使用键值对数组
   const [headers, setHeaders] = useState<{ key: string; value: string }[]>([
@@ -93,11 +95,11 @@ const CreateMonitor = () => {
       if (response.success) {
         navigate('/monitors');
       } else {
-        alert(`创建失败: ${response.message || '未知错误'}`);
+        alert(`${t('monitor.form.createFailed')}: ${response.message || t('monitor.form.unknownError')}`);
       }
     } catch (error) {
-      console.error('创建监控错误:', error);
-      alert('创建监控失败，请稍后重试');
+      console.error(t('monitor.form.createFailed'), error);
+      alert(t('monitor.form.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -114,7 +116,7 @@ const CreateMonitor = () => {
             <Button variant="soft" size="1" onClick={() => navigate('/monitors')}>
               <ArrowLeftIcon />
             </Button>
-            <Heading size="6">创建监控</Heading>
+            <Heading size="6">{t('monitor.form.title.create')}</Heading>
           </Flex>
         </Flex>
 
@@ -125,13 +127,13 @@ const CreateMonitor = () => {
                 <Flex direction="column" gap="4">
                   <Box>
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                      监控名称 *
+                      {t('monitor.form.name')} *
                     </Text>
                     <TextField.Input
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="输入监控名称"
+                      placeholder={t('monitor.form.namePlaceholder')}
                       required
                     />
                   </Box>
@@ -144,14 +146,14 @@ const CreateMonitor = () => {
                       name="url"
                       value={formData.url}
                       onChange={handleChange}
-                      placeholder="输入要监控的URL"
+                      placeholder={t('monitor.form.urlPlaceholder')}
                       required
                     />
                   </Box>
 
                   <Box>
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                      请求方法 *
+                      {t('monitor.form.method')} *
                     </Text>
                     <Select.Root 
                       name="method" 
@@ -172,7 +174,7 @@ const CreateMonitor = () => {
                   <Flex gap="4">
                     <Box style={{ flex: 1 }}>
                       <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                        检查间隔（分钟）*
+                        {t('monitor.form.interval')} *
                       </Text>
                       <TextField.Input
                         name="interval"
@@ -183,13 +185,13 @@ const CreateMonitor = () => {
                         required
                       />
                       <Text size="1" color="gray">
-                        最小间隔 1 分钟
+                        {t('monitor.form.intervalMin')}
                       </Text>
                     </Box>
 
                     <Box style={{ flex: 1 }}>
                       <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                        超时时间（秒）*
+                        {t('monitor.form.timeout')} *
                       </Text>
                       <TextField.Input
                         name="timeout"
@@ -204,7 +206,7 @@ const CreateMonitor = () => {
 
                   <Box>
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                      预期状态码 *
+                      {t('monitor.form.expectedStatus')} *
                     </Text>
                     <StatusCodeSelect 
                       value={formData.expectedStatus}
@@ -215,14 +217,14 @@ const CreateMonitor = () => {
 
                   <Box>
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                      请求头
+                      {t('monitor.form.headers')}
                     </Text>
                     <Box style={{ border: '1px solid var(--gray-6)', borderRadius: '6px', padding: '8px', marginBottom: '8px' }}>
                       <Table.Root>
                         <Table.Header>
                           <Table.Row>
-                            <Table.ColumnHeaderCell>名称</Table.ColumnHeaderCell>
-                            <Table.ColumnHeaderCell>值</Table.ColumnHeaderCell>
+                            <Table.ColumnHeaderCell>{t('monitor.form.headerName')}</Table.ColumnHeaderCell>
+                            <Table.ColumnHeaderCell>{t('monitor.form.headerValue')}</Table.ColumnHeaderCell>
                             <Table.ColumnHeaderCell style={{ width: '40px' }}></Table.ColumnHeaderCell>
                           </Table.Row>
                         </Table.Header>
@@ -231,14 +233,14 @@ const CreateMonitor = () => {
                             <Table.Row key={index}>
                               <Table.Cell>
                                 <TextField.Input
-                                  placeholder="Header Name"
+                                  placeholder={t('monitor.form.headerNamePlaceholder')}
                                   value={header.key}
                                   onChange={(e) => handleHeaderChange(index, 'key', e.target.value)}
                                 />
                               </Table.Cell>
                               <Table.Cell>
                                 <TextField.Input
-                                  placeholder="Header Value"
+                                  placeholder={t('monitor.form.headerValuePlaceholder')}
                                   value={header.value}
                                   onChange={(e) => handleHeaderChange(index, 'value', e.target.value)}
                                 />
@@ -264,25 +266,25 @@ const CreateMonitor = () => {
                           onClick={() => setHeaders([...headers, { key: '', value: '' }])}
                         >
                           <PlusIcon />
-                          添加请求头
+                          {t('monitor.form.addHeader')}
                         </Button>
                       </Flex>
                     </Box>
                     <Text size="1" color="gray">
-                      添加请求头，例如：Content-Type: application/json
+                      {t('monitor.form.headersHelp')}
                     </Text>
                   </Box>
 
                   {showBodyField && (
                     <Box>
                       <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
-                        请求体
+                        {t('monitor.form.body')}
                       </Text>
                       <TextArea
                         name="body"
                         value={formData.body}
                         onChange={handleChange}
-                        placeholder="请求体内容"
+                        placeholder={t('monitor.form.bodyPlaceholder')}
                         style={{ minHeight: '100px' }}
                       />
                     </Box>
@@ -292,10 +294,10 @@ const CreateMonitor = () => {
 
               <Flex justify="end" mt="4" gap="2">
                 <Button variant="soft" onClick={() => navigate('/monitors')}>
-                  取消
+                  {t('monitor.form.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? '创建中...' : '创建监控'}
+                  {loading ? t('monitor.form.creating') : t('monitor.form.create')}
                   {!loading && <PlusIcon />}
                 </Button>
               </Flex>

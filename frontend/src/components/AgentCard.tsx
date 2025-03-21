@@ -3,6 +3,7 @@ import { GlobeIcon } from '@radix-ui/react-icons';
 import { Agent } from '../api/agents';
 import ClientResourceSection from './ClientResourceSection';
 import '../styles/components.css';
+import { useTranslation } from 'react-i18next';
 
 interface AgentCardProps {
   agent: Agent;
@@ -13,6 +14,8 @@ interface AgentCardProps {
  * 用于显示单个客户端的状态和资源使用情况
  */
 const AgentCard = ({ agent }: AgentCardProps) => {
+  const { t } = useTranslation();
+  
   // 解析获取资源使用情况
   let cpuUsage = 0;
   let memoryUsage = 0;
@@ -20,7 +23,7 @@ const AgentCard = ({ agent }: AgentCardProps) => {
   let networkRx = 0;
   let networkTx = 0;
   
-  console.log('AgentCard接收到的客户端数据:', agent);
+  console.log(t('agentCard.receivedData'), agent);
   
   try {
     // 直接从agent获取资源使用情况
@@ -33,7 +36,7 @@ const AgentCard = ({ agent }: AgentCardProps) => {
       networkRx = agent.network_rx || 0;
       networkTx = agent.network_tx || 0;
       
-      console.log('计算后的资源使用情况:', {
+      console.log(t('agentCard.calculatedResource'), {
         cpuUsage,
         memoryUsage,
         diskUsage,
@@ -41,10 +44,10 @@ const AgentCard = ({ agent }: AgentCardProps) => {
         networkTx
       });
     } else {
-      console.warn('客户端没有资源指标数据:', agent.id);
+      console.warn(t('agentCard.noMetrics'), agent.id);
     }
   } catch (e) {
-    console.error("解析客户端资源使用数据失败", e);
+    console.error(t('agentCard.resourceError'), e);
   }
   
   // 根据status属性判断状态
@@ -59,9 +62,9 @@ const AgentCard = ({ agent }: AgentCardProps) => {
 
   // 状态文本映射
   const statusText: { [key: string]: string } = {
-    'active': '活跃',
-    'inactive': '离线',
-    'connecting': '连接中'
+    'active': t('agentCard.status.active'),
+    'inactive': t('agentCard.status.inactive'),
+    'connecting': t('agentCard.status.connecting')
   };
 
   return (

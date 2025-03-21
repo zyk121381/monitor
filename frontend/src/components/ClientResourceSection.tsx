@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@radix-ui/themes';
 import ResourceBar from './ResourceBar';
 import '../styles/components.css';
+import { useTranslation } from 'react-i18next';
 
 interface ClientResourceSectionProps {
   cpuUsage: number;
@@ -44,6 +45,8 @@ const ClientResourceSection = ({
   networkRx = 0,
   networkTx = 0
 }: ClientResourceSectionProps) => {
+  const { t } = useTranslation();
+  
   // 格式化网络流量显示
   const rxFormatted = formatNetworkSpeed(networkRx);
   const txFormatted = formatNetworkSpeed(networkTx);
@@ -56,7 +59,7 @@ const ClientResourceSection = ({
           <Flex justify="between" align="center" mb="1">
             <Flex align="center" gap="2">
               <Box className="resource-indicator resource-indicator-cpu" />
-              <Text size="2" className="resource-label">CPU</Text>
+              <Text size="2" className="resource-label">{t('clientResource.cpu')}</Text>
             </Flex>
             <Text size="2" weight="medium">{cpuUsage.toFixed(1)}%</Text>
           </Flex>
@@ -68,7 +71,7 @@ const ClientResourceSection = ({
           <Flex justify="between" align="center" mb="1">
             <Flex align="center" gap="2">
               <Box className="resource-indicator resource-indicator-memory" />
-              <Text size="2" className="resource-label">内存</Text>
+              <Text size="2" className="resource-label">{t('clientResource.memory')}</Text>
             </Flex>
             <Text size="2" weight="medium">{memoryUsage.toFixed(1)}%</Text>
           </Flex>
@@ -80,7 +83,7 @@ const ClientResourceSection = ({
           <Flex justify="between" align="center" mb="1">
             <Flex align="center" gap="2">
               <Box className="resource-indicator resource-indicator-disk" />
-              <Text size="2" className="resource-label">磁盘</Text>
+              <Text size="2" className="resource-label">{t('clientResource.disk')}</Text>
             </Flex>
             <Text size="2" weight="medium">{diskUsage.toFixed(1)}%</Text>
           </Flex>
@@ -90,7 +93,7 @@ const ClientResourceSection = ({
         {/* 网络流量 */}
         <Box className="resource-item">
           <Flex justify="between" align="center" mb="1">
-            <Text size="2" className="resource-label">网络流量</Text>
+            <Text size="2" className="resource-label">{t('clientResource.network')}</Text>
           </Flex>
           <Flex gap="3" className="network-metrics">
             {/* 下载速率 */}
@@ -98,7 +101,7 @@ const ClientResourceSection = ({
               <Flex justify="between" align="center" mb="1">
                 <Flex align="center" gap="2">
                   <Box className="resource-indicator resource-indicator-download" />
-                  <Text size="2" className="resource-label">下载</Text>
+                  <Text size="2" className="resource-label">{t('clientResource.download')}</Text>
                 </Flex>
                 <Text size="2" weight="medium">{rxFormatted.text}</Text>
               </Flex>
@@ -110,7 +113,7 @@ const ClientResourceSection = ({
               <Flex justify="between" align="center" mb="1">
                 <Flex align="center" gap="2">
                   <Box className="resource-indicator resource-indicator-upload" />
-                  <Text size="2" className="resource-label">上传</Text>
+                  <Text size="2" className="resource-label">{t('clientResource.upload')}</Text>
                 </Flex>
                 <Text size="2" weight="medium">{txFormatted.text}</Text>
               </Flex>

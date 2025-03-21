@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Code, Separator } from '@radix-ui/themes';
 import { ArrowLeftIcon, CopyIcon, CheckIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { generateToken } from '../../api/agents';
+import { useTranslation } from 'react-i18next';
 
 const CreateAgent = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const CreateAgent = () => {
   const [copied, setCopied] = useState(false);
   // 获取当前浏览器访问的地址作为服务端地址
   const [serverUrl, setServerUrl] = useState('');
+  const { t } = useTranslation();
   
   // 生成服务端验证的 token
   useEffect(() => {
@@ -57,7 +59,7 @@ const CreateAgent = () => {
             <Button variant="soft" size="1" onClick={() => navigate('/agents')}>
               <ArrowLeftIcon />
             </Button>
-            <Heading size="6">添加客户端</Heading>
+            <Heading size="6">{t('agent.form.title.create')}</Heading>
           </Flex>
         </Flex>
 
@@ -74,7 +76,7 @@ const CreateAgent = () => {
                 <Flex gap="2">
                   <InfoCircledIcon />
                   <Text>
-                    客户端将在运行安装命令后自动添加到系统中，无需手动创建
+                    {t('agent.add.note')}
                   </Text>
                 </Flex>
               </Box>
@@ -82,7 +84,7 @@ const CreateAgent = () => {
               {/* 服务端地址 */}
               <Box>
                 <Text as="label" size="2" weight="bold" style={{ display: 'block', marginBottom: '6px' }}>
-                  服务端地址
+                  {t('agent.add.serverAddress')}
                 </Text>
                 <input 
                   type="text" 
@@ -95,20 +97,20 @@ const CreateAgent = () => {
                     border: '1px solid var(--gray-7)',
                     fontSize: '14px'
                   }}
-                  placeholder="请输入服务端地址，例如：https://xugou.example.com"
+                  placeholder={t('agent.add.serverAddressPlaceholder')}
                 />
                 <Text size="1" color="gray" style={{ marginTop: '6px' }}>
-                  请确保此地址可以从客户端服务器访问
+                  {t('agent.add.serverAddressHelp')}
                 </Text>
               </Box>
               
               {/* 客户端Token */}
               <Box>
                 <Text as="label" size="2" weight="bold" style={{ display: 'block', marginBottom: '6px' }}>
-                  注册Token
+                  {t('agent.add.registrationToken')}
                 </Text>
                 {loading ? (
-                  <Text>正在生成Token...</Text>
+                  <Text>{t('agent.add.generatingToken')}</Text>
                 ) : (
                   <>
                     <Flex gap="2">
@@ -125,11 +127,11 @@ const CreateAgent = () => {
                       </Text>
                       <Button variant="soft" onClick={handleCopyToken}>
                         {copied ? <CheckIcon /> : <CopyIcon />}
-                        {copied ? '已复制' : '复制'}
+                        {copied ? t('common.copied') : t('common.copy')}
                       </Button>
                     </Flex>
                     <Text size="1" color="gray" style={{ marginTop: '6px' }}>
-                      此令牌将用于您的客户端向服务器注册身份，有效期为24小时
+                      {t('agent.add.tokenHelp')}
                     </Text>
                   </>
                 )}
@@ -140,15 +142,15 @@ const CreateAgent = () => {
               {/* 安装指南 */}
               <Box>
                 <Flex align="baseline" gap="2" mb="3">
-                  <Heading size="4">安装指南</Heading>
-                  <Text size="2" color="gray">按照以下两个步骤安装并注册客户端</Text>
+                  <Heading size="4">{t('agent.add.installGuide')}</Heading>
+                  <Text size="2" color="gray">{t('agent.add.installSteps')}</Text>
                 </Flex>
                 
                 <Card variant="surface" style={{ backgroundColor: 'var(--gray-2)' }}>
                   <Flex direction="column" gap="4">
                     {/* 第一步：下载客户端二进制文件 */}
                     <Box>
-                      <Text as="div" size="2" weight="bold" mb="2">步骤 1: 下载客户端二进制文件</Text>
+                      <Text as="div" size="2" weight="bold" mb="2">{t('agent.add.step1')}</Text>
                       <Flex gap="2" direction="column">
                         <Code size="2" style={{ display: 'block', padding: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
                           {`curl -sSL https://xugou-agent.r2.dev/xugou-agent-latest -o xugou-agent && chmod +x xugou-agent`}
@@ -162,17 +164,17 @@ const CreateAgent = () => {
                           }} 
                           style={{ alignSelf: 'flex-end' }}
                         >
-                          {copied ? '已复制' : '复制命令'}
+                          {copied ? t('common.copied') : t('agents.copyCommand')}
                         </Button>
                       </Flex>
                       <Text size="1" color="gray" style={{ marginTop: '8px' }}>
-                        此命令将从 Cloudflare R2 存储下载最新版客户端二进制文件并赋予可执行权限
+                        {t('agent.add.step1Help')}
                       </Text>
                     </Box>
                     
                     {/* 第二步：运行并注册客户端 */}
                     <Box>
-                      <Text as="div" size="2" weight="bold" mb="2">步骤 2: 注册并启动客户端</Text>
+                      <Text as="div" size="2" weight="bold" mb="2">{t('agent.add.step2')}</Text>
                       <Flex gap="2" direction="column">
                         <Code size="2" style={{ display: 'block', padding: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
                           {`./xugou-agent start --server ${serverUrl} --token ${token} --interval 60`}
@@ -186,19 +188,19 @@ const CreateAgent = () => {
                           }} 
                           style={{ alignSelf: 'flex-end' }}
                         >
-                          {copied ? '已复制' : '复制命令'}
+                          {copied ? t('common.copied') : t('agents.copyCommand')}
                         </Button>
                       </Flex>
                       <Text size="1" color="gray" style={{ marginTop: '8px' }}>
-                        此命令将启动客户端，并使用生成的令牌自动注册到服务端。参数 interval 表示上报间隔（秒）
+                        {t('agent.add.step2Help')}
                       </Text>
                     </Box>
                     
                     {/* 设置为系统服务（可选） */}
                     <Box>
-                      <Text as="div" size="2" weight="bold" mb="2">（可选）将客户端设置为系统服务</Text>
+                      <Text as="div" size="2" weight="bold" mb="2">{t('agent.add.optionalSetup')}</Text>
                       <Text size="1" color="gray" style={{ marginBottom: '8px' }}>
-                        在 Linux/Unix 系统上，您可以使用以下命令创建系统服务
+                        {t('agent.add.optionalSetupHelp')}
                       </Text>
                       <Flex gap="2" direction="column">
                         <Code size="2" style={{ display: 'block', padding: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
@@ -245,7 +247,7 @@ sudo systemctl start xugou-agent.service`);
                           }} 
                           style={{ alignSelf: 'flex-end' }}
                         >
-                          {copied ? '已复制' : '复制命令'}
+                          {copied ? t('common.copied') : t('agents.copyCommand')}
                         </Button>
                       </Flex>
                     </Box>
@@ -259,7 +261,7 @@ sudo systemctl start xugou-agent.service`);
                   variant="soft"
                   onClick={() => navigate('/agents')}
                 >
-                  返回客户端列表
+                  {t('agent.add.returnToList')}
                 </Button>
               </Flex>
             </Flex>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -13,6 +14,7 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   
   // 检查是否有来自注册页面的消息
   useEffect(() => {
@@ -34,7 +36,7 @@ const Login = () => {
         setError(result.message);
       }
     } catch (err: any) {
-      setError(err.message || '登录失败，请检查您的凭据');
+      setError(err.message || t('login.error'));
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +47,7 @@ const Login = () => {
       <Flex justify="center" align="center" style={{ minHeight: 'calc(100vh - 130px)', padding: '2rem 0' }}>
         <Card style={{ width: '400px', padding: '2rem' }}>
           <Flex direction="column" gap="4">
-            <Heading align="center" size="6">登录</Heading>
+            <Heading align="center" size="6">{t('login.title')}</Heading>
             
             {message && (
               <Text color="green" align="center">{message}</Text>
@@ -59,7 +61,7 @@ const Login = () => {
               <Flex direction="column" gap="3">
                 <div className="input-wrapper">
                   <input 
-                    placeholder="用户名" 
+                    placeholder={t('login.username')} 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -69,7 +71,7 @@ const Login = () => {
                 
                 <div className="input-wrapper">
                   <input 
-                    placeholder="密码" 
+                    placeholder={t('login.password')} 
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -79,7 +81,7 @@ const Login = () => {
                 </div>
                 
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? '登录中...' : '登录'}
+                  {isLoading ? t('common.loading') : t('login.button')}
                 </Button>
               </Flex>
             </form>

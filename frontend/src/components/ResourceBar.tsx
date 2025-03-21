@@ -39,6 +39,7 @@ const ResourceBar = ({
   height = 8,
   animate = true
 }: ResourceBarProps) => {
+  
   // 确保值在0-100之间
   const safeValue = Math.min(Math.max(value, 0), 100);
   

@@ -4,6 +4,7 @@ import { Box, Flex, Heading, Text, Button, Table, Badge, Card, IconButton, Grid,
 import { PlusIcon, Pencil1Icon, TrashIcon, CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon, LayoutIcon, ViewGridIcon, ReloadIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { getAllMonitors, deleteMonitor, Monitor } from '../../api/monitors';
 import MonitorCard from '../../components/MonitorCard';
+import { useTranslation } from 'react-i18next';
 
 const MonitorsList = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const MonitorsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'list' | 'grid'>('grid');
+  const { t } = useTranslation();
 
   // 获取监控数据
   const fetchData = async () => {
@@ -21,11 +23,11 @@ const MonitorsList = () => {
       if (response.success && response.monitors) {
         setMonitors(response.monitors);
       } else {
-        setError(response.message || '获取监控数据失败');
+        setError(response.message || t('monitors.loadingError'));
       }
     } catch (err) {
-      console.error('获取监控数据错误:', err);
-      setError('获取监控数据失败');
+      console.error(t('monitors.loadingError'), err);
+      setError(t('monitors.loadingError'));
     } finally {
       setLoading(false);
     }
@@ -51,7 +53,7 @@ const MonitorsList = () => {
 
   // 处理删除
   const handleDelete = async (id: number) => {
-    if (!window.confirm('确定要删除此监控吗？')) return;
+    if (!window.confirm(t('monitors.delete.confirm'))) return;
     
     try {
       const response = await deleteMonitor(id);
@@ -60,11 +62,11 @@ const MonitorsList = () => {
         // 更新列表，移除已删除的监控
         setMonitors(monitors.filter(monitor => monitor.id !== id));
       } else {
-        alert(response.message || '删除监控失败');
+        alert(response.message || t('monitors.delete.failed'));
       }
     } catch (err) {
-      console.error('删除监控错误:', err);
-      alert('删除监控失败');
+      console.error(t('monitors.delete.failed'), err);
+      alert(t('monitors.delete.failed'));
     }
   };
 
@@ -92,7 +94,7 @@ const MonitorsList = () => {
     return (
       <Box className="page-container detail-page">
         <Flex justify="center" align="center" p="4">
-          <Text>加载中...</Text>
+          <Text>{t('common.loading')}</Text>
         </Flex>
       </Box>
     );
@@ -108,7 +110,7 @@ const MonitorsList = () => {
           </Flex>
         </Card>
         <Button variant="soft" onClick={() => window.location.reload()} mt="2">
-          重试
+          {t('monitors.retry')}
         </Button>
       </Box>
     );
@@ -118,7 +120,7 @@ const MonitorsList = () => {
     <Box>
       <div className="page-container detail-page">
         <Flex justify="between" align="center" className="detail-header">
-          <Heading size="6">API监控</Heading>
+          <Heading size="6">{t('monitors.pageTitle')}</Heading>
           <Flex gap="3">
             <Tabs.Root defaultValue="grid">
               <Tabs.List>
@@ -132,11 +134,11 @@ const MonitorsList = () => {
             </Tabs.Root>
             <Button onClick={handleRefresh} disabled={loading}>
               <ReloadIcon />
-              刷新
+              {t('monitors.refresh')}
             </Button>
             <Button onClick={() => navigate('/monitors/create')}>
               <PlusIcon />
-              添加监控
+              {t('monitors.create')}
             </Button>
           </Flex>
         </Flex>
@@ -145,10 +147,10 @@ const MonitorsList = () => {
           {monitors.length === 0 ? (
             <Card>
               <Flex direction="column" align="center" justify="center" p="6" gap="3">
-                <Text>没有找到监控</Text>
+                <Text>{t('monitors.notFound')}</Text>
                 <Button onClick={() => navigate('/monitors/create')}>
                   <PlusIcon />
-                  添加监控
+                  {t('monitors.addOne')}
                 </Button>
               </Flex>
             </Card>
@@ -157,12 +159,12 @@ const MonitorsList = () => {
             <Table.Root variant="surface">
               <Table.Header>
                 <Table.Row>
-                  <Table.ColumnHeaderCell>名称</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>URL</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>状态</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>响应时间</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>可用率</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>操作</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>{t('monitors.table.name')}</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>{t('monitors.table.url')}</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>{t('monitors.table.status')}</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>{t('monitors.table.responseTime')}</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>{t('monitors.table.uptime')}</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>{t('monitors.table.actions')}</Table.ColumnHeaderCell>
                 </Table.Row>
               </Table.Header>
 
@@ -179,7 +181,7 @@ const MonitorsList = () => {
                       <Flex align="center" gap="2">
                         <StatusIcon status={monitor.status} />
                         <Badge color={statusColors[monitor.status]}>
-                          {monitor.status === 'up' ? '正常' : monitor.status === 'down' ? '故障' : '等待检查'}
+                          {monitor.status === 'up' ? t('monitors.status.up') : monitor.status === 'down' ? t('monitors.status.down') : t('monitor.status.pending')}
                         </Badge>
                       </Flex>
                     </Table.Cell>
@@ -191,13 +193,13 @@ const MonitorsList = () => {
                     </Table.Cell>
                     <Table.Cell>
                       <Flex gap="2">
-                        <IconButton variant="soft" onClick={() => navigate(`/monitors/${monitor.id}`)} title="查看详情">
+                        <IconButton variant="soft" onClick={() => navigate(`/monitors/${monitor.id}`)} title={t('monitors.viewDetails')}>
                           <InfoCircledIcon />
                         </IconButton>
-                        <IconButton variant="soft" onClick={() => navigate(`/monitors/edit/${monitor.id}`)} title="编辑监控">
+                        <IconButton variant="soft" onClick={() => navigate(`/monitors/edit/${monitor.id}`)} title={t('monitors.edit')}>
                           <Pencil1Icon />
                         </IconButton>
-                        <IconButton variant="soft" color="red" onClick={() => handleDelete(monitor.id)} title="删除监控">
+                        <IconButton variant="soft" color="red" onClick={() => handleDelete(monitor.id)} title={t('monitors.delete')}>
                           <TrashIcon />
                         </IconButton>
                       </Flex>
@@ -221,13 +223,13 @@ const MonitorsList = () => {
                     }} 
                     gap="2"
                   >
-                    <IconButton variant="ghost" size="1" onClick={() => navigate(`/monitors/${monitor.id}`)} title="查看详情">
+                    <IconButton variant="ghost" size="1" onClick={() => navigate(`/monitors/${monitor.id}`)} title={t('monitors.viewDetails')}>
                       <InfoCircledIcon />
                     </IconButton>
-                    <IconButton variant="ghost" size="1" onClick={() => navigate(`/monitors/edit/${monitor.id}`)} title="编辑监控">
+                    <IconButton variant="ghost" size="1" onClick={() => navigate(`/monitors/edit/${monitor.id}`)} title={t('monitors.edit')}>
                       <Pencil1Icon />
                     </IconButton>
-                    <IconButton variant="ghost" size="1" color="red" onClick={() => handleDelete(monitor.id)} title="删除监控">
+                    <IconButton variant="ghost" size="1" color="red" onClick={() => handleDelete(monitor.id)} title={t('monitors.delete')}>
                       <TrashIcon />
                     </IconButton>
                   </Flex>

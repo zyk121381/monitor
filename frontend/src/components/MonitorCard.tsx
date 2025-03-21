@@ -3,6 +3,7 @@ import { CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon } from '@ra
 import { Monitor } from '../api/monitors';
 import HeartbeatGrid from './HeartbeatGrid';
 import '../styles/components.css';
+import { useTranslation } from 'react-i18next';
 
 interface MonitorCardProps {
   monitor: Monitor;
@@ -13,6 +14,8 @@ interface MonitorCardProps {
  * 用于显示单个API监控服务的状态信息
  */
 const MonitorCard = ({ monitor }: MonitorCardProps) => {
+  const { t } = useTranslation();
+  
   // 状态图标组件
   const StatusIcon = ({ status }: { status: string }) => {
     switch (status) {
@@ -35,9 +38,9 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
 
   // 状态文本映射
   const statusText: { [key: string]: string } = {
-    'up': '正常',
-    'down': '故障',
-    'pending': '等待检查'
+    'up': t('monitorCard.status.up'),
+    'down': t('monitorCard.status.down'),
+    'pending': t('monitorCard.status.pending')
   };
 
   // 获取当前监控的状态
@@ -58,7 +61,7 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
         
         <Flex align="center" gap="2" style={{ width: '100%', minHeight: '8px' }}>
           <Text size="1" color="gray">
-            响应时间: {monitor.response_time || '未知'}ms
+            {t('monitorCard.responseTime')}: {monitor.response_time || t('monitorCard.unknown')}ms
           </Text>
         </Flex>
           

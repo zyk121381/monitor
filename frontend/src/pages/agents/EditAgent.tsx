@@ -4,6 +4,7 @@ import { Box, Flex, Heading, Text, Button, Card, TextField } from '@radix-ui/the
 import { ArrowLeftIcon, Cross2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAgent, updateAgent } from '../../api/agents';
+import { useTranslation } from 'react-i18next';
 
 const EditAgent = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const EditAgent = () => {
     status: 'active' as 'active' | 'inactive'
   };
   const [formData, setFormData] = useState(initialFormData);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchAgentData = async () => {
@@ -72,7 +74,7 @@ const EditAgent = () => {
       const response = await updateAgent(Number(id), payload);
       
       if (response.success) {
-        setToastMessage('客户端更新成功');
+        setToastMessage(t('agent.form.updateSuccess'));
         setToastType('success');
         setToastOpen(true);
         
@@ -81,13 +83,13 @@ const EditAgent = () => {
           navigate('/agents');
         }, 1500);
       } else {
-        setToastMessage(response.message || '更新失败');
+        setToastMessage(response.message || t('agent.form.updateError'));
         setToastType('error');
         setToastOpen(true);
       }
     } catch (error) {
       console.error('更新客户端失败:', error);
-      setToastMessage('更新客户端失败');
+      setToastMessage(t('agent.form.updateError'));
       setToastType('error');
       setToastOpen(true);
     } finally {
@@ -101,9 +103,9 @@ const EditAgent = () => {
         <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
           <Card>
             <Flex direction="column" align="center" gap="4" p="4">
-              <Heading size="6">客户端未找到</Heading>
-              <Text>找不到ID为 {id} 的客户端</Text>
-              <Button onClick={() => navigate('/agents')}>返回客户端列表</Button>
+              <Heading size="6">{t('agents.notFound')}</Heading>
+              <Text>{t('agents.notFoundId', { id })}</Text>
+              <Button onClick={() => navigate('/agents')}>{t('common.backToList')}</Button>
             </Flex>
           </Card>
         </Flex>
@@ -119,7 +121,7 @@ const EditAgent = () => {
             <Button variant="soft" size="1" onClick={() => navigate(`/agents/${id}`)}>
               <ArrowLeftIcon />
             </Button>
-            <Heading size="6">编辑客户端: {formData.name}</Heading>
+            <Heading size="6">{t('agent.form.editingClient', { name: formData.name })}</Heading>
           </Flex>
         </Flex>
 
@@ -129,26 +131,26 @@ const EditAgent = () => {
               <Flex direction="column" gap="4">
                 <Box mb="4">
                   <Text as="label" size="2" mb="1" weight="bold">
-                    客户端名称 <Text size="2" color="red">*</Text>
+                    {t('agent.form.name')} <Text size="2" color="red">*</Text>
                   </Text>
                   <TextField.Input
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="请输入客户端名称"
+                    placeholder={t('agent.form.namePlaceholder')}
                     required
                   />
                   <Text size="1" color="gray" mt="1">
-                    为客户端设置一个能够识别的名称
+                    {t('agent.form.nameHelp')}
                   </Text>
                 </Box>
                 
                 <Flex justify="end" mt="4" gap="2">
                   <Button variant="soft" onClick={() => navigate(`/agents/${id}`)}>
-                    取消
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={loading}>
-                    {loading ? '保存中...' : '保存更改'}
+                    {loading ? t('common.savingChanges') : t('common.saveChanges')}
                   </Button>
                 </Flex>
               </Flex>
@@ -165,7 +167,7 @@ const EditAgent = () => {
             style={{ backgroundColor: toastType === 'success' ? 'var(--green-9)' : 'var(--red-9)', borderRadius: '8px' }}
           >
             <Toast.Title className="ToastTitle">
-              {toastType === 'success' ? '成功' : '错误'}
+              {toastType === 'success' ? t('common.success') : t('common.error')}
             </Toast.Title>
             <Toast.Description className="ToastDescription">
               {toastMessage}

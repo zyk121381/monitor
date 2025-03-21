@@ -4,6 +4,7 @@ import { getStatusPageData, StatusAgent } from '../../api/status';
 import { Monitor } from '../../api/monitors';
 import ClientResourceSection from '../../components/ClientResourceSection';
 import MonitorCard from '../../components/MonitorCard';
+import { useTranslation } from 'react-i18next';
 
 // 定义一个样式常量用于卡片
 const cardStyles = {
@@ -21,13 +22,14 @@ const cardHoverStyles = {
 } as const;
 
 const StatusPage = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<{monitors: Monitor[], agents: StatusAgent[]}>({
     monitors: [],
     agents: []
   });
   const [loading, setLoading] = useState(false);
-  const [pageTitle, setPageTitle] = useState<string>('系统状态');
-  const [pageDescription, setPageDescription] = useState<string>('实时监控系统状态');
+  const [pageTitle, setPageTitle] = useState<string>(t('statusPage.title'));
+  const [pageDescription, setPageDescription] = useState<string>(t('statusPage.allOperational'));
   const [error, setError] = useState<string | null>(null);
   const requestInProgressRef = useRef(false); // 新增：跟踪请求是否正在进行中
   const fetchControllerRef = useRef<AbortController | null>(null); // 新增：用于取消重复请求
@@ -38,7 +40,7 @@ const StatusPage = () => {
     const fetchData = async () => {
       // 如果已经有请求在进行中，取消它
       if (requestInProgressRef.current && fetchControllerRef.current) {
-        console.log('StatusPage: 取消之前的请求');
+        console.log(t('statusPage.cancelPreviousRequest'));
         fetchControllerRef.current.abort();
       }
       
@@ -49,37 +51,37 @@ const StatusPage = () => {
       
       try {
         setLoading(true);
-        console.log('StatusPage: 正在获取状态页数据...');
+        console.log(t('statusPage.fetchingData'));
         const response = await getStatusPageData();
-        console.log('StatusPage: 获取到状态页数据响应:', response);
+        console.log(t('statusPage.dataResponse'), response);
         
         // 如果请求被取消，则退出
         if (signal.aborted) {
-          console.log('StatusPage: 请求已被取消');
+          console.log(t('statusPage.requestCancelled'));
           return;
         }
         
         if (response.success && response.data) {
           const statusData = response.data;
-          console.log('StatusPage: 处理状态页数据:', statusData);
+          console.log(t('statusPage.processingData'), statusData);
           
           // 设置页面标题和描述
-          setPageTitle(statusData.title || '系统状态');
-          setPageDescription(statusData.description || '实时监控系统状态');
+          setPageTitle(statusData.title || t('statusPage.title'));
+          setPageDescription(statusData.description || t('statusPage.allOperational'));
           
           setData({
             monitors: statusData.monitors || [],
             agents: statusData.agents || []
           });
         } else {
-          console.error('StatusPage: 获取状态页数据失败:', response.message);
-          setError(response.message || '获取状态页数据失败');
+          console.error(t('statusPage.fetchError'), response.message);
+          setError(response.message || t('statusPage.fetchError'));
         }
       } catch (err: any) {
         // 忽略被中止的请求错误
         if (err.name !== 'AbortError') {
-          console.error('StatusPage: 获取状态页数据出错:', err);
-          setError('获取状态页数据失败');
+          console.error(t('statusPage.fetchError'), err);
+          setError(t('statusPage.fetchError'));
         }
       } finally {
         // 标记请求结束
@@ -94,20 +96,20 @@ const StatusPage = () => {
     
     // 设置定时刷新，每分钟更新数据
     const intervalId = setInterval(() => {
-      console.log('StatusPage: 自动刷新数据...');
+      console.log(t('statusPage.autoRefresh'));
       fetchData();
     }, 60000); // 60000ms = 1分钟
     
     // 组件卸载时清除定时器和取消请求
     return () => {
-      console.log('StatusPage: 组件卸载，清除定时器');
+      console.log(t('statusPage.componentUnmount'));
       clearInterval(intervalId);
       
       if (fetchControllerRef.current) {
         fetchControllerRef.current.abort();
       }
     };
-  }, []); // 只在组件挂载时执行一次
+  }, [t]); // 依赖于 t 函数
 
   // 错误显示
   if (error) {
@@ -127,7 +129,7 @@ const StatusPage = () => {
       <Box>
         <div className="page-container">
           <Flex justify="center" align="center" style={{ minHeight: '50vh' }}>
-            <Text size="3">加载中...</Text>
+            <Text size="3">{t('common.loading')}</Text>
           </Flex>
         </div>
       </Box>
@@ -144,14 +146,14 @@ const StatusPage = () => {
             {pageDescription}
           </Text>
           <Flex gap="2" mt="2">
-            <Badge size="2">最后更新: 刚刚</Badge>
+            <Badge size="2">{t('statusPage.lastUpdated')}: {t('statusPage.justNow')}</Badge>
           </Flex>
         </Flex>
         
         {/* API服务状态 */}
         {data.monitors.length > 0 && (
           <Box py="6">
-            <Heading size="5" mb="4">API服务状态</Heading>
+            <Heading size="5" mb="4">{t('statusPage.apiServices')}</Heading>
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
               {data.monitors.map(monitor => (
                 <MonitorCard key={monitor.id} monitor={monitor} />
@@ -163,7 +165,7 @@ const StatusPage = () => {
         {/* 客户端监控状态 */}
         {data.agents.length > 0 && (
           <Box py="6">
-            <Heading size="5" mb="4">客户端监控状态</Heading>
+            <Heading size="5" mb="4">{t('statusPage.agentStatus')}</Heading>
             <Grid columns={{ initial: '1', md: '2', lg: '3' }} gap="4">
               {data.agents.map(agent => (
                 <Card 
@@ -220,14 +222,14 @@ const StatusPage = () => {
                             animation: agent.status === 'active' ? 'pulse 2s infinite' : 'none'
                           }}
                         />
-                        {agent.status === 'active' ? '在线' : '离线'}
+                        {agent.status === 'active' ? t('agent.status.online') : t('agent.status.offline')}
                       </Badge>
                     </Flex>
                     
                     {/* 系统资源使用情况 */}
                     <Box mt="3">
                       {/* 数据调试信息 */}
-                      {(() => { console.log('显示资源数据:', agent.name, agent.cpu, agent.memory); return null; })()}
+                      {(() => { console.log(t('statusPage.displayResourceData'), agent.name, agent.cpu, agent.memory); return null; })()}
                       {(agent.cpu !== undefined && agent.memory !== undefined) ? (
                         <ClientResourceSection 
                           cpuUsage={agent.cpu || 0}
@@ -238,19 +240,19 @@ const StatusPage = () => {
                         />
                       ) : (
                         <Box style={{ padding: '8px', backgroundColor: 'var(--gray-2)', borderRadius: '8px' }}>
-                          <Heading size="2" mb="2">系统信息</Heading>
+                          <Heading size="2" mb="2">{t('agent.systemInfo')}</Heading>
                           <Grid columns="2" gap="2">
-                            <Text size="2" style={{ color: 'var(--gray-9)' }}>操作系统:</Text>
-                            <Text size="2">{agent.os || '未知'}</Text>
+                            <Text size="2" style={{ color: 'var(--gray-9)' }}>{t('agent.os')}:</Text>
+                            <Text size="2">{agent.os || t('common.unknown')}</Text>
                             
-                            <Text size="2" style={{ color: 'var(--gray-9)' }}>版本:</Text>
-                            <Text size="2">{agent.version || '未知'}</Text>
+                            <Text size="2" style={{ color: 'var(--gray-9)' }}>{t('agent.version')}:</Text>
+                            <Text size="2">{agent.version || t('common.unknown')}</Text>
                             
-                            <Text size="2" style={{ color: 'var(--gray-9)' }}>主机名:</Text>
-                            <Text size="2">{agent.hostname || '未知'}</Text>
+                            <Text size="2" style={{ color: 'var(--gray-9)' }}>{t('agent.hostname')}:</Text>
+                            <Text size="2">{agent.hostname || t('common.unknown')}</Text>
                             
-                            <Text size="2" style={{ color: 'var(--gray-9)' }}>IP地址:</Text>
-                            <Text size="2">{agent.ip_address || '未知'}</Text>
+                            <Text size="2" style={{ color: 'var(--gray-9)' }}>{t('agent.ipAddress')}:</Text>
+                            <Text size="2">{agent.ip_address || t('common.unknown')}</Text>
                           </Grid>
                         </Box>
                       )}
@@ -259,7 +261,7 @@ const StatusPage = () => {
                     {/* 最后活动时间 */}
                     {agent.updated_at && (
                       <Text size="2" color="gray">
-                        最后活动: {new Date(agent.updated_at).toLocaleString()}
+                        {t('agent.lastUpdated')}: {new Date(agent.updated_at).toLocaleString()}
                       </Text>
                     )}
                   </Box>

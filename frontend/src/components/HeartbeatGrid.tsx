@@ -1,8 +1,11 @@
 import { Box, Flex, Text } from '@radix-ui/themes';
 import { MonitorStatusHistory } from '../api/monitors';
+import { useTranslation } from 'react-i18next';
 
 // 心跳网格组件 - 类似uptime-kuma的点阵网格
 const HeartbeatGrid = ({ uptime, history = [] }: { uptime: number, history?: (MonitorStatusHistory | string)[] }) => {
+  const { t } = useTranslation();
+  
   // 确保uptime值在0-100范围内
   const normalizedUptime = Math.min(Math.max(uptime, 0), 100);
   
@@ -89,7 +92,7 @@ const HeartbeatGrid = ({ uptime, history = [] }: { uptime: number, history?: (Mo
               transition: 'all 0.2s ease-in-out',
               cursor: 'pointer',
             }}
-            title={`${item.timestamp ? formatTimestamp(item.timestamp) : '未知时间'}: ${item.status === 'up' ? '正常' : '故障'}`}
+            title={`${item.timestamp ? formatTimestamp(item.timestamp) : t('heartbeatGrid.unknownTime')}: ${item.status === 'up' ? t('heartbeatGrid.up') : t('heartbeatGrid.down')}`}
             onMouseEnter={(e) => {
               const target = e.currentTarget;
               target.style.backgroundColor = getHoverColor(item.status);
@@ -120,12 +123,12 @@ const HeartbeatGrid = ({ uptime, history = [] }: { uptime: number, history?: (Mo
       </Flex>
       
       <Flex justify="between" mt="3">
-        <Text size="1" style={{ color: 'var(--gray-9)' }}>正常运行: {normalizedUptime.toFixed(2)}%</Text>
+        <Text size="1" style={{ color: 'var(--gray-9)' }}>{t('heartbeatGrid.uptime')}: {normalizedUptime.toFixed(2)}%</Text>
         <Flex gap="2" align="center">
           <Box style={{ width: '8px', height: '8px', backgroundColor: 'var(--green-5)', borderRadius: '50%' }} />
-          <Text size="1" style={{ color: 'var(--gray-9)' }}>正常</Text>
+          <Text size="1" style={{ color: 'var(--gray-9)' }}>{t('heartbeatGrid.up')}</Text>
           <Box style={{ width: '8px', height: '8px', backgroundColor: 'var(--red-5)', borderRadius: '50%', marginLeft: '8px' }} />
-          <Text size="1" style={{ color: 'var(--gray-9)' }}>故障</Text>
+          <Text size="1" style={{ color: 'var(--gray-9)' }}>{t('heartbeatGrid.down')}</Text>
         </Flex>
       </Flex>
     </Box>

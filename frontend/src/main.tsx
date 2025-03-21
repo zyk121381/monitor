@@ -5,6 +5,7 @@ import { Theme } from '@radix-ui/themes'
 import { AuthProvider } from './contexts/AuthContext'
 import '@radix-ui/themes/styles.css'
 import './styles/index.css'
+import './i18n/config'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

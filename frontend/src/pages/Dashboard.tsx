@@ -8,12 +8,14 @@ import StatusSummaryCard from '../components/StatusSummaryCard';
 import MonitorCard from '../components/MonitorCard';
 import AgentCard from '../components/AgentCard';
 import '../styles/components.css';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   // 获取所有数据
   useEffect(() => {
@@ -43,7 +45,7 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error('获取数据错误:', err);
-        setError('获取数据失败');
+        setError(t('common.error'));
       } finally {
         setLoading(false);
       }
@@ -59,7 +61,7 @@ const Dashboard = () => {
     
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);
-  }, []);
+  }, [t]);
 
   // 加载中显示
   if (loading) {
@@ -67,7 +69,7 @@ const Dashboard = () => {
       <Box className="dashboard-container">
         <Container size="3">
           <Flex justify="center" align="center" style={{ minHeight: '50vh' }}>
-            <Text size="3">加载中...</Text>
+            <Text size="3">{t('common.loading')}</Text>
           </Flex>
         </Container>
       </Box>
@@ -83,7 +85,7 @@ const Dashboard = () => {
             <Flex direction="column" align="center" gap="3">
               <Text size="3" style={{ color: 'var(--red-9)' }}>{error}</Text>
               <Button variant="soft" onClick={() => window.location.reload()}>
-                重试
+                {t('dashboard.refresh')}
               </Button>
             </Flex>
           </Flex>
@@ -96,21 +98,21 @@ const Dashboard = () => {
   const apiMonitorItems = [
     {
       icon: <CheckCircledIcon width="16" height="16" />,
-      label: '正常运行',
+      label: t('monitors.status.up'),
       value: monitors.filter(m => m.status === 'up').length,
       bgColor: 'var(--green-3)',
       iconColor: 'var(--green-9)'
     },
     {
       icon: <CrossCircledIcon width="16" height="16" />,
-      label: '服务中断',
+      label: t('monitors.status.down'),
       value: monitors.filter(m => m.status === 'down').length,
       bgColor: 'var(--red-3)',
       iconColor: 'var(--red-9)'
     },
     {
       icon: <ClockIcon width="16" height="16" />,
-      label: '总计监控',
+      label: t('dashboard.totalMonitors'),
       value: monitors.length,
       bgColor: 'var(--gray-3)',
       iconColor: 'var(--gray-9)'
@@ -121,21 +123,21 @@ const Dashboard = () => {
   const agentStatusItems = [
     {
       icon: <GlobeIcon width="16" height="16" />,
-      label: '客户端活跃',
+      label: t('agent.status.online'),
       value: agents.filter(a => a.status === 'active').length,
       bgColor: 'var(--green-3)',
       iconColor: 'var(--green-9)'
     },
     {
       icon: <ExclamationTriangleIcon width="16" height="16" />,
-      label: '客户端离线',
+      label: t('agent.status.offline'),
       value: agents.filter(a => a.status === 'inactive').length,
       bgColor: 'var(--amber-3)',
       iconColor: 'var(--amber-9)'
     },
     {
       icon: <GlobeIcon width="16" height="16" />,
-      label: '总计客户端',
+      label: t('dashboard.totalMonitors'),
       value: agents.length,
       bgColor: 'var(--gray-3)',
       iconColor: 'var(--gray-9)'
@@ -149,17 +151,17 @@ const Dashboard = () => {
           <Box>
             {/* 状态摘要 */}
             <Box pb="6">
-              <Heading size="6" mb="5">系统状态摘要</Heading>
+              <Heading size="6" mb="5">{t('dashboard.summary')}</Heading>
               
               <Flex gap="4" justify="between" direction={{ initial: 'column', sm: 'row' }} style={{ width: '100%' }}>
                 {/* API监控状态摘要 */}
                 <Box style={{ flex: 1 }}>
-                  <StatusSummaryCard title="API监控状态" items={apiMonitorItems} />
+                  <StatusSummaryCard title={t('navbar.apiMonitors')} items={apiMonitorItems} />
                 </Box>
                 
                 {/* 客户端监控状态摘要 */}
                 <Box style={{ flex: 1 }}>
-                  <StatusSummaryCard title="客户端监控状态" items={agentStatusItems} />
+                  <StatusSummaryCard title={t('navbar.agentMonitors')} items={agentStatusItems} />
                 </Box>
               </Flex>
             </Box>
@@ -167,9 +169,9 @@ const Dashboard = () => {
             {/* API监控状态 */}
             <Box py="5">
               <Flex justify="between" align="center" mb="4">
-                <Heading size="5">API监控状态</Heading>
+                <Heading size="5">{t('navbar.apiMonitors')}</Heading>
                 <Button variant="soft" asChild>
-                  <Link to="/monitors">查看所有API监控</Link>
+                  <Link to="/monitors">{t('monitors.title')}</Link>
                 </Button>
               </Flex>
               <Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">
@@ -182,9 +184,9 @@ const Dashboard = () => {
             {/* 客户端状态 */}
             <Box py="5">
               <Flex justify="between" align="center" mb="4">
-                <Heading size="5">客户端状态</Heading>
+                <Heading size="5">{t('navbar.agentMonitors')}</Heading>
                 <Button variant="soft" asChild>
-                  <Link to="/agents">查看所有客户端</Link>
+                  <Link to="/agents">{t('agents.title')}</Link>
                 </Button>
               </Flex>
               <Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">

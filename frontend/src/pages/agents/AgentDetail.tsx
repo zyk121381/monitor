@@ -5,6 +5,7 @@ import { ArrowLeftIcon, Pencil1Icon, Cross2Icon, ReloadIcon, ClockIcon, InfoCirc
 import * as Toast from '@radix-ui/react-toast';
 import { getAgent, Agent, deleteAgent } from '../../api/agents';
 import ClientResourceSection from '../../components/ClientResourceSection';
+import { useTranslation } from 'react-i18next';
 
 // 定义客户端状态颜色映射
 const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
@@ -34,6 +35,7 @@ const AgentDetail = () => {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const { t } = useTranslation();
 
   const fetchAgentData = async () => {
     setLoading(true);
@@ -44,7 +46,7 @@ const AgentDetail = () => {
       const agentResponse = await getAgent(Number(id));
       
       if (!agentResponse.success || !agentResponse.agent) {
-        throw new Error(agentResponse.message || '获取客户端数据失败');
+        throw new Error(agentResponse.message || t('common.error.fetch'));
       }
       
       const agentData = agentResponse.agent;
@@ -71,7 +73,7 @@ const AgentDetail = () => {
       setLoading(false);
     } catch (err) {
       console.error('AgentDetail: 获取客户端数据失败:', err);
-      setError(err instanceof Error ? err.message : '获取客户端数据失败');
+      setError(err instanceof Error ? err.message : t('common.error.fetch'));
       setLoading(false);
     }
   };
@@ -92,10 +94,10 @@ const AgentDetail = () => {
     } else if (id) {
       // 如果id存在但不是有效数字
       console.error(`无效的客户端ID: ${id}`);
-      setError(`无效的客户端ID: ${id}`);
+      setError(t('agents.notFoundId', { id }));
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   const handleRefresh = () => {
     fetchAgentData();
@@ -128,20 +130,20 @@ const AgentDetail = () => {
 
   // 使用agent.updated_at代替last_seen作为上次活动时间
   const formatDateTime = (dateTimeStr: string) => {
-    if (!dateTimeStr) return '未知';
+    if (!dateTimeStr) return t('common.notFound');
     const date = new Date(dateTimeStr);
     return date.toLocaleString();
   };
 
   const handleDelete = async () => {
-    if (!confirm('确定要删除此客户端吗？此操作无法撤销。')) {
+    if (!confirm(t('agent.deleteConfirm'))) {
       return;
     }
     
     try {
       setDeleteLoading(true);
       // 显示正在删除的Toast消息
-      setToastMessage('正在删除客户端...');
+      setToastMessage(t('agent.deleting'));
       setToastType('success');
       setToastOpen(true);
       
@@ -149,7 +151,7 @@ const AgentDetail = () => {
       
       if (response.success) {
         // 显示删除成功的Toast消息
-        setToastMessage('客户端已成功删除');
+        setToastMessage(t('agent.deleteSuccess'));
         setToastType('success');
         setToastOpen(true);
         
@@ -158,13 +160,13 @@ const AgentDetail = () => {
           navigate('/agents');
         }, 3000);
       } else {
-        setToastMessage(response.message || '删除客户端失败');
+        setToastMessage(response.message || t('agent.deleteError'));
         setToastType('error');
         setToastOpen(true);
       }
     } catch (error) {
       console.error('删除客户端失败:', error);
-      setToastMessage('删除客户端失败，请重试');
+      setToastMessage(t('agent.deleteError'));
       setToastType('error');
       setToastOpen(true);
     } finally {
@@ -176,7 +178,7 @@ const AgentDetail = () => {
     return (
       <Box>
         <Flex className="loading-container">
-          <Text>加载客户端详情中...</Text>
+          <Text>{t('agents.loadingDetail')}</Text>
         </Flex>
       </Box>
     );
@@ -188,9 +190,9 @@ const AgentDetail = () => {
         <Flex className="error-container">
           <Card>
             <Flex direction="column" align="center" gap="4">
-              <Heading size="6">加载出错</Heading>
+              <Heading size="6">{t('common.loadingError')}</Heading>
               <Text>{error}</Text>
-              <Button onClick={() => navigate('/agents')}>返回客户端列表</Button>
+              <Button onClick={() => navigate('/agents')}>{t('common.backToList')}</Button>
             </Flex>
           </Card>
         </Flex>
@@ -204,9 +206,9 @@ const AgentDetail = () => {
         <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
           <Card>
             <Flex direction="column" align="center" gap="4">
-              <Heading size="6">客户端未找到</Heading>
-              <Text>找不到ID为 {id} 的客户端</Text>
-              <Button onClick={() => navigate('/agents')}>返回客户端列表</Button>
+              <Heading size="6">{t('agents.notFound')}</Heading>
+              <Text>{t('agents.notFoundId', { id })}</Text>
+              <Button onClick={() => navigate('/agents')}>{t('common.backToList')}</Button>
             </Flex>
           </Card>
         </Flex>
@@ -222,19 +224,19 @@ const AgentDetail = () => {
             <Button variant="soft" size="1" onClick={() => navigate('/agents')}>
               <ArrowLeftIcon />
             </Button>
-            <Heading size="6">客户端详情</Heading>
+            <Heading size="6">{t('agent.details')}</Heading>
             <Badge color={statusColors[agent.status || 'inactive']}>
-              {agent.status === 'active' ? '在线' : '离线'}
+              {agent.status === 'active' ? t('agent.status.online') : t('agent.status.offline')}
             </Badge>
           </Flex>
           <Flex gap="2">
             <Button variant="soft" onClick={handleRefresh} disabled={loading}>
               <ReloadIcon />
-              刷新
+              {t('common.refresh')}
             </Button>
             <Button variant="soft" onClick={() => navigate(`/agents/edit/${id}`)}>
               <Pencil1Icon />
-              编辑
+              {t('agent.edit')}
             </Button>
             <Button 
               variant="soft" 
@@ -243,7 +245,7 @@ const AgentDetail = () => {
               disabled={deleteLoading}
             >
               <Cross2Icon />
-              {deleteLoading ? '删除中...' : '删除'}
+              {deleteLoading ? t('common.deleting') : t('agent.delete')}
             </Button>
           </Flex>
         </Flex>
@@ -264,13 +266,13 @@ const AgentDetail = () => {
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
               <Flex align="center" gap="2">
                 <LapTimerIcon />
-                <Text as="div" size="2" weight="bold">运行时间:</Text>
+                <Text as="div" size="2" weight="bold">{t('agent.uptime')}:</Text>
                 <Text as="div" size="2">{formatUptime(agent)}</Text>
               </Flex>
               
               <Flex align="center" gap="2">
                 <ClockIcon />
-                <Text as="div" size="2" weight="bold">上次更新:</Text>
+                <Text as="div" size="2" weight="bold">{t('agent.lastUpdated')}:</Text>
                 <Text as="div" size="2">{formatDateTime(agent.updated_at)}</Text>
               </Flex>
             </Grid>
@@ -278,7 +280,7 @@ const AgentDetail = () => {
 
           <Tabs.Root defaultValue="system">
             <Tabs.List>
-              <Tabs.Trigger value="system">系统状态</Tabs.Trigger>
+              <Tabs.Trigger value="system">{t('agents.system')}</Tabs.Trigger>
             </Tabs.List>
 
             <Box pt="3">
@@ -287,37 +289,37 @@ const AgentDetail = () => {
                   {/* 系统信息卡片 */}
                   <Card>
                     <Flex direction="column" gap="3">
-                      <Heading size="3">系统信息</Heading>
+                      <Heading size="3">{t('agent.systemInfo')}</Heading>
                       
                       <Box>
                         <Flex align="center" gap="2">
                           <DesktopIcon />
-                          <Text as="div" size="2" weight="bold">系统:</Text>
-                          <Text as="div" size="2">{agent.os || '未知'}</Text>
+                          <Text as="div" size="2" weight="bold">{t('agent.os')}:</Text>
+                          <Text as="div" size="2">{agent.os || t('common.notFound')}</Text>
                         </Flex>
                       </Box>
                       
                       <Box>
                         <Flex align="center" gap="2">
                           <InfoCircledIcon />
-                          <Text as="div" size="2" weight="bold">版本:</Text>
-                          <Text as="div" size="2">{agent.version || '未知'}</Text>
+                          <Text as="div" size="2" weight="bold">{t('agent.version')}:</Text>
+                          <Text as="div" size="2">{agent.version || t('common.notFound')}</Text>
                         </Flex>
                       </Box>
                       
                       <Box>
                         <Flex align="center" gap="2">
                           <GlobeIcon />
-                          <Text as="div" size="2" weight="bold">主机名:</Text>
-                          <Text as="div" size="2">{agent.hostname || '未知'}</Text>
+                          <Text as="div" size="2" weight="bold">{t('agent.hostname')}:</Text>
+                          <Text as="div" size="2">{agent.hostname || t('common.notFound')}</Text>
                         </Flex>
                       </Box>
                       
                       <Box>
                         <Flex align="center" gap="2">
                           <LaptopIcon />
-                          <Text as="div" size="2" weight="bold">IP地址:</Text>
-                          <Text as="div" size="2">{agent.ip_address || '未知'}</Text>
+                          <Text as="div" size="2" weight="bold">{t('agent.ipAddress')}:</Text>
+                          <Text as="div" size="2">{agent.ip_address || t('common.notFound')}</Text>
                         </Flex>
                       </Box>
                     </Flex>
@@ -326,7 +328,7 @@ const AgentDetail = () => {
                   {/* 系统资源信息卡片 */}
                   <Card>
                     <Flex direction="column" gap="4">
-                      <Heading size="3">系统资源</Heading>
+                      <Heading size="3">{t('agent.systemResources')}</Heading>
                       
                       <ClientResourceSection 
                         cpuUsage={agent.cpuUsage || 0}
@@ -356,7 +358,7 @@ const AgentDetail = () => {
             }}
           >
             <Toast.Title className="ToastTitle">
-              {toastType === 'success' ? '成功' : '错误'}
+              {toastType === 'success' ? t('common.success') : t('common.error')}
             </Toast.Title>
             <Toast.Description className="ToastDescription">
               {toastMessage}

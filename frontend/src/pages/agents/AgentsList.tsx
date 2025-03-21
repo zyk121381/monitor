@@ -4,6 +4,7 @@ import { Box, Flex, Heading, Text, Button, Card, Table, Badge, IconButton, Dialo
 import { PlusIcon, Cross2Icon, Pencil1Icon, InfoCircledIcon, ReloadIcon, LayoutIcon, ViewGridIcon } from '@radix-ui/react-icons';
 import { getAllAgents, deleteAgent, Agent } from '../../api/agents';
 import AgentCard from '../../components/AgentCard';
+import { useTranslation } from 'react-i18next';
 
 // 定义客户端状态颜色映射
 const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
@@ -25,6 +26,7 @@ const AgentsList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('card'); // 默认使用卡片视图
+  const { t } = useTranslation();
 
   // 获取客户端数据
   const fetchAgents = async () => {
@@ -36,7 +38,7 @@ const AgentsList = () => {
       const response = await getAllAgents();
       
       if (!response.success || !response.agents) {
-        throw new Error(response.message || '获取客户端数据失败');
+        throw new Error(response.message || t('common.error.fetch'));
       }
       
       // 处理客户端数据
@@ -58,7 +60,7 @@ const AgentsList = () => {
       
       setAgents(clientsWithStatus);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取客户端列表失败');
+      setError(err instanceof Error ? err.message : t('common.error.fetch'));
       console.error('获取客户端列表错误:', err);
     } finally {
       setLoading(false);
@@ -76,7 +78,7 @@ const AgentsList = () => {
     
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);
-  }, []);
+  }, [t]);
 
   // 刷新客户端列表
   const handleRefresh = () => {
@@ -100,10 +102,10 @@ const AgentsList = () => {
           // 删除成功，刷新客户端列表
           fetchAgents();
         } else {
-          setError(response.message || '删除客户端失败');
+          setError(response.message || t('common.error.delete'));
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : '删除客户端时发生错误');
+        setError(err instanceof Error ? err.message : t('common.error.delete'));
         console.error('删除客户端错误:', err);
       } finally {
         setDeleteDialogOpen(false);
@@ -129,13 +131,13 @@ const AgentsList = () => {
               }}
               gap="2"
             >
-              <IconButton variant="ghost" size="1" onClick={() => navigate(`/agents/${agent.id}`)} title="查看详情">
+              <IconButton variant="ghost" size="1" onClick={() => navigate(`/agents/${agent.id}`)} title={t('agent.details')}>
                 <InfoCircledIcon />
               </IconButton>
-              <IconButton variant="ghost" size="1" onClick={() => navigate(`/agents/edit/${agent.id}`)} title="编辑客户端">
+              <IconButton variant="ghost" size="1" onClick={() => navigate(`/agents/edit/${agent.id}`)} title={t('agent.edit')}>
                 <Pencil1Icon />
               </IconButton>
-              <IconButton variant="ghost" size="1" color="red" onClick={() => handleDeleteClick(agent.id)} title="删除客户端">
+              <IconButton variant="ghost" size="1" color="red" onClick={() => handleDeleteClick(agent.id)} title={t('agent.delete')}>
                 <Cross2Icon />
               </IconButton>
             </Flex>
@@ -151,13 +153,13 @@ const AgentsList = () => {
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>名称</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>主机名</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>IP地址</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>状态</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>操作系统</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>版本</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>操作</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.name')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.host')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.ip')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.status')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.os')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.version')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t('agents.table.actions')}</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -167,28 +169,28 @@ const AgentsList = () => {
                 <Text weight="medium">{agent.name}</Text>
               </Table.Cell>
               <Table.Cell>
-                <Text>{agent.hostname || '未知'}</Text>
+                <Text>{agent.hostname || t('common.notFound')}</Text>
               </Table.Cell>
               <Table.Cell>
-                <Text>{agent.ip_address || '未知'}</Text>
+                <Text>{agent.ip_address || t('common.notFound')}</Text>
               </Table.Cell>
               <Table.Cell>
                 <Badge 
                   color={statusColors[agent.status || 'unknown']}
                 >
                   {agent.status === 'active' 
-                    ? '在线' 
+                    ? t('agent.status.online') 
                     : agent.status === 'connecting' 
-                      ? '连接中' 
-                      : '离线'
+                      ? t('agent.status.connecting') 
+                      : t('agent.status.offline')
                   }
                 </Badge>
               </Table.Cell>
               <Table.Cell>
-                <Text>{agent.os || '未知'}</Text>
+                <Text>{agent.os || t('common.notFound')}</Text>
               </Table.Cell>
               <Table.Cell>
-                <Text>{agent.version || '未知'}</Text>
+                <Text>{agent.version || t('common.notFound')}</Text>
               </Table.Cell>
               <Table.Cell>
                 <Flex gap="2">
@@ -215,7 +217,7 @@ const AgentsList = () => {
     return (
       <Box className="page-container detail-page">
         <Flex justify="center" align="center" p="4">
-          <Text>加载中...</Text>
+          <Text>{t('common.loading')}</Text>
         </Flex>
       </Box>
     );
@@ -231,7 +233,7 @@ const AgentsList = () => {
           </Flex>
         </Card>
         <Button variant="soft" onClick={() => window.location.reload()} mt="2">
-          重试
+          {t('common.retry')}
         </Button>
       </Box>
     );
@@ -241,21 +243,21 @@ const AgentsList = () => {
     <Box>
       <div className="page-container detail-page">
         <Flex justify="between" align="center" className="detail-header">
-          <Heading size="6">客户端监控</Heading>
+          <Heading size="6">{t('agents.pageTitle')}</Heading>
           <Flex gap="3">
             <Tabs.Root defaultValue="card">
               <Tabs.List>
-                <Tabs.Trigger value="card" onClick={() => setViewMode('card')}>
+                <Tabs.Trigger value="card" onClick={() => setViewMode('card')} title={t('agents.cardView')}>
                   <ViewGridIcon />
                 </Tabs.Trigger>
-                <Tabs.Trigger value="table" onClick={() => setViewMode('table')}>
+                <Tabs.Trigger value="table" onClick={() => setViewMode('table')} title={t('agents.tableView')}>
                   <LayoutIcon />
                 </Tabs.Trigger>
               </Tabs.List>
             </Tabs.Root>
             <Button onClick={handleRefresh} disabled={loading}>
               <ReloadIcon />
-              刷新
+              {t('common.refresh')}
             </Button>
             <Button onClick={() => {
               console.log('点击添加客户端按钮(空列表)，准备导航到/agents/create');
@@ -266,7 +268,7 @@ const AgentsList = () => {
               }
             }}>
               <PlusIcon />
-              添加客户端
+              {t('agents.create')}
             </Button>
           </Flex>
         </Flex>
@@ -275,10 +277,10 @@ const AgentsList = () => {
           {agents.length === 0 ? (
             <Card>
               <Flex direction="column" align="center" justify="center" p="6" gap="3">
-                <Text>没有找到客户端</Text>
+                <Text>{t('agents.noAgents')}</Text>
                 <Button onClick={() => navigate('/agents/create')}>
                   <PlusIcon />
-                  添加客户端
+                  {t('agents.create')}
                 </Button>
               </Flex>
             </Card>
@@ -295,18 +297,18 @@ const AgentsList = () => {
       {/* 删除确认对话框 */}
       <Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <Dialog.Content>
-          <Dialog.Title>确认删除</Dialog.Title>
+          <Dialog.Title>{t('common.deleteConfirmation')}</Dialog.Title>
           <Dialog.Description>
-            您确定要删除此客户端吗？此操作无法撤销。
+            {t('common.deleteConfirmMessage')}
           </Dialog.Description>
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
               <Button variant="soft" color="gray">
-                取消
+                {t('common.cancel')}
               </Button>
             </Dialog.Close>
             <Button color="red" onClick={handleDeleteConfirm}>
-              删除
+              {t('common.delete')}
             </Button>
           </Flex>
         </Dialog.Content>

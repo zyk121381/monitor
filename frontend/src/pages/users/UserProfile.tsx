@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button, Card, Flex, Heading, Text, TextField, Box } from '@radix-ui/themes';
 import { useAuth } from '../../contexts/AuthContext';
 import { updateUser, changePassword, UpdateUserRequest, ChangePasswordRequest } from '../../api/users';
+import { useTranslation } from 'react-i18next';
 
 const UserProfile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -34,7 +36,7 @@ const UserProfile = () => {
     setIsProfileLoading(true);
     
     if (!user) {
-      setProfileError('用户未登录');
+      setProfileError(t('profile.error.notLoggedIn'));
       setIsProfileLoading(false);
       return;
     }
@@ -47,12 +49,12 @@ const UserProfile = () => {
     try {
       const response = await updateUser(user.id, data);
       if (response.success) {
-        setProfileSuccess('个人资料更新成功');
+        setProfileSuccess(t('profile.success.updated'));
       } else {
-        setProfileError(response.message || '更新个人资料失败');
+        setProfileError(response.message || t('profile.error.update'));
       }
     } catch (err: any) {
-      setProfileError(err.message || '更新个人资料失败');
+      setProfileError(err.message || t('profile.error.update'));
     } finally {
       setIsProfileLoading(false);
     }
@@ -64,12 +66,12 @@ const UserProfile = () => {
     setPasswordSuccess('');
     
     if (!user) {
-      setPasswordError('用户未登录');
+      setPasswordError(t('profile.error.notLoggedIn'));
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      setPasswordError('两次输入的密码不匹配');
+      setPasswordError(t('profile.error.passwordMismatch'));
       return;
     }
     
@@ -83,35 +85,35 @@ const UserProfile = () => {
     try {
       const response = await changePassword(user.id, data);
       if (response.success) {
-        setPasswordSuccess('密码修改成功');
+        setPasswordSuccess(t('profile.success.passwordChanged'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        setPasswordError(response.message || '修改密码失败');
+        setPasswordError(response.message || t('profile.error.passwordChange'));
       }
     } catch (err: any) {
-      setPasswordError(err.message || '修改密码失败');
+      setPasswordError(err.message || t('profile.error.passwordChange'));
     } finally {
       setIsPasswordLoading(false);
     }
   };
   
   if (!user) {
-    return <Text>加载中...</Text>;
+    return <Text>{t('common.loading')}</Text>;
   }
   
   return (
     <Box>
       <div className="page-container detail-page">
         <Flex justify="between" align="center" className="detail-header">
-          <Heading size="6">个人资料</Heading>
+          <Heading size="6">{t('profile.title')}</Heading>
         </Flex>
         
         <div className="detail-content">
           <Flex direction="column" gap="6">
             <Card>
-              <Heading size="4" mb="4">基本信息</Heading>
+              <Heading size="4" mb="4">{t('profile.basicInfo')}</Heading>
               
               {profileError && <Text color="red" mb="3">{profileError}</Text>}
               {profileSuccess && <Text color="green" mb="3">{profileSuccess}</Text>}
@@ -119,7 +121,7 @@ const UserProfile = () => {
               <form onSubmit={handleProfileUpdate}>
                 <Flex direction="column" gap="3">
                   <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">用户名</Text>
+                    <Text size="2" weight="medium">{t('user.username')}</Text>
                     <TextField.Input
                       value={username}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
@@ -128,7 +130,7 @@ const UserProfile = () => {
                   </Flex>
                   
                   <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">电子邮箱</Text>
+                    <Text size="2" weight="medium">{t('user.email')}</Text>
                     <TextField.Input
                       type="email"
                       value={email}
@@ -137,14 +139,14 @@ const UserProfile = () => {
                   </Flex>
                   
                   <Button type="submit" disabled={isProfileLoading}>
-                    {isProfileLoading ? '更新中...' : '更新个人资料'}
+                    {isProfileLoading ? t('common.savingChanges') : t('profile.update')}
                   </Button>
                 </Flex>
               </form>
             </Card>
             
             <Card>
-              <Heading size="4" mb="4">修改密码</Heading>
+              <Heading size="4" mb="4">{t('profile.changePassword')}</Heading>
               
               {passwordError && <Text color="red" mb="3">{passwordError}</Text>}
               {passwordSuccess && <Text color="green" mb="3">{passwordSuccess}</Text>}
@@ -152,7 +154,7 @@ const UserProfile = () => {
               <form onSubmit={handlePasswordChange}>
                 <Flex direction="column" gap="3">
                   <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">当前密码</Text>
+                    <Text size="2" weight="medium">{t('profile.currentPassword')}</Text>
                     <TextField.Input
                       type="password"
                       value={currentPassword}
@@ -162,7 +164,7 @@ const UserProfile = () => {
                   </Flex>
                   
                   <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">新密码</Text>
+                    <Text size="2" weight="medium">{t('profile.newPassword')}</Text>
                     <TextField.Input
                       type="password"
                       value={newPassword}
@@ -172,7 +174,7 @@ const UserProfile = () => {
                   </Flex>
                   
                   <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">确认新密码</Text>
+                    <Text size="2" weight="medium">{t('profile.confirmNewPassword')}</Text>
                     <TextField.Input
                       type="password"
                       value={confirmPassword}
@@ -182,7 +184,7 @@ const UserProfile = () => {
                   </Flex>
                   
                   <Button type="submit" disabled={isPasswordLoading}>
-                    {isPasswordLoading ? '修改中...' : '修改密码'}
+                    {isPasswordLoading ? t('common.savingChanges') : t('profile.changePasswordButton')}
                   </Button>
                 </Flex>
               </form>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { login as apiLogin, register as apiRegister, getCurrentUser, User, LoginRequest, RegisterRequest } from '../api/auth';
+import { useTranslation } from 'react-i18next';
 
 interface AuthContextType {
   user: User | null;
@@ -17,6 +18,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // 从 localStorage 获取 token 和 user
@@ -53,7 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(null);
       }
     } catch (error) {
-      console.error('获取用户信息失败:', error);
+      console.error(t('auth.error.fetchUser'), error);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setToken(null);
@@ -72,8 +74,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return { success: response.success, message: response.message };
     } catch (error) {
-      console.error('登录失败:', error);
-      return { success: false, message: '登录失败，请稍后再试' };
+      console.error(t('auth.error.login'), error);
+      return { success: false, message: t('login.error.tryAgain') };
     }
   };
 
@@ -82,8 +84,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await apiRegister(data);
       return { success: response.success, message: response.message };
     } catch (error) {
-      console.error('注册失败:', error);
-      return { success: false, message: '注册失败，请稍后再试' };
+      console.error(t('auth.error.register'), error);
+      return { success: false, message: t('register.error.tryAgain') };
     }
   };
 
