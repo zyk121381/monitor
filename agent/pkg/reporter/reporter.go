@@ -134,7 +134,13 @@ func (r *HTTPReporter) ensureRegistered(ctx context.Context, info *collector.Sys
 		return fmt.Errorf("注册失败: %s", response.Message)
 	}
 
-	fmt.Printf("客户端注册成功，通过Token: %s\n", r.apiToken)
+	// 根据响应消息区分是新注册还是状态更新
+	if response.Message == "客户端状态更新成功" {
+		fmt.Printf("客户端状态更新成功，通过Token: %s\n", r.apiToken)
+	} else {
+		fmt.Printf("客户端注册成功，通过Token: %s\n", r.apiToken)
+	}
+
 	r.registered = true
 	return nil
 }
@@ -143,7 +149,7 @@ func (r *HTTPReporter) ensureRegistered(ctx context.Context, info *collector.Sys
 func (r *HTTPReporter) Report(ctx context.Context, info *collector.SystemInfo) error {
 	// 确保客户端已注册
 	if err := r.ensureRegistered(ctx, info); err != nil {
-		return fmt.Errorf("客户端注册失败: %w", err)
+		return fmt.Errorf("客户端注册或状态更新失败: %w", err)
 	}
 
 	// 提取所有磁盘的总容量和使用量
@@ -224,8 +230,13 @@ func (r *HTTPReporter) Report(ctx context.Context, info *collector.SystemInfo) e
 		return fmt.Errorf("服务器返回错误状态码: %d", resp.StatusCode)
 	}
 
-	fmt.Printf("成功上报数据到服务器，token: %s, CPU: %.2f%%, 内存: %.2f%%\n",
-		r.apiToken, payload.CPUUsage, float64(payload.MemoryUsed)/float64(payload.MemoryTotal)*100)
+	fmt.Printf("成功上报数据到服务器，token: %s, CPU: %.2f%%, 内存: %.2f%%, 硬盘: %.2f%%, 网络下载: %.2f KB/s, 网络上传: %.2f KB/s\n",
+		r.apiToken,
+		payload.CPUUsage,
+		float64(payload.MemoryUsed)/float64(payload.MemoryTotal)*100,
+		float64(payload.DiskUsed)/float64(payload.DiskTotal)*100,
+		float64(payload.NetworkRX),
+		float64(payload.NetworkTX))
 
 	return nil
 }

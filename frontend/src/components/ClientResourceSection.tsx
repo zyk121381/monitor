@@ -11,6 +11,29 @@ interface ClientResourceSectionProps {
 }
 
 /**
+ * 网络流量单位自适应函数
+ * @param value KB/s 的值
+ * @returns 格式化后的字符串和用于进度条的百分比值
+ */
+const formatNetworkSpeed = (value: number): { text: string, percent: number } => {
+  // 当值小于 1024 KB/s 时，显示 KB/s
+  if (value < 1024) {
+    return {
+      text: `${value.toFixed(2)} KB/s`,
+      percent: Math.min(value / 51.2, 100) // 5MB/s 是进度条的满值
+    };
+  } 
+  // 当值大于等于 1024 KB/s 时，显示 MB/s
+  else {
+    const valueMB = value / 1024;
+    return {
+      text: `${valueMB.toFixed(2)} MB/s`,
+      percent: Math.min(value / 51.2, 100) // 5MB/s 是进度条的满值
+    };
+  }
+};
+
+/**
  * 客户端资源使用情况展示组件
  * 用于显示CPU、内存、磁盘和网络流量等资源使用情况
  */
@@ -21,9 +44,9 @@ const ClientResourceSection = ({
   networkRx = 0,
   networkTx = 0
 }: ClientResourceSectionProps) => {
-  // 将 KB/s 转换为 MB/s
-  const networkRxMB = networkRx / 1024;
-  const networkTxMB = networkTx / 1024;
+  // 格式化网络流量显示
+  const rxFormatted = formatNetworkSpeed(networkRx);
+  const txFormatted = formatNetworkSpeed(networkTx);
   
   return (
     <Box className="client-resource-section">
@@ -77,9 +100,9 @@ const ClientResourceSection = ({
                   <Box className="resource-indicator resource-indicator-download" />
                   <Text size="2" className="resource-label">下载</Text>
                 </Flex>
-                <Text size="2" weight="medium">{networkRxMB.toFixed(2)} MB/s</Text>
+                <Text size="2" weight="medium">{rxFormatted.text}</Text>
               </Flex>
-              <ResourceBar value={Math.min(networkRxMB * 20, 100)} color="cyan" height={6} />
+              <ResourceBar value={rxFormatted.percent} color="cyan" height={6} />
             </Box>
             
             {/* 上传速率 */}
@@ -89,9 +112,9 @@ const ClientResourceSection = ({
                   <Box className="resource-indicator resource-indicator-upload" />
                   <Text size="2" className="resource-label">上传</Text>
                 </Flex>
-                <Text size="2" weight="medium">{networkTxMB.toFixed(2)} MB/s</Text>
+                <Text size="2" weight="medium">{txFormatted.text}</Text>
               </Flex>
-              <ResourceBar value={Math.min(networkTxMB * 20, 100)} color="indigo" height={6} />
+              <ResourceBar value={txFormatted.percent} color="indigo" height={6} />
             </Box>
           </Flex>
         </Box>

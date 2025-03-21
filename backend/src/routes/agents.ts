@@ -431,12 +431,35 @@ agents.post('/register', async (c) => {
     // 查找是否已存在使用相同token的客户端
     const existingAgent = await c.env.DB.prepare(
       'SELECT id FROM agents WHERE token = ?'
-    ).bind(token).first();
+    ).bind(token).first<{id: number}>();
     
     if (existingAgent) {
+      // 如果客户端已存在，更新其状态信息
+      const updateResult = await c.env.DB.prepare(
+        `UPDATE agents SET 
+         status = 'active',
+         hostname = ?,
+         ip_address = ?,
+         os = ?,
+         version = ?,
+         updated_at = ?
+         WHERE id = ?`
+      ).bind(
+        hostname || null,
+        ip_address || null,
+        os || null,
+        version || null,
+        new Date().toISOString(),
+        existingAgent.id
+      ).run();
+      
+      if (!updateResult.success) {
+        throw new Error('更新客户端信息失败');
+      }
+      
       return c.json({ 
-        success: false, 
-        message: '客户端已注册',
+        success: true, 
+        message: '客户端状态更新成功',
         agent: existingAgent
       });
     }

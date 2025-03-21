@@ -29,7 +29,7 @@ const AgentCard = ({ agent }: AgentCardProps) => {
       memoryUsage = Math.round((agent.memory_used / agent.memory_total) * 100);
       diskUsage = Math.round((agent.disk_used / agent.disk_total) * 100);
       
-      // 传递原始网络流量数据 (KB/s)，由 ClientResourceSection 负责转换为 MB/s
+      // 传递原始网络流量数据 (KB/s)，ClientResourceSection 组件负责单位自适应显示
       networkRx = agent.network_rx || 0;
       networkTx = agent.network_tx || 0;
       

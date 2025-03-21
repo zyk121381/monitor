@@ -63,7 +63,29 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
     const responseTime = endTime - startTime;
     
     // 检查响应状态
-    const isUp = response.status === monitor.expected_status;
+    let isUp = false;
+    
+    // 支持状态码范围检查
+    if (monitor.expected_status === 200) {
+      // 如果是精确的状态码，就精确匹配
+      isUp = response.status === monitor.expected_status;
+    } else if (monitor.expected_status === 2) {
+      // 如果是2，则表示2xx
+      isUp = response.status >= 200 && response.status < 300;
+    } else if (monitor.expected_status === 3) {
+      // 如果是3，则表示3xx
+      isUp = response.status >= 300 && response.status < 400;
+    } else if (monitor.expected_status === 4) {
+      // 如果是4，则表示4xx
+      isUp = response.status >= 400 && response.status < 500;
+    } else if (monitor.expected_status === 5) {
+      // 如果是5，则表示5xx
+      isUp = response.status >= 500 && response.status < 600;
+    } else {
+      // 其他情况，精确匹配
+      isUp = response.status === monitor.expected_status;
+    }
+    
     const status = isUp ? 'up' : 'down';
     
     // 记录状态历史
