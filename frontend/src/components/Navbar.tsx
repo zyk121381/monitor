@@ -140,12 +140,9 @@ const Navbar = () => {
                     </DropdownMenu.Root>
                   </>
                 ) : (
-                  <Flex gap="2">
+                  <Flex gap="2" align="center">
                     <Button variant="ghost" onClick={() => navigate('/login')} size="2">
                       登录
-                    </Button>
-                    <Button variant="soft" onClick={() => navigate('/register')} size="2">
-                      注册
                     </Button>
                   </Flex>
                 )}

@@ -22,6 +22,7 @@ export interface StatusPageConfigResponse {
   description: string;
   logoUrl: string;
   customCss: string;
+  urlPrefix?: string; // 状态页URL前缀
   monitors: ConfigMonitor[]; // 监控项对象数组
   agents: ConfigAgent[]; // 客户端对象数组
 }
@@ -32,6 +33,7 @@ export interface StatusPageConfig {
   description: string;
   logoUrl: string;
   customCss: string;
+  urlPrefix?: string; // 状态页URL前缀
   monitors: number[]; // 选中的监控ID列表
   agents: number[]; // 选中的客户端ID列表
 }
@@ -52,6 +54,7 @@ export interface StatusPageData {
   description: string;
   logoUrl: string;
   customCss: string;
+  urlPrefix?: string; // 状态页URL前缀
   monitors: Monitor[];
   agents: StatusAgent[];
 }

@@ -754,4 +754,15 @@ textarea:focus {
 .monitor-card:hover, .agent-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  color: var(--accent-9);
+  text-decoration: none;
+}
+
+.footer-link-icon {
+  margin-right: 8px;
 } 

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { useAuth } from '../../contexts/AuthContext';
-import './auth.css';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -84,19 +83,6 @@ const Login = () => {
                 </Button>
               </Flex>
             </form>
-            
-            <Flex justify="between" mt="2">
-              <Text size="2">
-                <Link to="/forgot-password" style={{ color: 'var(--accent-9)', textDecoration: 'none' }}>
-                  忘记密码?
-                </Link>
-              </Text>
-              <Text size="2">
-                <Link to="/register" style={{ color: 'var(--accent-9)', textDecoration: 'none' }}>
-                  注册账号
-                </Link>
-              </Text>
-            </Flex>
           </Flex>
         </Card>
       </Flex>

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, TextField, Select, Table, IconButton, TextArea } from '@radix-ui/themes';
 import { ArrowLeftIcon, UpdateIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { getMonitor, updateMonitor } from '../../api/monitors';
+import StatusCodeSelect from '../../components/StatusCodeSelect';
 
 const EditMonitor = () => {
   const navigate = useNavigate();
@@ -96,6 +97,11 @@ const EditMonitor = () => {
         ? parseInt(value) || 0 
         : value
     }));
+  };
+  
+  // 处理状态码变更
+  const handleStatusCodeChange = (value: number) => {
+    setFormData(prev => ({ ...prev, expectedStatus: value }));
   };
   
   // 处理请求头键值对更改
@@ -294,13 +300,9 @@ const EditMonitor = () => {
                     <Text as="label" size="2" style={{ marginBottom: '4px', display: 'block' }}>
                       预期状态码 *
                     </Text>
-                    <TextField.Input
-                      name="expectedStatus"
-                      type="number"
-                      value={formData.expectedStatus.toString()}
-                      onChange={handleChange}
-                      min="100"
-                      max="599"
+                    <StatusCodeSelect 
+                      value={formData.expectedStatus}
+                      onChange={handleStatusCodeChange}
                       required
                     />
                   </Box>

@@ -15,7 +15,7 @@ const Home = () => {
             轻量化监控平台
           </Heading>
           <Text size="5" align="center" style={{ maxWidth: '800px' }}>
-            XUGOU 是一个轻量化的监控平台，基于 CloudFlare 搭建，用于跟踪API、服务和系统的可用性和性能。
+            XUGOU 是一个轻量化的监控平台，基于 CloudFlare 搭建，用于跟踪API、服务和系统的可用性以及资源使用情况。
           </Text>
           <Flex gap="4" mt="4">
             {isAuthenticated ? (
@@ -25,10 +25,7 @@ const Home = () => {
             ) : (
               <>
                 <Button size="3" asChild>
-                  <Link to="/register">开始使用</Link>
-                </Button>
-                <Button size="3" variant="soft" asChild>
-                  <Link to="/login">登录</Link>
+                  <Link to="/login">开始使用</Link>
                 </Button>
               </>
             )}

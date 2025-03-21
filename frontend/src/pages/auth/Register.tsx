@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { useAuth } from '../../contexts/AuthContext';
-import './auth.css';
 
 const Register = () => {
   const [username, setUsername] = useState('');
