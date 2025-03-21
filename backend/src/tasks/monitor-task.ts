@@ -97,15 +97,17 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
     // 更新监控项状态
     await c.env.DB.prepare(
       `UPDATE monitors 
-       SET status = ?, 
+       SET status = 'down', 
            last_checked = datetime('now'),
-           response_time = ?,
-           uptime = CASE 
-             WHEN status = 'up' THEN uptime + 1
-             ELSE uptime
-           END
+           uptime = (
+             SELECT ROUND((COUNT(CASE WHEN status = 'up' THEN 1 ELSE NULL END) * 100.0 / COUNT(*)), 2)
+             FROM monitor_status_history
+             WHERE monitor_id = ?
+             ORDER BY timestamp DESC
+             LIMIT 100
+           )
        WHERE id = ?`
-    ).bind(status, responseTime, monitor.id).run();
+    ).bind(monitor.id, monitor.id).run();
     
     console.log(`监控项检查完成: ${monitor.name}, 状态: ${status}, 响应时间: ${responseTime}ms`);
     
@@ -127,9 +129,16 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
     await c.env.DB.prepare(
       `UPDATE monitors 
        SET status = 'down', 
-           last_checked = datetime('now')
+           last_checked = datetime('now'),
+           uptime = (
+             SELECT ROUND((COUNT(CASE WHEN status = 'up' THEN 1 ELSE NULL END) * 100.0 / COUNT(*)), 2)
+             FROM monitor_status_history
+             WHERE monitor_id = ?
+             ORDER BY timestamp DESC
+             LIMIT 100
+           )
        WHERE id = ?`
-    ).bind(monitor.id).run();
+    ).bind(monitor.id, monitor.id).run();
     
     return {
       success: false,

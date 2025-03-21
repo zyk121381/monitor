@@ -187,7 +187,7 @@ const MonitorsList = () => {
                       <Text>{monitor.response_time}ms</Text>
                     </Table.Cell>
                     <Table.Cell>
-                      <Text>{monitor.uptime}%</Text>
+                      <Text>{Math.min(monitor.uptime || 0, 100).toFixed(2)}%</Text>
                     </Table.Cell>
                     <Table.Cell>
                       <Flex gap="2">

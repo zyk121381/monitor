@@ -311,6 +311,14 @@ export async function createDefaultStatusPage(env: Bindings): Promise<void> {
 
 // 初始化数据库路由
 initDb.get('/init-db', async (c) => {
+  // 检查环境变量是否允许数据库初始化
+  if (c.env.ENABLE_DB_INIT !== 'true') {
+    return c.json({
+      success: false,
+      message: '数据库初始化功能已禁用。若要启用，请设置环境变量 ENABLE_DB_INIT=true'
+    }, 403);
+  }
+
   try {
     console.log('开始初始化数据库...');
     

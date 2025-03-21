@@ -392,6 +392,7 @@ const StatusPageConfig = () => {
                             状态页标题
                           </Text>
                           <TextField.Input
+                            name="title"
                             value={config.title}
                             onChange={handleChange}
                             placeholder="输入状态页标题"

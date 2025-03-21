@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, Text, Button, Card, Grid } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
-import { ActivityLogIcon, LightningBoltIcon, MixerHorizontalIcon, DesktopIcon } from '@radix-ui/react-icons';
+import { ActivityLogIcon, LightningBoltIcon, MixerHorizontalIcon, DesktopIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
 import { useAuth } from '../contexts/AuthContext';
 
 const Home = () => {
@@ -17,6 +17,12 @@ const Home = () => {
           <Text size="5" align="center" style={{ maxWidth: '800px' }}>
             XUGOU 是一个轻量化的监控平台，基于 CloudFlare 搭建，用于跟踪API、服务和系统的可用性以及资源使用情况。
           </Text>
+          
+          {/* GitHub 图标 */}
+          <Flex justify="center" py="2">
+            <GitHubLogoIcon width="32" height="32" />
+          </Flex>
+
           <Flex gap="4" mt="4">
             {isAuthenticated ? (
               <Button size="3" asChild>
@@ -26,6 +32,9 @@ const Home = () => {
               <>
                 <Button size="3" asChild>
                   <Link to="/login">开始使用</Link>
+                </Button>
+                <Button size="3" asChild>
+                  <a href="https://github.com/zaunist/xugou" target="_blank" rel="noopener noreferrer">访问仓库</a>
                 </Button>
               </>
             )}
