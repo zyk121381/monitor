@@ -63,7 +63,7 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 1. 克隆项目
 ```bash
-git clone https://github.com/yourusername/xugou.git
+git clone https://github.com/zaunist/xugou.git
 cd xugou
 ```
 

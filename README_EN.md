@@ -63,7 +63,7 @@ XUGOU adopts a modern system architecture, including the following components:
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/xugou.git
+git clone https://github.com/zaunist/xugou.git
 cd xugou
 ```
 
