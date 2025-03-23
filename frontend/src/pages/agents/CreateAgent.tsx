@@ -51,11 +51,6 @@ const CreateAgent = () => {
     setServerUrl(e.target.value);
   };
 
-  // 获取系统对应的下载命令
-  const getDownloadCommand = () => {
-    return `curl -sSL https://dl.xugou.mdzz.uk/latest/xugou-agent-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') -o xugou-agent && chmod +x xugou-agent`;
-  };
-
   // 平台和架构选择状态
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedArch, setSelectedArch] = useState<string | null>(null);
