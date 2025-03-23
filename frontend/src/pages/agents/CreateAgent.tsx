@@ -51,6 +51,41 @@ const CreateAgent = () => {
     setServerUrl(e.target.value);
   };
 
+  // 获取系统对应的下载命令
+  const getDownloadCommand = () => {
+    return `curl -sSL https://dl.xugou.mdzz.uk/latest/xugou-agent-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') -o xugou-agent && chmod +x xugou-agent`;
+  };
+
+  // 平台和架构选择状态
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [selectedArch, setSelectedArch] = useState<string | null>(null);
+
+  // 处理平台选择
+  const handlePlatformSelect = (platform: string) => {
+    setSelectedPlatform(platform);
+    setSelectedArch(null); // 重置架构选择
+  };
+
+  // 处理架构选择
+  const handleArchSelect = (arch: string) => {
+    setSelectedArch(arch);
+  };
+
+  // 获取当前选择的下载URL
+  const getDownloadUrl = () => {
+    if (!selectedPlatform || !selectedArch) return '';
+    
+    const extension = selectedPlatform === 'windows' ? '.exe' : '';
+    return `https://dl.xugou.mdzz.uk/latest/xugou-agent-${selectedPlatform}-${selectedArch}${extension}`;
+  };
+
+  // 获取下载命令
+  const getDownloadCommandForSelection = () => {
+    if (!selectedPlatform || !selectedArch || selectedPlatform === 'windows') return '';
+    
+    return `curl -sSL ${getDownloadUrl()} -o xugou-agent && chmod +x xugou-agent`;
+  };
+
   return (
     <Box>
       <div className="page-container detail-page">
@@ -150,24 +185,100 @@ const CreateAgent = () => {
                   <Flex direction="column" gap="4">
                     {/* 第一步：下载客户端二进制文件 */}
                     <Box>
-                      <Text as="div" size="2" weight="bold" mb="2">{t('agent.add.step1')}</Text>
-                      <Flex gap="2" direction="column">
-                        <Code size="2" style={{ display: 'block', padding: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                          {`curl -sSL https://xugou-agent.r2.dev/xugou-agent-latest -o xugou-agent && chmod +x xugou-agent`}
-                        </Code>
-                        <Button 
-                          variant="soft" 
-                          onClick={() => {
-                            navigator.clipboard.writeText(`curl -sSL https://xugou-agent.r2.dev/xugou-agent-latest -o xugou-agent && chmod +x xugou-agent`);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }} 
-                          style={{ alignSelf: 'flex-end' }}
-                        >
-                          {copied ? t('common.copied') : t('agents.copyCommand')}
-                        </Button>
-                      </Flex>
-                      <Text size="1" color="gray" style={{ marginTop: '8px' }}>
+                      <Text as="div" size="2" weight="bold" mb="3">{t('agent.add.step1')}</Text>
+                      
+                      <Box>
+                        {/* 平台选择 */}
+                        <Text as="div" size="2" mb="2">1. 选择操作系统:</Text>
+                        <Flex gap="2" mb="4">
+                          <Button 
+                            variant={selectedPlatform === 'linux' ? 'solid' : 'soft'} 
+                            size="2"
+                            onClick={() => handlePlatformSelect('linux')}
+                          >
+                            Linux
+                          </Button>
+                          <Button 
+                            variant={selectedPlatform === 'darwin' ? 'solid' : 'soft'} 
+                            size="2"
+                            onClick={() => handlePlatformSelect('darwin')}
+                          >
+                            macOS
+                          </Button>
+                          <Button 
+                            variant={selectedPlatform === 'windows' ? 'solid' : 'soft'} 
+                            size="2"
+                            onClick={() => handlePlatformSelect('windows')}
+                          >
+                            Windows
+                          </Button>
+                        </Flex>
+                        
+                        {/* 架构选择 - 仅在选择平台后显示 */}
+                        {selectedPlatform && (
+                          <>
+                            <Text as="div" size="2" mb="2">2. 选择系统架构:</Text>
+                            <Flex gap="2" mb="4">
+                              <Button 
+                                variant={selectedArch === 'amd64' ? 'solid' : 'soft'} 
+                                size="2"
+                                onClick={() => handleArchSelect('amd64')}
+                              >
+                                {selectedPlatform === 'darwin' ? 'AMD64 (Intel)' : 'AMD64 (x86_64)'}
+                              </Button>
+                              <Button 
+                                variant={selectedArch === 'arm64' ? 'solid' : 'soft'} 
+                                size="2"
+                                onClick={() => handleArchSelect('arm64')}
+                              >
+                                {selectedPlatform === 'darwin' ? 'ARM64 (Apple Silicon)' : 'ARM64'}
+                              </Button>
+                            </Flex>
+                          </>
+                        )}
+                        
+                        {/* 下载命令和按钮 - 仅在选择架构后显示 */}
+                        {selectedPlatform && selectedArch && (
+                          <Box mt="4" style={{ border: '1px solid var(--gray-6)', borderRadius: '6px', padding: '12px' }}>
+                            <Text as="div" size="2" weight="bold" mb="2">
+                              3. {selectedPlatform === 'windows' ? '下载安装文件:' : '下载并安装:'}
+                            </Text>
+                            
+                            {selectedPlatform !== 'windows' && (
+                              <>
+                                <Code size="2" style={{ display: 'block', padding: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5', marginBottom: '8px' }}>
+                                  {getDownloadCommandForSelection()}
+                                </Code>
+                                <Flex gap="2" justify="end">
+                                  <Button 
+                                    variant="soft"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(getDownloadCommandForSelection());
+                                      setCopied(true);
+                                      setTimeout(() => setCopied(false), 2000);
+                                    }}
+                                  >
+                                    {copied ? t('common.copied') : t('common.copy')}
+                                  </Button>
+                                </Flex>
+                                <Text size="1" style={{ color: 'var(--gray-11)', marginTop: '8px', marginBottom: '12px' }}>
+                                  或者直接下载:
+                                </Text>
+                              </>
+                            )}
+                            
+                            <Flex gap="2" justify="center">
+                              <a href={getDownloadUrl()} download style={{ textDecoration: 'none', width: '100%' }}>
+                                <Button variant="solid" size="2" style={{ width: '100%' }}>
+                                  下载 {selectedPlatform === 'darwin' ? 'macOS' : selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} {selectedArch} {selectedPlatform === 'windows' ? '版本' : '二进制文件'}
+                                </Button>
+                              </a>
+                            </Flex>
+                          </Box>
+                        )}
+                      </Box>
+                      
+                      <Text size="1" color="gray" style={{ marginTop: '12px' }}>
                         {t('agent.add.step1Help')}
                       </Text>
                     </Box>

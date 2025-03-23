@@ -78,15 +78,6 @@ jobs:
         echo "Version: $VERSION"
 
     # Linux AMD64
-    - name: Upload Linux AMD64 to R2 (version)
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-        source-dir: ./xugou-agent-linux-amd64/
-        destination-dir: releases/${{ env.VERSION }}/
         
     - name: Upload Linux AMD64 to R2 (latest)
       uses: ryand56/r2-upload-action@latest
@@ -99,15 +90,6 @@ jobs:
         destination-dir: latest/
 
     # Linux ARM64
-    - name: Upload Linux ARM64 to R2 (version)
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-        source-dir: ./xugou-agent-linux-arm64/
-        destination-dir: releases/${{ env.VERSION }}/
         
     - name: Upload Linux ARM64 to R2 (latest)
       uses: ryand56/r2-upload-action@latest
@@ -120,15 +102,6 @@ jobs:
         destination-dir: latest/
 
     # macOS AMD64
-    - name: Upload macOS AMD64 to R2 (version)
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-        source-dir: ./xugou-agent-darwin-amd64/
-        destination-dir: releases/${{ env.VERSION }}/
         
     - name: Upload macOS AMD64 to R2 (latest)
       uses: ryand56/r2-upload-action@latest
@@ -141,15 +114,6 @@ jobs:
         destination-dir: latest/
 
     # macOS ARM64
-    - name: Upload macOS ARM64 to R2 (version)
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-        source-dir: ./xugou-agent-darwin-arm64/
-        destination-dir: releases/${{ env.VERSION }}/
         
     - name: Upload macOS ARM64 to R2 (latest)
       uses: ryand56/r2-upload-action@latest
@@ -162,15 +126,6 @@ jobs:
         destination-dir: latest/
 
     # Windows AMD64
-    - name: Upload Windows AMD64 to R2 (version)
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-        source-dir: ./xugou-agent-windows-amd64/
-        destination-dir: releases/${{ env.VERSION }}/
         
     - name: Upload Windows AMD64 to R2 (latest)
       uses: ryand56/r2-upload-action@latest
@@ -183,15 +138,6 @@ jobs:
         destination-dir: latest/
 
     # Windows ARM64
-    - name: Upload Windows ARM64 to R2 (version)
-      uses: ryand56/r2-upload-action@latest
-      with:
-        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-        source-dir: ./xugou-agent-windows-arm64/
-        destination-dir: releases/${{ env.VERSION }}/
         
     - name: Upload Windows ARM64 to R2 (latest)
       uses: ryand56/r2-upload-action@latest
