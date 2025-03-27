@@ -22,6 +22,7 @@ Currently implemented features:
 Planned features:
 
 - 🚧 Real-time Notifications - Anomaly event notifications through multiple channels (Email, Webhook, Slack, etc.)
+- 📱 Mobile APP - Convenient monitoring status check on mobile devices
 
 ## ✨ Core Features
 
@@ -92,11 +93,13 @@ npm run dev
 5. Access the system
 Open your browser and visit `http://localhost:5173`
 
+6. Default username: admin  Default password: admin123
+
 ## Detailed Video Tutorial
 
 Not yet available
 
-## ⭐ Support Us
+## ⭐ Support the Author
 
 Support us in any way you can:
 
