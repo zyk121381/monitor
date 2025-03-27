@@ -83,11 +83,30 @@ async function checkSingleMonitor(c: any, monitor: Monitor) {
     console.log(`开始检查监控项: ${monitor.name} (${monitor.url})`);
     
     const startTime = Date.now();
+    
+    // 解析 headers
+    const customHeaders = monitor.headers ? JSON.parse(monitor.headers) : {};
+    
+    // 执行请求
     const response = await fetch(monitor.url, {
       method: monitor.method,
       headers: {
-        'User-Agent': 'Xugou-Monitor/1.0',
-        ...(monitor.headers ? JSON.parse(monitor.headers) : {})
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Ch-Ua': '"Google Chrome";v="123", "Not:A-Brand";v="8"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"macOS"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'Referer': new URL(monitor.url).origin,
+        ...customHeaders
       },
       body: monitor.body || undefined
     });
