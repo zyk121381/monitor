@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --test-scheduled",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "deploy": "wrangler deploy"
   },
   "keywords": [],
