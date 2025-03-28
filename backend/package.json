@@ -4,13 +4,8 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "deploy": "wrangler deploy",
-    "deploy:dev": "wrangler deploy --env development",
-    "deploy:prod": "wrangler deploy --env production",
-    "dev:wrangler": "wrangler dev"
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy"
   },
   "keywords": [],
   "author": "",

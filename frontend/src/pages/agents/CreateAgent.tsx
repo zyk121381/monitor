@@ -4,6 +4,7 @@ import { Box, Flex, Heading, Text, Button, Card, Code, Separator } from '@radix-
 import { ArrowLeftIcon, CopyIcon, CheckIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { generateToken } from '../../api/agents';
 import { useTranslation } from 'react-i18next';
+import { ENV_API_BASE_URL } from '../../config';
 
 const CreateAgent = () => {
   const navigate = useNavigate();
@@ -11,14 +12,12 @@ const CreateAgent = () => {
   const [token, setToken] = useState('');
   const [copied, setCopied] = useState(false);
   // 获取当前浏览器访问的地址作为服务端地址
-  const [serverUrl, setServerUrl] = useState('');
+  const serverUrl = ENV_API_BASE_URL;
   const { t } = useTranslation();
   
   // 生成服务端验证的 token
   useEffect(() => {
     // 获取当前访问的URL
-    const origin = window.location.origin;
-    setServerUrl(origin);
     
     const fetchToken = async () => {
       setLoading(true);
@@ -44,11 +43,6 @@ const CreateAgent = () => {
     navigator.clipboard.writeText(token);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  // 处理服务端地址变更
-  const handleServerUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setServerUrl(e.target.value);
   };
 
   // 平台和架构选择状态
@@ -113,22 +107,26 @@ const CreateAgent = () => {
               
               {/* 服务端地址 */}
               <Box>
-                <Text as="label" size="2" weight="bold" style={{ display: 'block', marginBottom: '6px' }}>
+              <Text as="label" size="2" weight="bold" style={{ display: 'block', marginBottom: '6px' }}>
                   {t('agent.add.serverAddress')}
                 </Text>
-                <input 
-                  type="text" 
-                  value={serverUrl} 
-                  onChange={handleServerUrlChange}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '4px',
-                    border: '1px solid var(--gray-7)',
-                    fontSize: '14px'
-                  }}
-                  placeholder={t('agent.add.serverAddressPlaceholder')}
-                />
+                    <Flex gap="2">
+                      <Text className="token-display" style={{ 
+                        padding: '10px', 
+                        backgroundColor: 'var(--gray-3)', 
+                        borderRadius: '4px',
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        flex: 1,
+                        overflowX: 'auto'
+                      }}>
+                        {serverUrl}
+                      </Text>
+                      <Button variant="soft" onClick={handleCopyToken}>
+                        {copied ? <CheckIcon /> : <CopyIcon />}
+                        {copied ? t('common.copied') : t('common.copy')}
+                      </Button>
+                    </Flex>
                 <Text size="1" color="gray" style={{ marginTop: '6px' }}>
                   {t('agent.add.serverAddressHelp')}
                 </Text>
@@ -317,7 +315,7 @@ Description=Xugou Agent
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/xugou-agent start --server ${serverUrl} --token ${token} --interval 60
+ExecStart=/usr/local/bin/xugou-agent start --server ${serverUrl} --token ${token} --interval 300
 Restart=always
 RestartSec=10
 

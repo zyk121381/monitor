@@ -6,6 +6,16 @@ import * as Toast from '@radix-ui/react-toast';
 import { getMonitor, deleteMonitor, checkMonitor, Monitor, MonitorStatusHistory } from '../../api/monitors';
 import { useTranslation } from 'react-i18next';
 
+// 将范围状态码转换为可读形式（2 -> 2xx, 3 -> 3xx 等）
+const formatStatusCode = (code: number): string => {
+  // 对于2、3、4、5这些值，显示为2xx、3xx等
+  if (code >= 2 && code <= 5) {
+    return `${code}xx`;
+  }
+  // 其他正常显示数字
+  return code.toString();
+};
+
 // 状态条组件 - 时间轴格子展示
 const StatusBar = ({ status, history = [] }: { status: string, uptime: number, history?: MonitorStatusHistory[] }) => {
   const { t } = useTranslation();
@@ -296,7 +306,7 @@ const MonitorDetail = () => {
                       <Text>{t('monitor.timeout')}:</Text>
                       <Text>{monitor.timeout} {t('common.seconds')}</Text>
                       <Text>{t('monitor.expectedStatus')}:</Text>
-                      <Text>{monitor.expected_status}</Text>
+                      <Text>{formatStatusCode(monitor.expected_status)}</Text>
                       <Text>{t('monitor.createTime')}:</Text>
                       <Text>{new Date(monitor.created_at).toLocaleString()}</Text>
                     </Grid>
@@ -359,7 +369,7 @@ const MonitorDetail = () => {
                   <Text>{t('monitor.timeout')}:</Text>
                   <Text>{monitor.timeout} {t('common.seconds')}</Text>
                   <Text>{t('monitor.expectedStatus')}:</Text>
-                  <Text>{monitor.expected_status}</Text>
+                  <Text>{formatStatusCode(monitor.expected_status)}</Text>
                   <Text>{t('monitor.headers')}:</Text>
                   <Text style={{ overflowWrap: 'break-word' }}>
                     {typeof monitor.headers === 'string' ? monitor.headers : JSON.stringify(monitor.headers)}
