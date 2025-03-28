@@ -3,6 +3,7 @@ import { jwt } from 'hono/jwt';
 import bcrypt from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
 import { getJwtSecret } from '../utils/jwt';
+import { getUserByUsername, createUser, getUserById } from '../db/auth';
 
 // 导入 D1 数据库类型
 type Bindings = {
@@ -51,9 +52,7 @@ auth.post('/register', async (c) => {
     const { username, password, email } = await c.req.json();
     
     // 检查用户名是否已存在
-    const existingUser = await c.env.DB.prepare(
-      'SELECT * FROM users WHERE username = ?'
-    ).bind(username).first<User | null>();
+    const existingUser = await getUserByUsername(c.env.DB, username);
     
     if (existingUser) {
       return c.json({ success: false, message: '用户名已存在' }, 400);
@@ -64,25 +63,7 @@ auth.post('/register', async (c) => {
     const hashedPassword = await bcrypt.hash(password, salt);
     
     // 创建新用户
-    const result = await c.env.DB.prepare(
-      'INSERT INTO users (username, password, email, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).bind(
-      username, 
-      hashedPassword, 
-      email || null, 
-      'user', 
-      new Date().toISOString(), 
-      new Date().toISOString()
-    ).run();
-    
-    if (!result.success) {
-      throw new Error('数据库插入失败');
-    }
-    
-    // 获取新创建的用户ID
-    const newUser = await c.env.DB.prepare(
-      'SELECT id, username, role FROM users WHERE username = ?'
-    ).bind(username).first<{id: number, username: string, role: string}>();
+    const newUser = await createUser(c.env.DB, username, hashedPassword, email || null);
     
     return c.json({ 
       success: true, 
@@ -101,9 +82,7 @@ auth.post('/login', async (c) => {
     const { username, password } = await c.req.json();
     
     // 查找用户
-    const user = await c.env.DB.prepare(
-      'SELECT * FROM users WHERE username = ?'
-    ).bind(username).first<User>();
+    const user = await getUserByUsername(c.env.DB, username);
     
     if (!user) {
       return c.json({ success: false, message: '用户名或密码错误' }, 401);
@@ -149,9 +128,7 @@ auth.get('/me', async (c) => {
   try {
     const payload = c.get('jwtPayload');
     
-    const user = await c.env.DB.prepare(
-      'SELECT id, username, email, role FROM users WHERE id = ?'
-    ).bind(payload.id).first<{id: number, username: string, email?: string, role: string}>();
+    const user = await getUserById(c.env.DB, payload.id);
     
     if (!user) {
       return c.json({ success: false, message: '用户不存在' }, 404);

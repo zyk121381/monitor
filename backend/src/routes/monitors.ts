@@ -3,6 +3,7 @@ import { jwt } from 'hono/jwt';
 import { Bindings } from '../models/db';
 import { Monitor, MonitorStatusHistory } from '../models/monitor';
 import { getJwtSecret } from '../utils/jwt';
+import * as monitorDb from '../db/monitor';
 
 const monitors = new Hono<{ Bindings: Bindings }>();
 
@@ -62,9 +63,7 @@ monitors.get('/:id', async (c) => {
     const id = parseInt(c.req.param('id'));
     const payload = c.get('jwtPayload');
     
-    const monitor = await c.env.DB.prepare(
-      'SELECT * FROM monitors WHERE id = ?'
-    ).bind(id).first<Monitor>();
+    const monitor = await monitorDb.getMonitorById(c.env.DB, id);
     
     if (!monitor) {
       return c.json({ success: false, message: '监控不存在' }, 404);
@@ -76,19 +75,10 @@ monitors.get('/:id', async (c) => {
     }
     
     // 获取历史状态数据
-    const historyResult = await c.env.DB.prepare(
-      `SELECT * FROM monitor_status_history 
-       WHERE monitor_id = ? 
-       ORDER BY timestamp ASC`
-    ).bind(id).all<MonitorStatusHistory>();
+    const historyResult = await monitorDb.getMonitorStatusHistory(c.env.DB, id);
     
     // 获取最近的检查历史记录
-    const checksResult = await c.env.DB.prepare(
-      `SELECT * FROM monitor_checks 
-       WHERE monitor_id = ? 
-       ORDER BY checked_at DESC 
-       LIMIT 5`
-    ).bind(id).all();
+    const checksResult = await monitorDb.getMonitorChecks(c.env.DB, id, 5);
     
     return c.json({ 
       success: true, 
@@ -367,9 +357,7 @@ monitors.get('/:id/checks', async (c) => {
     const limit = parseInt(c.req.query('limit') || '10');
     
     // 检查监控是否存在
-    const monitor = await c.env.DB.prepare(
-      'SELECT * FROM monitors WHERE id = ?'
-    ).bind(id).first<Monitor>();
+    const monitor = await monitorDb.getMonitorById(c.env.DB, id);
     
     if (!monitor) {
       return c.json({ success: false, message: '监控不存在' }, 404);
@@ -381,12 +369,7 @@ monitors.get('/:id/checks', async (c) => {
     }
     
     // 获取检查记录
-    const checksResult = await c.env.DB.prepare(
-      `SELECT * FROM monitor_checks 
-       WHERE monitor_id = ? 
-       ORDER BY checked_at DESC 
-       LIMIT ?`
-    ).bind(id, limit).all();
+    const checksResult = await monitorDb.getMonitorChecks(c.env.DB, id, limit);
     
     return c.json({ 
       success: true, 
@@ -405,9 +388,7 @@ monitors.post('/:id/check', async (c) => {
     const payload = c.get('jwtPayload');
     
     // 检查监控是否存在
-    const monitor = await c.env.DB.prepare(
-      'SELECT * FROM monitors WHERE id = ?'
-    ).bind(id).first<Monitor>();
+    const monitor = await monitorDb.getMonitorById(c.env.DB, id);
     
     if (!monitor) {
       return c.json({ success: false, message: '监控不存在' }, 404);
@@ -418,136 +399,13 @@ monitors.post('/:id/check', async (c) => {
       return c.json({ success: false, message: '无权访问此监控' }, 403);
     }
     
-    // 触发监控检查
-    const startTime = Date.now();
-    let response;
-    let error = null;
-    
-    // 解析 headers
-    let headers = {};
-    try {
-      headers = JSON.parse(monitor.headers || '{}');
-    } catch (e) {
-      console.error('解析请求头错误:', e);
-    }
-    
-    // 执行请求
-    try {
-      const controller = new AbortController();
-      // 设置超时
-      const timeoutId = setTimeout(() => controller.abort(), monitor.timeout * 1000);
-      
-      response = await fetch(monitor.url, {
-        method: monitor.method,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Sec-Ch-Ua': '"Google Chrome";v="123", "Not:A-Brand";v="8"',
-          'Sec-Ch-Ua-Mobile': '?0',
-          'Sec-Ch-Ua-Platform': '"macOS"',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-          'Sec-Fetch-User': '?1',
-          'Upgrade-Insecure-Requests': '1',
-          'Referer': new URL(monitor.url).origin,
-          ...headers
-        },
-        body: monitor.method !== 'GET' && monitor.method !== 'HEAD' ? monitor.body : undefined,
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-    } catch (e) {
-      error = e instanceof Error ? e.message : String(e);
-    }
-    
-    const responseTime = Date.now() - startTime;
-    const now = new Date().toISOString();
-    let status = 'down';
-    
-    // 判断状态
-    let isUp = false;
-    
-    // 支持状态码范围检查
-    if (monitor.expected_status === 2) {
-      // 如果是2，则表示2xx
-      isUp = response ? (response.status >= 200 && response.status < 300) : false;
-    } else if (monitor.expected_status === 3) {
-      // 如果是3，则表示3xx
-      isUp = response ? (response.status >= 300 && response.status < 400) : false;
-    } else if (monitor.expected_status === 4) {
-      // 如果是4，则表示4xx
-      isUp = response ? (response.status >= 400 && response.status < 500) : false;
-    } else if (monitor.expected_status === 5) {
-      // 如果是5，则表示5xx
-      isUp = response ? (response.status >= 500 && response.status < 600) : false;
-    } else {
-      // 其他情况，精确匹配
-      isUp = response ? (response.status === monitor.expected_status) : false;
-    }
-    
-    status = isUp ? 'up' : 'down';
-    
-    // 添加调试日志
-    console.log(`监控状态判断: 返回状态码=${response?.status}, 期望状态码=${monitor.expected_status}, 最终状态=${status}`);
-    
-    // 更新监控状态
-    await c.env.DB.prepare(`
-      UPDATE monitors
-      SET status = ?, response_time = ?, last_checked = ?
-      WHERE id = ?
-    `).bind(
-      status,
-      responseTime,
-      now,
-      monitor.id
-    ).run();
-    
-    // 添加检查记录
-    await c.env.DB.prepare(`
-      INSERT INTO monitor_checks
-      (monitor_id, status, response_time, status_code, error, checked_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(
-      monitor.id,
-      status,
-      responseTime,
-      response ? response.status : null,
-      error,
-      now
-    ).run();
-    
-    // 添加状态历史记录（仅当状态变化时）
-    if (monitor.status !== status) {
-      await c.env.DB.prepare(`
-        INSERT INTO monitor_status_history
-        (monitor_id, status, timestamp)
-        VALUES (?, ?, ?)
-      `).bind(
-        monitor.id,
-        status,
-        now
-      ).run();
-    }
+    // 使用抽象出来的通用检查监控函数进行检查
+    const result = await monitorDb.checkSingleMonitor(c.env.DB, monitor);
     
     return c.json({ 
       success: true,
       message: '监控检查完成',
-      result: {
-        monitor_id: monitor.id,
-        name: monitor.name,
-        status,
-        previous_status: monitor.status,
-        response_time: responseTime,
-        status_code: response ? response.status : null,
-        error,
-        checked_at: now
-      }
+      result
     });
   } catch (error) {
     console.error('手动检查监控错误:', error);

@@ -1,148 +1,119 @@
 import { Hono } from 'hono';
 import { jwt } from 'hono/jwt';
+import { cors } from 'hono/cors';
 import { Bindings } from '../models/db';
-import { getJwtSecret } from '../utils/jwt';
 
-// 状态页配置接口定义
+import {
+  StatusPageConfig as DbStatusPageConfig,
+  Monitor,
+  Agent,
+  getUserStatusPageConfig,
+  getConfigMonitors,
+  getConfigAgents,
+  getStatusPageConfigById,
+  updateStatusPageConfig,
+  createStatusPageConfig,
+  clearConfigMonitorLinks,
+  clearConfigAgentLinks,
+  addMonitorToConfig,
+  addAgentToConfig,
+  getAllStatusPageConfigs,
+  getSelectedMonitors,
+  getSelectedAgents,
+  getMonitorsByIds,
+  getMonitorHistory,
+  getAgentsByIds,
+  getAdminUserId,
+  createDefaultConfig
+} from '../db/status';
+
+// 状态页配置接口
 interface StatusPageConfig {
   title: string;
   description: string;
   logoUrl: string;
   customCss: string;
-  monitors: Array<{
-    id: number;
-    name: string;
-    selected: boolean;
-  }>;
-  agents: Array<{
-    id: number;
-    name: string;
-    selected: boolean;
-  }>;
+  monitors: number[]; // 已选择的监控项ID
+  agents: number[]; // 已选择的客户端ID
 }
 
-// 监控项接口
-interface Monitor {
-  id: number;
-  name: string;
-  url: string;
-  method: string;
-  interval: number;
-  timeout: number;
-  expected_status: number;
-  headers: string;
-  body: string;
-  created_by: number;
-  active: boolean;
-  status: string;
-  uptime: number;
-  response_time: number;
-  last_checked?: string;
-  created_at: string;
-  updated_at: string;
-  history?: string[];
-}
-
-// 客户端接口
-interface Agent {
-  id: number;
-  name: string;
-  token: string;
-  created_by: number;
-  created_at: string;
-  updated_at: string;
-  status?: string;
-  cpu?: number;
-  memory?: number;
-  disk?: number;
-  network_rx?: number;
-  network_tx?: number;
-  hostname?: string;
-  ip_address?: string;
-  os?: string;
-  version?: string;
-}
-
-// 数据库中的状态页配置记录
-interface DbStatusPageConfig {
-  id?: number;
-  user_id: number;
-  title: string;
-  description: string;
-  logo_url: string;
-  custom_css: string;
-}
-
-// 数据库中的监控项记录
-interface DbMonitorItem {
-  monitor_id: number;
-}
-
-// 数据库中的客户端记录
-interface DbAgentItem {
-  agent_id: number;
-}
-
-// 创建 Hono 路由
+// 创建API路由
 const app = new Hono<{ Bindings: Bindings }>();
 
-// 保护管理员路由
-const adminRoutes = new Hono<{ Bindings: Bindings }>()
-  .use('*', async (c, next) => {
-    try {
-      const jwtMiddleware = jwt({
-        secret: getJwtSecret(c)
-      });
-      await jwtMiddleware(c, next);
-      
-      const payload = c.get('jwtPayload');
-      if (!payload || !payload.id) {
-        return c.json({ error: '未授权' }, 401);
-      }
-      
-      // 这里不再调用next()，防止重复调用
-    } catch (error) {
-      console.error('JWT认证错误:', error);
-      return c.json({ error: '认证失败' }, 401);
-    }
-  });
+// 启用CORS
+app.use('/*', cors());
 
-// 获取状态页配置
+// 创建管理员路由组
+const adminRoutes = new Hono<{ Bindings: Bindings }>();
+
+// 使用中间件验证JWT（仅对管理员路由）
+adminRoutes.use('/*', async (c, next) => {
+  try {
+    // 使用环境变量中的JWT密钥进行验证
+    const jwtMiddleware = jwt({
+      secret: c.env.JWT_SECRET,
+    });
+    
+    // 执行JWT认证
+    return await jwtMiddleware(c, next);
+  } catch (error) {
+    console.error('JWT验证失败:', error);
+    return c.json({ error: '未授权' }, 401);
+  }
+});
+
+// 获取状态页配置(管理员)
 adminRoutes.get('/config', async (c) => {
   const payload = c.get('jwtPayload');
   const userId = payload.id;
   
   try {
-    // 获取用户的状态页配置
-    const configResult = await c.env.DB.prepare(
-      'SELECT * FROM status_page_config WHERE user_id = ?'
-    ).bind(userId).all<DbStatusPageConfig>();
+    // 检查是否已存在配置
+    const existingConfig = await getStatusPageConfigById(c.env.DB, userId);
     
-    let config: DbStatusPageConfig | null = null;
-    if (configResult.results && configResult.results.length > 0) {
-      config = configResult.results[0];
+    console.log('状态页配置查询结果:', existingConfig);
+    
+    let configId: number;
+    
+    if (existingConfig && existingConfig.id) {
+      configId = existingConfig.id;
+    } else {
+      // 创建默认配置
+      const insertResult = await createStatusPageConfig(
+        c.env.DB,
+        userId,
+        '系统状态',
+        '实时监控系统状态',
+        '',
+        ''
+      );
+      
+      if (!insertResult || typeof insertResult.id !== 'number') {
+        throw new Error('创建状态页配置失败');
+      }
+      
+      configId = insertResult.id;
     }
     
-    // 获取配置的监控项
-    const monitorsResult = await c.env.DB.prepare(
-      'SELECT m.id, m.name, CASE WHEN spm.monitor_id IS NOT NULL THEN 1 ELSE 0 END as selected ' +
-      'FROM monitors m ' +
-      'LEFT JOIN status_page_monitors spm ON m.id = spm.monitor_id AND spm.config_id = ? ' +
-      'WHERE m.created_by = ?'
-    ).bind(config?.id || 0, userId).all<{id: number, name: string, selected: number}>();
+    // 获取该用户的所有监控项
+    const monitorsResult = await getConfigMonitors(c.env.DB, configId, userId);
     
-    // 获取配置的客户端
-    const agentsResult = await c.env.DB.prepare(
-      'SELECT a.id, a.name, CASE WHEN spa.agent_id IS NOT NULL THEN 1 ELSE 0 END as selected ' +
-      'FROM agents a ' +
-      'LEFT JOIN status_page_agents spa ON a.id = spa.agent_id AND spa.config_id = ? ' +
-      'WHERE a.created_by = ?'
-    ).bind(config?.id || 0, userId).all<{id: number, name: string, selected: number}>();
+    // 获取该用户的所有客户端
+    const agentsResult = await getConfigAgents(c.env.DB, configId, userId);
     
-    // 构建响应
-    const response: StatusPageConfig = {
-      title: config?.title || '系统状态',
-      description: config?.description || '当前系统运行状态',
+    // 构建配置对象返回
+    const config = await c.env.DB.prepare(
+      'SELECT * FROM status_page_config WHERE id = ?'
+    ).bind(configId).first<{
+      title?: string; 
+      description?: string; 
+      logo_url?: string; 
+      custom_css?: string;
+    }>();
+    
+    return c.json({
+      title: config?.title || '',
+      description: config?.description || '',
       logoUrl: config?.logo_url || '',
       customCss: config?.custom_css || '',
       monitors: monitorsResult.results?.map(m => ({
@@ -155,9 +126,7 @@ adminRoutes.get('/config', async (c) => {
         name: a.name,
         selected: a.selected === 1
       })) || []
-    };
-    
-    return c.json(response);
+    });
   } catch (error) {
     console.error('获取状态页配置失败:', error);
     return c.json({ error: '获取状态页配置失败' }, 500);
@@ -179,9 +148,7 @@ adminRoutes.post('/config', async (c) => {
   
   try {
     // 检查是否已存在配置
-    const existingConfig = await c.env.DB.prepare(
-      'SELECT id FROM status_page_config WHERE user_id = ?'
-    ).bind(userId).first<{id: number}>();
+    const existingConfig = await getStatusPageConfigById(c.env.DB, userId);
     
     console.log('现有配置查询结果:', existingConfig);
     
@@ -190,69 +157,53 @@ adminRoutes.post('/config', async (c) => {
     if (existingConfig && existingConfig.id) {
       // 更新现有配置
       console.log('更新现有配置ID:', existingConfig.id);
-      await c.env.DB.prepare(
-        'UPDATE status_page_config SET title = ?, description = ?, logo_url = ?, custom_css = ? WHERE id = ?'
-      ).bind(
+      await updateStatusPageConfig(
+        c.env.DB,
+        existingConfig.id,
         data.title,
         data.description,
         data.logoUrl,
-        data.customCss,
-        existingConfig.id
-      ).run();
+        data.customCss
+      );
       
       configId = existingConfig.id;
     } else {
       // 创建新配置
       console.log('创建新配置');
-      const insertResult = await c.env.DB.prepare(
-        'INSERT INTO status_page_config (user_id, title, description, logo_url, custom_css) VALUES (?, ?, ?, ?, ?)'
-      ).bind(
+      const insertResult = await createStatusPageConfig(
+        c.env.DB,
         userId,
         data.title,
         data.description,
         data.logoUrl,
         data.customCss
-      ).run();
+      );
       
       console.log('插入配置结果:', insertResult);
       
-      if (!insertResult.success) {
+      if (!insertResult || typeof insertResult.id !== 'number') {
         throw new Error('创建状态页配置失败');
       }
       
-      // 获取新插入的ID
-      const lastInsertId = await c.env.DB.prepare('SELECT last_insert_rowid() as id').first<{ id: number }>();
-      console.log('获取的最后插入ID:', lastInsertId);
-      
-      if (!lastInsertId || typeof lastInsertId.id !== 'number') {
-        throw new Error('获取配置ID失败');
-      }
-      
-      configId = lastInsertId.id;
+      configId = insertResult.id;
     }
     
     // 清除现有的监控项关联
     console.log('清除配置ID的现有监控关联:', configId);
-    const deleteMonitorsResult = await c.env.DB.prepare(
-      'DELETE FROM status_page_monitors WHERE config_id = ?'
-    ).bind(configId).run();
+    const deleteMonitorsResult = await clearConfigMonitorLinks(c.env.DB, configId);
     console.log('删除现有监控关联结果:', deleteMonitorsResult);
     
     // 清除现有的客户端关联
     console.log('清除配置ID的现有客户端关联:', configId);
-    const deleteAgentsResult = await c.env.DB.prepare(
-      'DELETE FROM status_page_agents WHERE config_id = ?'
-    ).bind(configId).run();
+    const deleteAgentsResult = await clearConfigAgentLinks(c.env.DB, configId);
     console.log('删除现有客户端关联结果:', deleteAgentsResult);
     
     // 添加选定的监控项
     console.log('接收到的监控项IDs:', data.monitors);
-    if (Array.isArray(data.monitors) && data.monitors.length > 0) {
+    if (data.monitors && data.monitors.length > 0) {
       console.log(`添加 ${data.monitors.length} 个监控项`);
       for (const monitorId of data.monitors) {
-        const insertResult = await c.env.DB.prepare(
-          'INSERT INTO status_page_monitors (config_id, monitor_id) VALUES (?, ?)'
-        ).bind(configId, monitorId).run();
+        const insertResult = await addMonitorToConfig(c.env.DB, configId, monitorId);
         console.log(`添加监控项 ${monitorId} 结果:`, insertResult);
       }
     } else {
@@ -261,12 +212,10 @@ adminRoutes.post('/config', async (c) => {
     
     // 添加选定的客户端
     console.log('接收到的客户端IDs:', data.agents);
-    if (Array.isArray(data.agents) && data.agents.length > 0) {
+    if (data.agents && data.agents.length > 0) {
       console.log(`添加 ${data.agents.length} 个客户端`);
       for (const agentId of data.agents) {
-        const insertResult = await c.env.DB.prepare(
-          'INSERT INTO status_page_agents (config_id, agent_id) VALUES (?, ?)'
-        ).bind(configId, agentId).run();
+        const insertResult = await addAgentToConfig(c.env.DB, configId, agentId);
         console.log(`添加客户端 ${agentId} 结果:`, insertResult);
       }
     } else {
@@ -286,9 +235,7 @@ app.get('/data', async (c) => {
   try {
     // 获取所有配置
     console.log('获取状态页配置...');
-    const configsResult = await c.env.DB.prepare(
-      'SELECT * FROM status_page_config'
-    ).all<DbStatusPageConfig>();
+    const configsResult = await getAllStatusPageConfigs(c.env.DB);
     
     console.log('状态页配置查询结果:', JSON.stringify(configsResult));
     
@@ -296,12 +243,23 @@ app.get('/data', async (c) => {
       console.log('未找到状态页配置，返回默认配置');
       
       // 尝试创建一个默认配置
-      const defaultConfig = await createDefaultConfig(c);
-      if (defaultConfig) {
-        return c.json({ 
-          success: true,
-          data: defaultConfig
-        });
+      try {
+        const adminUser = await getAdminUserId(c.env.DB);
+        if (adminUser && adminUser.id) {
+          const configId = await createDefaultConfig(c.env.DB, adminUser.id);
+          if (configId) {
+            // 重新获取新创建的配置
+            const defaultConfig = await createDefaultStatusPageData(c);
+            if (defaultConfig) {
+              return c.json({ 
+                success: true,
+                data: defaultConfig
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('创建默认配置失败:', error);
       }
       
       return c.json({ 
@@ -322,16 +280,12 @@ app.get('/data', async (c) => {
     console.log('找到状态页配置:', config);
     
     // 获取选中的监控项
-    const selectedMonitors = await c.env.DB.prepare(
-      'SELECT monitor_id FROM status_page_monitors WHERE config_id = ?'
-    ).bind(config.id).all<{ monitor_id: number }>();
+    const selectedMonitors = await getSelectedMonitors(c.env.DB, config.id as number);
     
     console.log('选中的监控项:', JSON.stringify(selectedMonitors));
     
     // 获取选中的客户端
-    const selectedAgents = await c.env.DB.prepare(
-      'SELECT agent_id FROM status_page_agents WHERE config_id = ?'
-    ).bind(config.id).all<{ agent_id: number }>();
+    const selectedAgents = await getSelectedAgents(c.env.DB, config.id as number);
     
     console.log('选中的客户端:', JSON.stringify(selectedAgents));
     
@@ -339,27 +293,18 @@ app.get('/data', async (c) => {
     let monitors: Monitor[] = [];
     if (selectedMonitors.results && selectedMonitors.results.length > 0) {
       const monitorIds = selectedMonitors.results.map(m => m.monitor_id);
-      const placeholders = monitorIds.map(() => '?').join(',');
       
-      console.log(`查询监控项详情, IDs: ${monitorIds}, SQL占位符: ${placeholders}`);
+      console.log(`查询监控项详情, IDs: ${monitorIds}`);
       
       if (monitorIds.length > 0) {
-        const monitorsResult = await c.env.DB.prepare(
-          `SELECT * FROM monitors WHERE id IN (${placeholders})`
-        ).bind(...monitorIds).all<Monitor>();
+        const monitorsResult = await getMonitorsByIds(c.env.DB, monitorIds);
         
         console.log('监控项查询结果:', JSON.stringify(monitorsResult));
         
         if (monitorsResult.results) {
           // 获取每个监控的历史记录
           monitors = await Promise.all(monitorsResult.results.map(async (monitor) => {
-            const historyResult = await c.env.DB.prepare(
-              `SELECT status, timestamp 
-               FROM monitor_status_history 
-               WHERE monitor_id = ? 
-               ORDER BY timestamp DESC 
-               LIMIT 24`
-            ).bind(monitor.id).all<{status: string, timestamp: string}>();
+            const historyResult = await getMonitorHistory(c.env.DB, monitor.id);
             
             // 将历史记录转换为状态数组
             const history = historyResult.results 
@@ -381,14 +326,11 @@ app.get('/data', async (c) => {
     let agents: Agent[] = [];
     if (selectedAgents.results && selectedAgents.results.length > 0) {
       const agentIds = selectedAgents.results.map(a => a.agent_id);
-      const placeholders = agentIds.map(() => '?').join(',');
       
-      console.log(`查询客户端详情, IDs: ${agentIds}, SQL占位符: ${placeholders}`);
+      console.log(`查询客户端详情, IDs: ${agentIds}`);
       
       if (agentIds.length > 0) {
-        const agentsResult = await c.env.DB.prepare(
-          `SELECT * FROM agents WHERE id IN (${placeholders})`
-        ).bind(...agentIds).all<Agent>();
+        const agentsResult = await getAgentsByIds(c.env.DB, agentIds);
         
         console.log('客户端查询结果:', JSON.stringify(agentsResult));
         
@@ -474,129 +416,106 @@ app.get('/data', async (c) => {
   }
 });
 
-// 创建默认配置
-async function createDefaultConfig(c: any) {
+// 创建默认状态页数据
+async function createDefaultStatusPageData(c: any) {
   try {
-    console.log('创建默认状态页配置');
-    
-    // 查找管理员账户
-    const admin = await c.env.DB.prepare(
-      'SELECT id FROM users WHERE role = ?'
-    ).bind('admin').first();
-    
-    if (!admin) {
-      console.log('未找到管理员账户');
+    // 获取所有配置
+    const configsResult = await getAllStatusPageConfigs(c.env.DB);
+    if (!configsResult.results || configsResult.results.length === 0) {
       return null;
     }
     
-    // 创建默认配置
-    const insertResult = await c.env.DB.prepare(
-      'INSERT INTO status_page_config (user_id, title, description, logo_url, custom_css) VALUES (?, ?, ?, ?, ?)'
-    ).bind(
-      admin.id,
-      '系统状态',
-      '实时监控系统状态',
-      '',
-      ''
-    ).run();
+    const config = configsResult.results[0];
     
-    if (!insertResult.success) {
-      console.log('创建默认配置失败');
-      return null;
-    }
+    // 获取选中的监控项
+    const selectedMonitors = await getSelectedMonitors(c.env.DB, config.id as number);
     
-    // 获取新插入的ID
-    const lastInsertId = await c.env.DB.prepare('SELECT last_insert_rowid() as id').first();
-    if (!lastInsertId || typeof lastInsertId.id !== 'number') {
-      console.log('获取配置ID失败');
-      return null;
-    }
+    // 获取选中的客户端
+    const selectedAgents = await getSelectedAgents(c.env.DB, config.id as number);
     
-    const configId = lastInsertId.id;
-    console.log(`创建的默认配置ID: ${configId}`);
-    
-    // 获取所有监控项目
-    let monitors;
-    try {
-      // 获取监控项
-      monitors = await c.env.DB.prepare(
-        'SELECT * FROM monitors WHERE active = 1'
-      ).all();
-    } catch (error) {
-      console.error('获取监控项失败:', error);
-      monitors = { results: [] };
-    }
-    
-    // 获取所有客户端
-    let agents;
-    try {
-      // 获取所有客户端
-      agents = await c.env.DB.prepare(
-        'SELECT * FROM agents'
-      ).all();
-    } catch (error) {
-      console.error('获取客户端失败:', error);
-      agents = { results: [] };
-    }
-    
-    // 关联监控项
-    if (monitors.results && monitors.results.length > 0) {
-      console.log(`找到 ${monitors.results.length} 个活跃监控项`);
-      for (const monitor of monitors.results) {
-        await c.env.DB.prepare(
-          'INSERT INTO status_page_monitors (config_id, monitor_id) VALUES (?, ?)'
-        ).bind(configId, monitor.id).run();
+    // 获取监控项详细信息
+    let monitors: any[] = [];
+    if (selectedMonitors.results && selectedMonitors.results.length > 0) {
+      const monitorIds = selectedMonitors.results.map(m => m.monitor_id);
+      
+      if (monitorIds.length > 0) {
+        const monitorsResult = await getMonitorsByIds(c.env.DB, monitorIds);
+        
+        if (monitorsResult.results) {
+          monitors = monitorsResult.results;
+        }
       }
     }
     
-    // 关联客户端
-    if (agents.results && agents.results.length > 0) {
-      console.log(`找到 ${agents.results.length} 个活跃客户端`);
-      for (const agent of agents.results) {
-        await c.env.DB.prepare(
-          'INSERT INTO status_page_agents (config_id, agent_id) VALUES (?, ?)'
-        ).bind(configId, agent.id).run();
+    // 获取客户端详细信息
+    let agents: any[] = [];
+    if (selectedAgents.results && selectedAgents.results.length > 0) {
+      const agentIds = selectedAgents.results.map(a => a.agent_id);
+      
+      if (agentIds.length > 0) {
+        const agentsResult = await getAgentsByIds(c.env.DB, agentIds);
+        
+        if (agentsResult.results) {
+          agents = agentsResult.results;
+        }
       }
     }
     
-    // 返回创建的配置
+    // 为监控项添加必要的字段
+    const enrichedMonitors = monitors.map(monitor => ({
+      ...monitor,
+      status: monitor.status || 'unknown',
+      uptime: monitor.uptime || 0,
+      response_time: monitor.response_time || 0,
+      history: Array(24).fill('unknown')
+    }));
+    
+    // 为客户端添加资源使用情况字段
+    const enrichedAgents = agents.map(agent => {
+      // 计算内存使用百分比 (如果有总量和使用量)
+      const memoryPercent = agent.memory_total && agent.memory_used
+        ? (agent.memory_used / agent.memory_total) * 100
+        : null;
+        
+      // 计算磁盘使用百分比 (如果有总量和使用量)
+      const diskPercent = agent.disk_total && agent.disk_used
+        ? (agent.disk_used / agent.disk_total) * 100
+        : null;
+        
+      return {
+        ...agent,
+        cpu: agent.cpu_usage || 0,
+        memory: memoryPercent || 0,
+        disk: diskPercent || 0,
+        network_rx: agent.network_rx || 0,
+        network_tx: agent.network_tx || 0,
+        hostname: agent.hostname || "未知主机",
+        ip_address: agent.ip_address || "0.0.0.0",
+        os: agent.os || "未知系统",
+        version: agent.version || "未知版本"
+      };
+    });
+    
     return {
-      title: '系统状态',
-      description: '实时监控系统状态',
-      logoUrl: '',
-      customCss: '',
-      monitors: monitors.results ? monitors.results.map((monitor: any) => ({
-        ...monitor,
-        status: monitor.status || 'unknown',
-        uptime: monitor.uptime || 0,
-        response_time: monitor.response_time || 0,
-        history: Array(24).fill('unknown')
-      })) : [],
-      agents: agents.results ? agents.results.map((agent: any) => {
-        // 计算内存使用百分比 (如果有总量和使用量)
-        const memoryPercent = agent.memory_total && agent.memory_used
-          ? (agent.memory_used / agent.memory_total) * 100
-          : null;
-          
-        // 计算磁盘使用百分比 (如果有总量和使用量)
-        const diskPercent = agent.disk_total && agent.disk_used
-          ? (agent.disk_used / agent.disk_total) * 100
-          : null;
-          
-        return {
-          ...agent,
-          // 使用数据库中的 status 字段，不重新计算
-          cpu: agent.cpu_usage || 0,               // 使用数据库中的CPU使用率
-          memory: memoryPercent || 0,              // 使用数据库中的内存使用百分比
-          disk: diskPercent || 0,                  // 使用数据库中的磁盘使用百分比
-          network_rx: agent.network_rx || 0,       // 使用数据库中的网络下载速率
-          network_tx: agent.network_tx || 0,       // 使用数据库中的网络上传速率
-          hostname: agent.hostname || "未知主机",
-          ip_address: agent.ip_address || "0.0.0.0",
-          os: agent.os || "未知系统",
-          version: agent.version || "未知版本"
-        };
-      }) : []
+      title: config.title,
+      description: config.description,
+      logoUrl: config.logo_url,
+      customCss: config.custom_css,
+      monitors: enrichedMonitors,
+      agents: enrichedAgents.map(agent => ({
+        id: agent.id,
+        name: agent.name,
+        status: agent.status,
+        cpu: agent.cpu,
+        memory: agent.memory,
+        disk: agent.disk,
+        network_rx: agent.network_rx,
+        network_tx: agent.network_tx,
+        hostname: agent.hostname,
+        ip_address: agent.ip_address,
+        os: agent.os,
+        version: agent.version
+      }))
     };
   } catch (error) {
     console.error('创建默认配置失败:', error);

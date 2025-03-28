@@ -3,6 +3,16 @@ import { jwt } from 'hono/jwt';
 import { compare, hash } from 'bcryptjs';
 import { Bindings } from '../models/db';
 import { getJwtSecret } from '../utils/jwt';
+import { 
+  getAllUsers, 
+  getUserById, 
+  getFullUserById, 
+  checkUserExists, 
+  createUser,
+  updateUser,
+  updateUserPassword,
+  deleteUser
+} from '../db/users';
 
 // 用户类型定义
 interface User {
@@ -36,9 +46,7 @@ users.get('/', async (c) => {
     }
     
     // 查询所有用户，不包括密码
-    const result = await c.env.DB.prepare(
-      'SELECT id, username, email, role, created_at, updated_at FROM users ORDER BY id'
-    ).all<Omit<User, 'password'>>();
+    const result = await getAllUsers(c.env.DB);
     
     return c.json({ success: true, users: result.results });
   } catch (error) {
@@ -59,9 +67,7 @@ users.get('/:id', async (c) => {
     }
     
     // 查询用户，不包括密码
-    const user = await c.env.DB.prepare(
-      'SELECT id, username, email, role, created_at, updated_at FROM users WHERE id = ?'
-    ).bind(id).first<Omit<User, 'password'>>();
+    const user = await getUserById(c.env.DB, id);
     
     if (!user) {
       return c.json({ success: false, message: '用户不存在' }, 404);
@@ -92,9 +98,7 @@ users.post('/', async (c) => {
     }
     
     // 检查用户名是否已存在
-    const existingUser = await c.env.DB.prepare(
-      'SELECT id FROM users WHERE username = ?'
-    ).bind(data.username).first();
+    const existingUser = await checkUserExists(c.env.DB, data.username);
     
     if (existingUser) {
       return c.json({ success: false, message: '用户名已存在' }, 400);
@@ -108,29 +112,15 @@ users.post('/', async (c) => {
     
     // 哈希密码
     const hashedPassword = await hash(data.password, 10);
-    const now = new Date().toISOString();
     
     // 插入新用户
-    const result = await c.env.DB.prepare(
-      `INSERT INTO users (username, password, email, role, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(
-      data.username,
-      hashedPassword,
-      data.email || null,
-      data.role,
-      now,
-      now
-    ).run();
-    
-    if (!result.success) {
-      throw new Error('创建用户失败');
-    }
-    
-    // 获取新创建的用户
-    const newUser = await c.env.DB.prepare(
-      'SELECT id, username, email, role, created_at, updated_at FROM users WHERE rowid = last_insert_rowid()'
-    ).first<Omit<User, 'password'>>();
+    const newUser = await createUser(
+      c.env.DB, 
+      data.username, 
+      hashedPassword, 
+      data.email || null, 
+      data.role
+    );
     
     return c.json({ success: true, user: newUser }, 201);
   } catch (error) {
@@ -151,9 +141,7 @@ users.put('/:id', async (c) => {
     }
     
     // 检查用户是否存在
-    const user = await c.env.DB.prepare(
-      'SELECT * FROM users WHERE id = ?'
-    ).bind(id).first<User>();
+    const user = await getFullUserById(c.env.DB, id);
     
     if (!user) {
       return c.json({ success: false, message: '用户不存在' }, 404);
@@ -167,68 +155,42 @@ users.put('/:id', async (c) => {
     }
     
     // 准备更新数据
-    const updates = [];
-    const values = [];
+    const updates: any = {};
     
-    if (data.username !== undefined) {
+    if (data.username !== undefined && data.username !== user.username) {
       // 检查新用户名是否已存在
-      if (data.username !== user.username) {
-        const existingUser = await c.env.DB.prepare(
-          'SELECT id FROM users WHERE username = ? AND id != ?'
-        ).bind(data.username, id).first();
-        
-        if (existingUser) {
-          return c.json({ success: false, message: '用户名已存在' }, 400);
-        }
-        
-        updates.push('username = ?');
-        values.push(data.username);
+      const existingUser = await checkUserExists(c.env.DB, data.username, id);
+      
+      if (existingUser) {
+        return c.json({ success: false, message: '用户名已存在' }, 400);
       }
+      
+      updates.username = data.username;
     }
     
     if (data.email !== undefined) {
-      updates.push('email = ?');
-      values.push(data.email);
+      updates.email = data.email;
     }
     
     if (data.role !== undefined) {
-      updates.push('role = ?');
-      values.push(data.role);
+      updates.role = data.role;
     }
     
     // 如果提供了新密码，则更新密码
     if (data.password) {
-      const hashedPassword = await hash(data.password, 10);
-      updates.push('password = ?');
-      values.push(hashedPassword);
-    }
-    
-    updates.push('updated_at = ?');
-    values.push(new Date().toISOString());
-    
-    // 添加 ID 作为 WHERE 条件
-    values.push(id);
-    
-    // 如果没有要更新的字段，直接返回
-    if (updates.length <= 1) {
-      return c.json({ success: false, message: '没有提供要更新的字段' }, 400);
+      updates.password = await hash(data.password, 10);
     }
     
     // 执行更新
-    const result = await c.env.DB.prepare(
-      `UPDATE users SET ${updates.join(', ')} WHERE id = ?`
-    ).bind(...values).run();
-    
-    if (!result.success) {
-      throw new Error('更新用户失败');
+    try {
+      const updatedUser = await updateUser(c.env.DB, id, updates);
+      return c.json({ success: true, user: updatedUser });
+    } catch (err) {
+      if (err instanceof Error && err.message === '没有提供要更新的字段') {
+        return c.json({ success: false, message: '没有提供要更新的字段' }, 400);
+      }
+      throw err;
     }
-    
-    // 获取更新后的用户
-    const updatedUser = await c.env.DB.prepare(
-      'SELECT id, username, email, role, created_at, updated_at FROM users WHERE id = ?'
-    ).bind(id).first<Omit<User, 'password'>>();
-    
-    return c.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error('更新用户错误:', error);
     return c.json({ success: false, message: '更新用户失败' }, 500);
@@ -252,22 +214,14 @@ users.delete('/:id', async (c) => {
     }
     
     // 检查用户是否存在
-    const user = await c.env.DB.prepare(
-      'SELECT id FROM users WHERE id = ?'
-    ).bind(id).first();
+    const user = await getUserById(c.env.DB, id);
     
     if (!user) {
       return c.json({ success: false, message: '用户不存在' }, 404);
     }
     
     // 执行删除
-    const result = await c.env.DB.prepare(
-      'DELETE FROM users WHERE id = ?'
-    ).bind(id).run();
-    
-    if (!result.success) {
-      throw new Error('删除用户失败');
-    }
+    await deleteUser(c.env.DB, id);
     
     return c.json({ success: true, message: '用户已删除' });
   } catch (error) {
@@ -299,9 +253,7 @@ users.post('/:id/change-password', async (c) => {
     }
     
     // 获取用户
-    const user = await c.env.DB.prepare(
-      'SELECT * FROM users WHERE id = ?'
-    ).bind(id).first<User>();
+    const user = await getFullUserById(c.env.DB, id);
     
     if (!user) {
       return c.json({ success: false, message: '用户不存在' }, 404);
@@ -319,17 +271,7 @@ users.post('/:id/change-password', async (c) => {
     const hashedPassword = await hash(newPassword, 10);
     
     // 更新密码
-    const result = await c.env.DB.prepare(
-      'UPDATE users SET password = ?, updated_at = ? WHERE id = ?'
-    ).bind(
-      hashedPassword,
-      new Date().toISOString(),
-      id
-    ).run();
-    
-    if (!result.success) {
-      throw new Error('更新密码失败');
-    }
+    await updateUserPassword(c.env.DB, id, hashedPassword);
     
     return c.json({ success: true, message: '密码已更新' });
   } catch (error) {
