@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Flex, Text, Button, Avatar, DropdownMenu, Separator, Container, Theme } from '@radix-ui/themes';
-import { ExitIcon, PersonIcon, PersonIcon as UserIcon, DashboardIcon, ChevronDownIcon, ActivityLogIcon, CubeIcon, PieChartIcon } from '@radix-ui/react-icons';
+import { ExitIcon, PersonIcon, PersonIcon as UserIcon, DashboardIcon, ChevronDownIcon, ActivityLogIcon, CubeIcon, PieChartIcon, BellIcon } from '@radix-ui/react-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import '../styles/components.css';
@@ -84,6 +84,13 @@ const Navbar = () => {
                         <Button variant="ghost" size="2" className="nav-button">
                           <PieChartIcon width="14" height="14" />
                           <Text ml="1" size="2">{t('navbar.statusPage')}</Text>
+                        </Button>
+                      </Link>
+                      
+                      <Link to="/notifications" className={`nav-link ${isActive('/notifications') ? 'active' : ''}`}>
+                        <Button variant="ghost" size="2" className="nav-button">
+                          <BellIcon width="14" height="14" />
+                          <Text ml="1" size="2">{t('navbar.notifications')}</Text>
                         </Button>
                       </Link>
                     </Flex>

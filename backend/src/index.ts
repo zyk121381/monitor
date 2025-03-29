@@ -4,9 +4,11 @@ import { cors } from 'hono/cors';
 import { Bindings } from './models/db';
 import { prettyJSON } from 'hono/pretty-json';
 import { checkAndInitializeDatabase } from './setup/initCheck';
+import { ExecutionContext } from 'hono';
 
-// 声明环境变量类型
+// 添加全局变量声明
 declare global {
+  var isInitialized: boolean;
   namespace NodeJS {
     interface ProcessEnv {
       NODE_ENV?: string;
@@ -47,6 +49,7 @@ import userRoutes from './routes/users';
 import statusRoutes from './routes/status';
 import initDbRoutes from './setup/database';
 import { monitorTask, runScheduledTasks } from './tasks';
+import notificationsRouter from './routes/notifications';
 
 // 创建Hono应用
 const app = new Hono<{ Bindings: Bindings }>();
@@ -90,6 +93,7 @@ app.route('/api/agents', agentRoutes);
 app.route('/api/users', userRoutes);
 app.route('/api/status', statusRoutes);
 app.route('/api', initDbRoutes);
+app.route('/api/notifications', notificationsRouter);
 
 // 添加监控检查触发路由
 app.get('/api/trigger-check', async (c) => {
@@ -106,7 +110,15 @@ let dbInitialized = false;
 // 导出 fetch 函数供 Cloudflare Workers 使用
 export default {
   // 处理 HTTP 请求
-  async fetch(request: Request, env: any, ctx: any) {
+  async fetch(request: Request, env: Bindings, ctx: ExecutionContext) {
+    // 静态初始化标志
+    if (!globalThis.isInitialized) {
+      console.log('第一次请求，初始化应用...');
+      
+      // 设置初始化标志
+      globalThis.isInitialized = true;
+    }
+
     try {
       // 如果数据库尚未初始化，则进行初始化检查
       if (!dbInitialized) {

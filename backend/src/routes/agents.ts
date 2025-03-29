@@ -396,6 +396,26 @@ agents.post('/status', async (c) => {
       version
     });
     
+    // 动态导入阈值通知函数以避免循环依赖
+    const { handleAgentThresholdNotification } = await import('../tasks/agent-task');
+    
+    // 检查CPU使用率是否需要通知
+    if (typeof cpu_usage === 'number') {
+      await handleAgentThresholdNotification(c.env, agent.id, 'cpu', cpu_usage);
+    }
+    
+    // 检查内存使用率是否需要通知
+    if (typeof memory_total === 'number' && typeof memory_used === 'number' && memory_total > 0) {
+      const memoryUsagePercent = (memory_used / memory_total) * 100;
+      await handleAgentThresholdNotification(c.env, agent.id, 'memory', memoryUsagePercent);
+    }
+    
+    // 检查磁盘使用率是否需要通知
+    if (typeof disk_total === 'number' && typeof disk_used === 'number' && disk_total > 0) {
+      const diskUsagePercent = (disk_used / disk_total) * 100;
+      await handleAgentThresholdNotification(c.env, agent.id, 'disk', diskUsagePercent);
+    }
+    
     return c.json({ 
       success: true, 
       message: '客户端状态已更新'

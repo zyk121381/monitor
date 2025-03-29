@@ -28,15 +28,23 @@ export async function cleanupOldRecords(db: Bindings['DB']) {
       WHERE checked_at < datetime('now', '-30 days')
     `).run();
     
+    // 清理通知历史记录
+    const deleteNotificationHistoryResult = await db.prepare(`
+      DELETE FROM notification_history 
+      WHERE sent_at < datetime('now', '-30 days')
+    `).run();
+    
     const statusHistoryDeleted = (deleteStatusHistoryResult.meta as DbResultMeta)?.changes || 0;
     const checksDeleted = (deleteChecksResult.meta as DbResultMeta)?.changes || 0;
+    const notificationHistoryDeleted = (deleteNotificationHistoryResult.meta as DbResultMeta)?.changes || 0;
     
-    console.log(`清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${checksDeleted} 条检查记录`);
+    console.log(`清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${checksDeleted} 条检查记录，${notificationHistoryDeleted} 条通知历史记录`);
     
     return {
       success: true,
       statusHistoryDeleted,
-      checksDeleted
+      checksDeleted,
+      notificationHistoryDeleted
     };
   } catch (error) {
     console.error('清理历史记录出错:', error);

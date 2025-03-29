@@ -26,6 +26,7 @@ import StatusPage from './pages/status/StatusPage';
 import StatusPageConfig from './pages/status/StatusPageConfig';
 import CreateAgent from './pages/agents/CreateAgent';
 import EditAgent from './pages/agents/EditAgent';
+import NotificationsConfig from './pages/notifications/NotificationsConfig';
 
 // 受保护的路由组件
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -86,6 +87,13 @@ function App() {
         <Route path="/status/config" element={
           <ProtectedRoute>
             <Layout><StatusPageConfig /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        {/* 通知配置 - 需要认证 */}
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <Layout><NotificationsConfig /></Layout>
           </ProtectedRoute>
         } />
         

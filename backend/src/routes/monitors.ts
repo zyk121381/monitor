@@ -402,6 +402,73 @@ monitors.post('/:id/check', async (c) => {
     // 使用抽象出来的通用检查监控函数进行检查
     const result = await monitorDb.checkSingleMonitor(c.env.DB, monitor);
     
+    // 新增处理通知的逻辑
+    try {
+      const { shouldSendNotification, sendNotification } = await import('../utils/notification');
+      
+      // 判断是否需要发送通知
+      if (result.previous_status !== result.status) {
+        console.log(`状态已变化: ${result.previous_status} -> ${result.status}`);
+        
+        // 检查是否需要发送通知
+        console.log(`检查通知设置...`);
+        const notificationCheck = await shouldSendNotification(
+          c.env.DB,
+          'monitor',
+          monitor.id,
+          result.previous_status,
+          result.status
+        );
+        
+        console.log(`通知判断结果: shouldSend=${notificationCheck.shouldSend}, channels=${JSON.stringify(notificationCheck.channels)}`);
+        
+        if (notificationCheck.shouldSend && notificationCheck.channels.length > 0) {
+          console.log(`监控 ${monitor.name} (ID: ${monitor.id}) 状态变更，正在发送通知...`);
+          
+          // 准备通知变量
+          const variables = {
+            name: monitor.name,
+            status: result.status,
+            previous_status: result.previous_status || '未知',
+            time: new Date().toLocaleString('zh-CN'),
+            response_time: `${result.responseTime}ms`,
+            url: monitor.url,
+            status_code: result.statusCode ? result.statusCode.toString() : '无',
+            expected_status_code: monitor.expected_status.toString(),
+            error: result.error || '无',
+            details: `URL: ${monitor.url}\n响应时间: ${result.responseTime}ms\n状态码: ${result.statusCode || '无'}\n错误信息: ${result.error || '无'}`
+          };
+          
+          console.log(`通知变量: ${JSON.stringify(variables)}`);
+          
+          // 发送通知
+          console.log(`开始发送通知...`);
+          const notificationResult = await sendNotification(
+            c.env.DB,
+            'monitor',
+            monitor.id,
+            variables,
+            notificationCheck.channels
+          );
+          
+          console.log(`通知发送结果: ${JSON.stringify(notificationResult)}`);
+          
+          if (notificationResult.success) {
+            console.log(`监控 ${monitor.name} (ID: ${monitor.id}) 通知发送成功`);
+          } else {
+            console.error(`监控 ${monitor.name} (ID: ${monitor.id}) 通知发送失败`);
+          }
+        } else {
+          console.log(`监控 ${monitor.name} (ID: ${monitor.id}) 状态变更，但不需要发送通知`);
+        }
+      } else {
+        console.log(`监控 ${monitor.name} (ID: ${monitor.id}) 状态未变更，不发送通知`);
+      }
+    } catch (notificationError) {
+      console.error('处理通知时出错:', notificationError);
+      // 通知处理错误不影响主流程返回
+    }
+    
     return c.json({ 
       success: true,
       message: '监控检查完成',

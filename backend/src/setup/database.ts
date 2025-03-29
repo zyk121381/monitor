@@ -32,6 +32,19 @@ export async function createTables(env: Bindings): Promise<void> {
 
   console.log('创建状态页客户端关联表...');
   await env.DB.exec("CREATE TABLE IF NOT EXISTS status_page_agents (config_id INTEGER NOT NULL, agent_id INTEGER NOT NULL, PRIMARY KEY (config_id, agent_id), FOREIGN KEY (config_id) REFERENCES status_page_config(id) ON DELETE CASCADE, FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE)");
+  
+  // 添加通知系统相关表
+  console.log('创建通知渠道表...');
+  await env.DB.exec("CREATE TABLE IF NOT EXISTS notification_channels (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, type TEXT NOT NULL, config TEXT NOT NULL, enabled BOOLEAN NOT NULL DEFAULT 1, created_by INTEGER NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (created_by) REFERENCES users(id))");
+  
+  console.log('创建通知模板表...');
+  await env.DB.exec("CREATE TABLE IF NOT EXISTS notification_templates (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, type TEXT NOT NULL, subject TEXT NOT NULL, content TEXT NOT NULL, is_default BOOLEAN NOT NULL DEFAULT 0, created_by INTEGER NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (created_by) REFERENCES users(id))");
+  
+  console.log('创建通知设置表...');
+  await env.DB.exec("CREATE TABLE IF NOT EXISTS notification_settings (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, target_type TEXT NOT NULL DEFAULT 'global', target_id INTEGER DEFAULT NULL, enabled BOOLEAN NOT NULL DEFAULT 1, on_down BOOLEAN NOT NULL DEFAULT 1, on_recovery BOOLEAN NOT NULL DEFAULT 1, on_offline BOOLEAN NOT NULL DEFAULT 1, on_cpu_threshold BOOLEAN NOT NULL DEFAULT 0, cpu_threshold INTEGER NOT NULL DEFAULT 90, on_memory_threshold BOOLEAN NOT NULL DEFAULT 0, memory_threshold INTEGER NOT NULL DEFAULT 85, on_disk_threshold BOOLEAN NOT NULL DEFAULT 0, disk_threshold INTEGER NOT NULL DEFAULT 90, channels TEXT DEFAULT '[]', override_global BOOLEAN NOT NULL DEFAULT 0, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id), UNIQUE(user_id, target_type, target_id))");
+  
+  console.log('创建通知历史记录表...');
+  await env.DB.exec("CREATE TABLE IF NOT EXISTS notification_history (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, target_id INTEGER, channel_id INTEGER NOT NULL, template_id INTEGER NOT NULL, status TEXT NOT NULL, content TEXT NOT NULL, error TEXT, sent_at TEXT DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (channel_id) REFERENCES notification_channels(id), FOREIGN KEY (template_id) REFERENCES notification_templates(id))");
 }
 
 // 创建管理员用户
@@ -225,6 +238,138 @@ export async function addSampleAgents(env: Bindings): Promise<void> {
   }
 }
 
+// 添加通知模板初始化函数
+export async function createNotificationTemplates(env: Bindings): Promise<void> {
+  // 检查是否已有通知模板
+  const existingTemplates = await env.DB.prepare('SELECT COUNT(*) as count FROM notification_templates').first<{count: number}>();
+  
+  if (existingTemplates.count === 0) {
+    console.log('添加默认通知模板...');
+    const now = new Date().toISOString();
+    const userId = 1; // 管理员用户ID
+    
+    // 添加 Monitor 监控模板 (ID: 1)
+    await env.DB.prepare(
+      `INSERT INTO notification_templates (id, name, type, subject, content, is_default, created_by, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      1,
+      'Monitor监控模板',
+      'default',
+      '【${status}】${name} 监控状态变更',
+      '🔔 网站监控状态变更通知\n\n📊 服务: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🔗 地址: ${url}\n⏱️ 响应时间: ${response_time}\n📝 实际状态码: ${status_code}\n🎯 期望状态码: ${expected_status_code}\n\n❗ 错误信息: ${error}',
+      1, // is_default=1
+      userId,
+      now,
+      now
+    ).run();
+    
+    // 添加 Agent 客户端监控模板 (ID: 2)
+    await env.DB.prepare(
+      `INSERT INTO notification_templates (id, name, type, subject, content, is_default, created_by, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      2,
+      'Agent监控模板',
+      'default',
+      '【${status}】${name} 客户端状态变更',
+      '🔔 客户端状态变更通知\n\n📊 主机: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🖥️ 主机信息:\n  主机名: ${hostname}\n  IP地址: ${ip_address}\n  操作系统: ${os}\n\n❗ 错误信息: ${error}',
+      1, // is_default=1
+      userId,
+      now,
+      now
+    ).run();
+  }
+}
+
+// 添加通知渠道和设置初始化函数
+export async function createNotificationChannelsAndSettings(env: Bindings): Promise<void> {
+  // 检查是否已有通知渠道
+  const existingChannels = await env.DB.prepare('SELECT COUNT(*) as count FROM notification_channels').first<{count: number}>();
+  
+  if (existingChannels.count === 0) {
+    console.log('添加默认通知渠道...');
+    const now = new Date().toISOString();
+    const userId = 1; // 管理员用户ID
+    
+    // 添加Telegram通知渠道 (ID: 1)
+    await env.DB.prepare(
+      `INSERT INTO notification_channels (id, name, type, config, enabled, created_by, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      1,
+      '默认Telegram通知渠道(https://t.me/xugou_group)',
+      'telegram',
+      '{"botToken": "8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU", "chatId": "-1002608818360"}',
+      1, // enabled
+      userId,
+      now,
+      now
+    ).run();
+  }
+  
+  // 检查是否已有通知设置
+  const existingSettings = await env.DB.prepare('SELECT COUNT(*) as count FROM notification_settings').first<{count: number}>();
+  
+  if (existingSettings.count === 0) {
+    console.log('添加默认通知设置...');
+    const now = new Date().toISOString();
+    const userId = 1; // 管理员用户ID
+    
+    // 添加全局监控通知设置 (ID: 1)
+    await env.DB.prepare(
+      `INSERT INTO notification_settings (id, user_id, target_type, enabled, on_down, on_recovery, channels, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      1,
+      userId,
+      'global-monitor',
+      1, // enabled
+      1, // on_down
+      1, // on_recovery
+      '[1]', // channels (只有Telegram)
+      now,
+      now
+    ).run();
+    
+    // 添加全局客户端通知设置 (ID: 2)
+    await env.DB.prepare(
+      `INSERT INTO notification_settings (id, user_id, target_type, enabled, on_offline, on_recovery, on_cpu_threshold, cpu_threshold, on_memory_threshold, memory_threshold, on_disk_threshold, disk_threshold, channels, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      2,
+      userId,
+      'global-agent',
+      1, // enabled
+      1, // on_offline
+      1, // on_recovery
+      1, // on_cpu_threshold
+      80, // cpu_threshold
+      1, // on_memory_threshold
+      80, // memory_threshold
+      1, // on_disk_threshold
+      90, // disk_threshold
+      '[1]', // channels (只有Telegram)
+      now,
+      now
+    ).run();
+    
+    // 添加全局系统通知设置 (ID: 3)
+    await env.DB.prepare(
+      `INSERT INTO notification_settings (id, user_id, target_type, enabled, channels, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      3,
+      userId,
+      'global-system',
+      1, // enabled
+      '[1]', // channels (只有Telegram)
+      now,
+      now
+    ).run();
+  }
+}
+
 // 初始化数据库，包括创建表和填充示例数据
 export async function initializeDatabase(env: Bindings): Promise<{ success: boolean, message: string }> {
   try {
@@ -239,6 +384,12 @@ export async function initializeDatabase(env: Bindings): Promise<{ success: bool
     // 添加示例数据
     await addSampleMonitors(env);
     await addSampleAgents(env);
+    
+    // 添加默认通知模板
+    await createNotificationTemplates(env);
+    
+    // 添加默认通知渠道和设置
+    await createNotificationChannelsAndSettings(env);
     
     // 创建默认状态页配置和关联数据
     await createDefaultStatusPage(env);
@@ -325,6 +476,13 @@ initDb.get('/init-db', async (c) => {
     // 先删除已有的表
     console.log('删除已有的表...');
     try {
+      // 先删除通知系统相关表（删除表时要注意外键约束）
+      await c.env.DB.exec("DROP TABLE IF EXISTS notification_history");
+      await c.env.DB.exec("DROP TABLE IF EXISTS notification_settings");
+      await c.env.DB.exec("DROP TABLE IF EXISTS notification_templates");
+      await c.env.DB.exec("DROP TABLE IF EXISTS notification_channels");
+      
+      // 再删除其他表
       await c.env.DB.exec("DROP TABLE IF EXISTS status_page_agents");
       await c.env.DB.exec("DROP TABLE IF EXISTS status_page_monitors");
       await c.env.DB.exec("DROP TABLE IF EXISTS status_page_config");
@@ -344,7 +502,7 @@ initDb.get('/init-db', async (c) => {
       return c.json({ 
         success: true, 
         message: '数据库初始化成功',
-        tables: ['users', 'monitors', 'monitor_checks', 'monitor_status_history', 'agents', 'status_page_config', 'status_page_monitors', 'status_page_agents']
+        tables: ['users', 'monitors', 'monitor_checks', 'monitor_status_history', 'agents', 'status_page_config', 'status_page_monitors', 'status_page_agents', 'notification_channels', 'notification_templates', 'notification_settings', 'notification_history']
       });
     } else {
       return c.json({ 
