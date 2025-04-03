@@ -7,7 +7,7 @@
     "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./src/assets/splash.png",
+      "image": "./src/assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "uk.mdzz.xugou"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -29,6 +30,11 @@
     "plugins": [
       "expo-localization"
     ],
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "89f54573-833b-4828-9879-951bf8af7978"
+      }
+    }
   }
 }
