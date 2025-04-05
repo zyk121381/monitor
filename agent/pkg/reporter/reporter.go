@@ -31,7 +31,7 @@ type HTTPReporter struct {
 // NewHTTPReporter 创建一个新的HTTP数据上报器
 func NewHTTPReporter(serverURL, apiToken string) Reporter {
 	return &HTTPReporter{
-		serverURL: serverURL,
+		serverURL: normalizeURL(serverURL),
 		apiToken:  apiToken,
 		client: &http.Client{
 			Timeout: 10 * time.Second,
@@ -39,6 +39,15 @@ func NewHTTPReporter(serverURL, apiToken string) Reporter {
 		lastUpdateTime: time.Now(),
 		registered:     false,
 	}
+}
+
+// normalizeURL 处理URL格式，确保URL末尾没有斜杠
+func normalizeURL(url string) string {
+	// 移除URL末尾的斜杠
+	if len(url) > 0 && url[len(url)-1] == '/' {
+		return url[:len(url)-1]
+	}
+	return url
 }
 
 // StatusPayload 定义上报到后端的数据结构
