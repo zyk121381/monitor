@@ -9,36 +9,6 @@ import { ExecutionContext } from 'hono';
 // 添加全局变量声明
 declare global {
   var isInitialized: boolean;
-  namespace NodeJS {
-    interface ProcessEnv {
-      NODE_ENV?: string;
-      PORT?: string;
-      JWT_SECRET?: string;
-    }
-  }
-}
-
-// 定义 D1 数据库类型
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-  dump(): Promise<ArrayBuffer>;
-  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
-  exec<T = unknown>(query: string): Promise<D1Result<T>>;
-}
-
-interface D1PreparedStatement {
-  bind(...values: any[]): D1PreparedStatement;
-  first<T = unknown>(colName?: string): Promise<T>;
-  run<T = unknown>(): Promise<D1Result<T>>;
-  all<T = unknown>(): Promise<D1Result<T>>;
-  raw<T = unknown>(): Promise<T[]>;
-}
-
-interface D1Result<T = unknown> {
-  results?: T[];
-  success: boolean;
-  error?: string;
-  meta?: object;
 }
 
 // 导入路由
@@ -75,16 +45,6 @@ app.use('*', async (c, next) => {
 
 // 公共路由
 app.get('/', (c) => c.json({ message: 'XUGOU API 服务正在运行' }));
-
-// 获取 JWT 密钥
-const getJwtSecret = (c: any) => {
-  // 在 Cloudflare Workers 环境中，使用 env 变量
-  if (typeof process === 'undefined') {
-    return c.env.JWT_SECRET || 'your-secret-key-change-in-production';
-  }
-  // 在 Node.js 环境中，使用 process.env
-  return process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-};
 
 // 路由注册
 app.route('/api/auth', authRoutes);

@@ -23,10 +23,6 @@ cd agent
 go build -o xugou-agent
 ```
 
-### 使用预编译二进制文件
-
-从 [Releases](https://github.com/xugou/agent/releases) 页面下载适合您系统的预编译二进制文件。
-
 ## 使用方法
 
 ### 基本命令
