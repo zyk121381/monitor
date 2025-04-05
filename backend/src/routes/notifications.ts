@@ -23,13 +23,12 @@ import { Context, Next } from 'hono';
 const notifications = new Hono<{ Bindings: Bindings }>();
 
 // JWT验证中间件
-const jwtMiddleware = (c: Context<{ Bindings: Bindings }>, next: Next) => {
-  const jwtSecret = getJwtSecret(c.env);
-  return jwt({ secret: jwtSecret })(c, next);
-};
-
-// 应用JWT中间件到所有路由
-notifications.use('/*', jwtMiddleware);
+notifications.use('/*', async (c, next) => {
+  const jwtMiddleware = jwt({
+    secret: getJwtSecret(c)
+  });
+  return jwtMiddleware(c, next);
+});
 
 // 获取通知配置
 notifications.get('/', async (c) => {

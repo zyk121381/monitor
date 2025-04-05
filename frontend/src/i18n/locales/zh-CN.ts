@@ -298,7 +298,7 @@ const zhCN = {
     'agent.add.serverAddressHelp': '请确保此地址可以从客户端服务器访问',
     'agent.add.registrationToken': '注册Token',
     'agent.add.generatingToken': '正在生成Token...',
-    'agent.add.tokenHelp': '此令牌将用于您的客户端向服务器注册身份，有效期为24小时',
+    'agent.add.tokenHelp': '此令牌将用于您的客户端向服务器注册身份，令牌仅展示一次，请妥善保存',
     'agent.add.installGuide': '安装指南',
     'agent.add.installSteps': '按照以下两个步骤安装并注册客户端',
     'agent.add.step1': '步骤 1: 下载客户端二进制文件',
