@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, loadApiBaseUrl } from '../config/api';
 
 // 创建一个Axios实例
 const apiClient: AxiosInstance = axios.create({
@@ -15,6 +15,16 @@ const apiClient: AxiosInstance = axios.create({
 // 请求拦截器
 apiClient.interceptors.request.use(
   async (config) => {
+    // 从存储中获取最新的API_BASE_URL
+    try {
+      const baseUrl = await loadApiBaseUrl();
+      config.baseURL = baseUrl;
+    } catch (error) {
+      console.error('获取API_BASE_URL失败', error);
+      // 出错时使用默认值
+      config.baseURL = API_BASE_URL;
+    }
+    
     // 从存储中获取token
     const token = await AsyncStorage.getItem('auth_token');
     

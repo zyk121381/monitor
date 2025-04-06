@@ -191,6 +191,12 @@ export default {
     lightTheme: 'Light Theme',
     darkTheme: 'Dark Theme',
     systemTheme: 'System Theme',
+    // API related settings
+    apiSettings: 'API Settings',
+    apiBaseUrl: 'API Base URL',
+    apiHelperText: 'Please enter the XUGOU backend API server address',
+    apiUrlSaved: 'API address saved. Please restart the app for changes to take effect.',
+    apiUrlSaveFailed: 'Failed to save API address',
   },
   
   // Dashboard
@@ -212,5 +218,12 @@ export default {
     addAgent: 'Add Agent',
     checkAll: 'Check All',
     viewStatus: 'View Status Page',
+  },
+  
+  // Setup
+  setup: {
+    welcome: 'Welcome to XUGOU Monitor',
+    firstTimeSetup: 'First-time Setup',
+    continue: 'Continue',
   },
 }; 

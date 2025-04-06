@@ -191,6 +191,12 @@ export default {
     lightTheme: '浅色主题',
     darkTheme: '深色主题',
     systemTheme: '跟随系统',
+    // API相关设置
+    apiSettings: 'API设置',
+    apiBaseUrl: 'API基础地址',
+    apiHelperText: '请填写XUGOU后端API服务地址',
+    apiUrlSaved: 'API地址已保存。请重启应用以使更改生效。',
+    apiUrlSaveFailed: '保存API地址失败',
   },
   
   // 仪表盘
@@ -212,5 +218,12 @@ export default {
     addAgent: '添加客户端',
     checkAll: '检查所有',
     viewStatus: '查看状态页',
+  },
+  
+  // 设置向导
+  setup: {
+    welcome: '欢迎使用XUGOU监控',
+    firstTimeSetup: '首次使用设置',
+    continue: '继续',
   },
 };
