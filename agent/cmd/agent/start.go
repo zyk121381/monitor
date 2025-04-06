@@ -18,11 +18,11 @@ func init() {
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "启动 Xugou Agent",
-		Long:  `启动 Xugou Agent 开始收集系统信息并上报到服务器`,
+		Long:  `启动 Xugou Agent 开始采集系统信息并上报到服务器`,
 		Run:   runStart,
 	}
 
-	startCmd.Flags().IntP("interval", "i", 60, "数据收集和上报间隔（秒）")
+	startCmd.Flags().IntP("interval", "i", 60, "数据采集和上报间隔（秒）")
 	viper.BindPFlag("interval", startCmd.Flags().Lookup("interval"))
 
 	rootCmd.AddCommand(startCmd)
@@ -55,16 +55,8 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// 初始化数据收集器和上报器
 	dataCollector := collector.NewCollector()
-	var dataReporter reporter.Reporter
-
-	// 根据配置决定使用哪种上报器
-	if server == "console" {
-		dataReporter = reporter.NewConsoleReporter()
-		fmt.Println("使用控制台上报器")
-	} else {
-		dataReporter = reporter.NewHTTPReporter(server, token)
-		fmt.Println("使用HTTP上报器")
-	}
+	dataReporter := reporter.NewHTTPReporter(server, token)
+	fmt.Println("使用HTTP上报器")
 
 	// 设置定时器，按指定间隔收集和上报数据
 	ticker := time.NewTicker(time.Duration(interval) * time.Second)
@@ -96,7 +88,7 @@ func collectAndReport(ctx context.Context, c collector.Collector, r reporter.Rep
 	// 收集系统信息
 	info, err := c.Collect(ctx)
 	if err != nil {
-		fmt.Printf("收集系统信息失败: %v\n", err)
+		fmt.Printf("采集系统信息失败: %v\n", err)
 		return
 	}
 

@@ -16,14 +16,11 @@ interface TelegramConfig {
   chatId: string;
 }
 
-interface EmailConfig {
-  receipts: string;
-  smtpServer?: string;
-  smtpPort?: string;
-  smtpUsername?: string;
-  smtpPassword?: string;
-  senderEmail?: string;
-  useSSL?: boolean;
+// 新的Resend配置接口
+interface ResendConfig {
+  apiKey: string;
+  from: string;
+  to: string;
 }
 
 /**
@@ -31,9 +28,72 @@ interface EmailConfig {
  */
 function parseChannelConfig<T>(channel: NotificationChannel): T {
   try {
-    return JSON.parse(channel.config) as T;
+    console.log(`[解析配置] 开始解析渠道ID=${channel.id} 名称=${channel.name} 类型=${channel.type}的配置`);
+    
+    let config: any;
+    if (typeof channel.config === 'string') {
+      // 如果是字符串，尝试解析为JSON对象
+      try {
+        config = JSON.parse(channel.config);
+        console.log(`[解析配置] 成功解析渠道${channel.id}的JSON配置`);
+      } catch (jsonError) {
+        console.error(`[解析配置] 解析渠道${channel.id}的JSON配置失败:`, jsonError);
+        console.error(`[解析配置] 配置内容: ${channel.config.substring(0, 100)}${channel.config.length > 100 ? '...' : ''}`);
+        return {} as T;
+      }
+    } else if (typeof channel.config === 'object') {
+      // 如果已经是对象，直接使用
+      config = channel.config;
+      console.log(`[解析配置] 渠道${channel.id}配置已经是对象格式`);
+    } else {
+      console.error(`[解析配置] 无效的配置格式: ${typeof channel.config}`);
+      return {} as T;
+    }
+    
+    // 根据渠道类型进行配置验证
+    if (channel.type === 'resend') {
+      // 验证Resend配置
+      if (!config.apiKey) {
+        console.warn(`[解析配置] Resend渠道${channel.id}缺少API密钥配置`);
+      }
+      if (!config.from) {
+        console.warn(`[解析配置] Resend渠道${channel.id}缺少发件人配置`);
+      }
+      if (!config.to) {
+        console.warn(`[解析配置] Resend渠道${channel.id}缺少收件人配置`);
+      }
+      
+      // 检查是否可能是配置类型错误 - 包含telegram配置项
+      if (config.botToken || config.chatId) {
+        console.error(`[解析配置] 警告: Resend渠道${channel.id}包含Telegram配置项，可能配置类型错误`);
+      }
+    } else if (channel.type === 'telegram') {
+      // 验证Telegram配置
+      if (!config.botToken) {
+        console.warn(`[解析配置] Telegram渠道${channel.id}缺少botToken配置`);
+      }
+      if (!config.chatId) {
+        console.warn(`[解析配置] Telegram渠道${channel.id}缺少chatId配置`);
+      }
+      
+      // 检查是否可能是配置类型错误 - 包含resend配置项
+      if (config.apiKey || config.from || config.to) {
+        console.error(`[解析配置] 警告: Telegram渠道${channel.id}包含Resend配置项，可能配置类型错误`);
+      }
+    }
+    
+    console.log(`[解析配置] 渠道${channel.id}配置解析完成`);
+    return config as T;
   } catch (e) {
     console.error('解析渠道配置失败:', e);
+    console.error('解析失败的渠道信息:', {
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+      config: typeof channel.config === 'string' ? 
+        (channel.config.substring(0, 50) + (channel.config.length > 50 ? '...' : '')) : 
+        '非字符串格式'
+    });
     return {} as T;
   }
 }
@@ -50,30 +110,77 @@ function replaceVariables(text: string, variables: Record<string, string>): stri
 }
 
 /**
- * 通过邮件渠道发送通知
+ * 通过Resend API发送邮件通知
  */
-async function sendEmailNotification(
+async function sendResendNotification(
   channel: NotificationChannel,
   subject: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // 解析渠道配置
-    const config = JSON.parse(channel.config);
-    const recipients = config.receipts || '';
-
-    // 记录发送的内容 (生产环境中这里应该调用实际的邮件发送API)
-    console.log(`[邮件通知] 发送至: ${recipients}`);
-    console.log(`[邮件通知] 主题: ${subject}`);
-    console.log(`[邮件通知] 内容: ${content}`);
-
-    // 在实际项目中，这里应该调用邮件发送服务API
-    // 例如使用Mailgun, SendGrid, SES等第三方服务
-
-    // 模拟成功发送
-    return { success: true };
+    const config = parseChannelConfig<ResendConfig>(channel);
+    
+    // 检查必要参数
+    if (!config.apiKey) {
+      return { success: false, error: 'Resend API密钥不能为空' };
+    }
+    
+    if (!config.from) {
+      return { success: false, error: 'Resend发件人不能为空' };
+    }
+    
+    if (!config.to) {
+      return { success: false, error: 'Resend收件人不能为空' };
+    }
+    
+    // 提取配置
+    const apiKey = config.apiKey;
+    const from = config.from;
+    const to = config.to.split(',').map(email => email.trim());
+    
+    // 记录发送的内容
+    console.log(`[Resend通知] 准备发送邮件通知`);
+    console.log(`[Resend通知] 发送者: ${from}`);
+    console.log(`[Resend通知] A接收者: ${to.join(', ')}`);
+    console.log(`[Resend通知] 主题: ${subject}`);
+    console.log(`[Resend通知] 内容: ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}`);
+    
+    // 构建请求数据
+    const requestData = {
+      from: from,
+      to: to,
+      subject: subject,
+      html: content.replace(/\n/g, '<br>') // 将换行符转换为HTML换行
+    };
+    
+    console.log(`[Resend通知] 请求数据: ${JSON.stringify(requestData)}`);
+    
+    // 发送API请求
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestData)
+    });
+    
+    // 解析响应
+    const responseData = await response.json();
+    
+    if (response.ok) {
+      console.log(`[Resend通知] 发送成功: ${JSON.stringify(responseData)}`);
+      return { success: true };
+    } else {
+      console.error(`[Resend通知] 发送失败: ${JSON.stringify(responseData)}`);
+      return { 
+        success: false, 
+        error: responseData.message || `发送失败，HTTP状态码: ${response.status}` 
+      };
+    }
   } catch (error) {
-    console.error('发送邮件通知失败:', error);
+    console.error('发送Resend通知失败:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : String(error) 
@@ -211,8 +318,8 @@ async function sendNotificationByChannel(
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   switch (channel.type) {
-    case 'email':
-      return await sendEmailNotification(channel, subject, content);
+    case 'resend':
+      return await sendResendNotification(channel, subject, content);
     case 'telegram':
       return await sendTelegramNotification(channel, subject, content);
     default:
@@ -248,106 +355,102 @@ export async function sendNotification(
     
     // 获取对应模板
     const template = await getNotificationTemplateById(db, templateId);
+    let notificationTemplate = template;
     
+    // 如果找不到指定模板，回退到默认模板
     if (!template) {
       console.error(`找不到ID为${templateId}的通知模板，使用默认模板ID=1`);
-      // 如果找不到指定模板，回退到默认模板
-      const defaultTemplate = await getNotificationTemplateById(db, 1);
+      notificationTemplate = await getNotificationTemplateById(db, 1);
       
-      if (!defaultTemplate) {
+      if (!notificationTemplate) {
         throw new Error('找不到默认通知模板');
       }
-      
-      // 使用默认模板继续处理
-      const subject = replaceVariables(defaultTemplate.subject, variables);
-      const content = replaceVariables(defaultTemplate.content, variables);
-      
-      const results: Array<{ channelId: number; success: boolean; error?: string }> = [];
-      
-      // 对每个渠道发送通知
-      for (const channelId of channelIds) {
-        const channel = await getNotificationChannelById(db, channelId);
-        
-        if (!channel || !channel.enabled) {
-          results.push({ 
-            channelId, 
-            success: false, 
-            error: '通知渠道不存在或未启用' 
-          });
-          continue;
-        }
-        
-        // 发送通知
-        const sendResult = await sendNotificationByChannel(channel, subject, content);
-        
-        // 记录通知历史
-        await createNotificationHistory(db, {
-          type,
-          target_id: targetId,
-          channel_id: channelId,
-          template_id: defaultTemplate.id,
-          status: sendResult.success ? 'success' : 'failed',
-          content: content,
-          error: sendResult.error || null
-        });
-        
-        results.push({ 
-          channelId, 
-          success: sendResult.success, 
-          error: sendResult.error 
-        });
-      }
-      
-      return {
-        success: results.some(r => r.success), // 只要有一个渠道发送成功，就认为整体发送成功
-        results
-      };
-    } else {
-      // 替换主题和内容中的变量
-      const subject = replaceVariables(template.subject, variables);
-      const content = replaceVariables(template.content, variables);
-      
-      const results: Array<{ channelId: number; success: boolean; error?: string }> = [];
-      
-      // 对每个渠道发送通知
-      for (const channelId of channelIds) {
-        const channel = await getNotificationChannelById(db, channelId);
-        
-        if (!channel || !channel.enabled) {
-          results.push({ 
-            channelId, 
-            success: false, 
-            error: '通知渠道不存在或未启用' 
-          });
-          continue;
-        }
-        
-        // 发送通知
-        const sendResult = await sendNotificationByChannel(channel, subject, content);
-        
-        // 记录通知历史
-        await createNotificationHistory(db, {
-          type,
-          target_id: targetId,
-          channel_id: channelId,
-          template_id: template.id,
-          status: sendResult.success ? 'success' : 'failed',
-          content: content,
-          error: sendResult.error || null
-        });
-        
-        results.push({ 
-          channelId, 
-          success: sendResult.success, 
-          error: sendResult.error 
-        });
-      }
-      
-      return {
-        success: results.some(r => r.success), // 只要有一个渠道发送成功，就认为整体发送成功
-        results
-      };
     }
+    
+    // 此时notificationTemplate一定不为null，因为如果找不到默认模板，函数已经抛出异常
+    // 替换主题和内容中的变量
+    const subject = replaceVariables(notificationTemplate!.subject, variables);
+    const content = replaceVariables(notificationTemplate!.content, variables);
+    
+    const results: Array<{ channelId: number; success: boolean; error?: string }> = [];
+    
+    // 对每个渠道发送通知
+    for (const channelId of channelIds) {
+      const channel = await getNotificationChannelById(db, channelId);
+      
+      if (!channel || !channel.enabled) {
+        results.push({ 
+          channelId, 
+          success: false, 
+          error: '通知渠道不存在或未启用' 
+        });
+        continue;
+      }
+      
+      // 调试输出当前渠道信息
+      console.log(`[通知] 正在通过渠道 ${channel.id}(${channel.name}, 类型:${channel.type}) 发送通知...`);
+      
+      // 检查渠道类型是否正确，类型应该是resend或telegram
+      console.log(`[通知] 渠道${channel.id}配置信息:`, JSON.stringify({
+        id: channel.id,
+        name: channel.name,
+        type: channel.type,
+        enabled: channel.enabled,
+        config: channel.config.substring(0, 50) + (channel.config.length > 50 ? '...' : '')
+      }));
+      
+      // 如果是邮件类型但配置为telegram，或者是telegram类型但配置为邮件，则记录警告
+      try {
+        const configObj = JSON.parse(channel.config);
+        
+        // 检查是否resend类型但使用了telegram配置
+        if (channel.type === 'resend' && 'botToken' in configObj && 'chatId' in configObj && !('apiKey' in configObj)) {
+          console.error(`[通知] 错误: 渠道${channel.id}类型为resend，但配置是telegram格式!`);
+          
+          // 尝试修正渠道类型
+          console.log(`[通知] 尝试使用telegram处理流程发送通知...`);
+          channel.type = 'telegram';
+        } 
+        // 检查是否telegram类型但使用了resend配置
+        else if (channel.type === 'telegram' && 'apiKey' in configObj && 'from' in configObj) {
+          console.error(`[通知] 错误: 渠道${channel.id}类型为telegram，但配置是resend格式!`);
+          
+          // 尝试修正渠道类型
+          console.log(`[通知] 尝试使用resend处理流程发送通知...`);
+          channel.type = 'resend';
+        }
+      } catch (e) {
+        console.error(`[通知] 解析渠道${channel.id}配置失败:`, e);
+      }
+      
+      // 发送通知
+      const sendResult = await sendNotificationByChannel(channel, subject, content);
+      
+      // 记录发送结果
+      console.log(`[通知] 渠道 ${channel.id} 发送结果: ${sendResult.success ? '成功' : '失败'}, ${sendResult.error || ''}`);
+      
+      // 记录通知历史
+      await createNotificationHistory(db, {
+        type,
+        target_id: targetId,
+        channel_id: channelId,
+        template_id: notificationTemplate!.id,
+        status: sendResult.success ? 'success' : 'failed',
+        content: content,
+        error: sendResult.error || null
+      });
+      
+      results.push({ 
+        channelId, 
+        success: sendResult.success, 
+        error: sendResult.error 
+      });
+    }
+    
+    return {
+      success: results.some(r => r.success), // 只要有一个渠道发送成功，就认为整体发送成功
+      results
+    };
   } catch (error) {
     console.error('发送通知失败:', error);
     return {
@@ -457,5 +560,43 @@ export async function shouldSendNotification(
   } catch (error) {
     console.error(`检查通知条件出错 (${type} ${id}):`, error);
     return { shouldSend: false, channels: [] };
+  }
+}
+
+/**
+ * 简化版的发送通知函数，用于测试邮件
+ */
+export async function sendTestEmail(
+  channel: {
+    id: string | number;
+    name: string;
+    type: string;
+    config: any;
+    enabled: boolean;
+  },
+  subject: string,
+  content: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log(`[测试邮件] 发送测试邮件: ${subject}`);
+    // 创建一个符合NotificationChannel类型的对象
+    const completeChannel: NotificationChannel = {
+      id: typeof channel.id === 'string' ? 0 : channel.id,
+      name: channel.name,
+      type: channel.type,
+      // 如果config是对象，转换为字符串
+      config: typeof channel.config === 'object' ? JSON.stringify(channel.config) : channel.config,
+      enabled: channel.enabled,
+      created_by: 0, // 默认值
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    return await sendNotificationByChannel(completeChannel, subject, content);
+  } catch (error) {
+    console.error('发送测试邮件失败:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
   }
 } 
