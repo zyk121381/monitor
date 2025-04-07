@@ -1,4 +1,4 @@
-import axios from '../utils/axios';
+import axios from './client';
 import { API_ENDPOINTS } from '../config/api';
 
 // 监控类型
