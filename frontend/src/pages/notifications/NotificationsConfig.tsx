@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Text, Card, Button, TextField, Tabs, Container, Theme, Switch, Dialog, Select } from '@radix-ui/themes';
-import { BellIcon, PlusIcon, CheckCircledIcon, CrossCircledIcon, InfoCircledIcon, CheckIcon } from '@radix-ui/react-icons';
+import { Box, Flex, Heading, Text, Card, Button, TextField, Tabs, Container, Switch, Dialog, Select } from '@radix-ui/themes';
+import { BellIcon, PlusIcon, CheckCircledIcon, CrossCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import '../../styles/components.css';
 import { useTranslation } from 'react-i18next';

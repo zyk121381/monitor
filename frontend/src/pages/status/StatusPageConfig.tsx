@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Separator, Container } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Container } from '@radix-ui/themes';
 import { EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAllMonitors, Monitor } from '../../api/monitors';
@@ -372,7 +372,6 @@ const StatusPageConfig = () => {
                 </Button>
               </Flex>
             </Flex>
-            <Separator size="4" mb="4" color="gray" />
           </Box>
 
           <div className="detail-content">

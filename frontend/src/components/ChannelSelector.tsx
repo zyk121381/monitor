@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Box, Flex, Text, Button, Select } from '@radix-ui/themes';
+import { Box, Flex, Text } from '@radix-ui/themes';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
