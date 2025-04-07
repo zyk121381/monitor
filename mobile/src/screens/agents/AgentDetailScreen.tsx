@@ -7,8 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Alert,
-  Dimensions
+  Alert
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -91,20 +90,8 @@ const agentService = {
     return Promise.resolve(history.reverse());
   },
   
-  restartAgent: (id: string): Promise<{ success: boolean }> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true });
-      }, 2000);
-    });
-  },
-  
   deleteAgent: (id: string): Promise<{ success: boolean }> => {
     return Promise.resolve({ success: true });
-  },
-  
-  generateToken: (id: string): Promise<{ success: boolean, token: string }> => {
-    return Promise.resolve({ success: true, token: 'agent_' + Math.random().toString(36).substr(2, 16) });
   }
 };
 
@@ -121,9 +108,6 @@ const AgentDetailScreen: React.FC = () => {
   const [resourceHistory, setResourceHistory] = useState<ResourceHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [restarting, setRestarting] = useState(false);
-  const [showToken, setShowToken] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
   
   // 加载客户端详情和资源历史
   const fetchData = async () => {
@@ -146,57 +130,6 @@ const AgentDetailScreen: React.FC = () => {
     setRefreshing(true);
     await fetchData();
     setRefreshing(false);
-  };
-  
-  // 重启客户端
-  const handleRestart = () => {
-    Alert.alert(
-      t('agents.restartTitle', '重启客户端'),
-      t('agents.restartConfirmation', '您确定要重启此客户端吗？这可能会导致短暂的服务中断。'),
-      [
-        {
-          text: t('common.cancel', '取消'),
-          style: 'cancel'
-        },
-        {
-          text: t('agents.restart', '重启'),
-          style: 'destructive',
-          onPress: async () => {
-            setRestarting(true);
-            try {
-              const result = await agentService.restartAgent(agentId);
-              
-              if (result.success) {
-                Alert.alert(
-                  t('agents.restartSuccessTitle', '重启命令已发送'),
-                  t('agents.restartSuccessMessage', '重启命令已成功发送到客户端。客户端将在几分钟内重启。')
-                );
-              }
-            } catch (error) {
-              console.error('重启客户端失败', error);
-              Alert.alert(t('common.error', '错误'), t('agents.restartFailed', '重启客户端失败'));
-            } finally {
-              setRestarting(false);
-            }
-          }
-        }
-      ]
-    );
-  };
-  
-  // 生成新令牌
-  const handleGenerateToken = async () => {
-    try {
-      const result = await agentService.generateToken(agentId);
-      
-      if (result.success) {
-        setToken(result.token);
-        setShowToken(true);
-      }
-    } catch (error) {
-      console.error('生成令牌失败', error);
-      Alert.alert(t('common.error', '错误'), t('agents.generateTokenFailed', '生成新令牌失败'));
-    }
   };
   
   // 删除客户端
@@ -227,11 +160,6 @@ const AgentDetailScreen: React.FC = () => {
         }
       ]
     );
-  };
-  
-  // 编辑客户端
-  const handleEdit = () => {
-    navigation.navigate('EditAgent', { agentId });
   };
   
   // 获取状态颜色
@@ -470,58 +398,8 @@ const AgentDetailScreen: React.FC = () => {
         </View>
       )}
       
-      {/* 令牌信息 */}
-      {showToken && token && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>{t('agents.token', '客户端令牌')}</Text>
-          <View style={styles.tokenContainer}>
-            <Text style={styles.tokenValue}>{token}</Text>
-            <Text style={styles.tokenHelper}>
-              {t('agents.tokenHelper', '请保管好此令牌，它只会显示一次。您可以使用此令牌重新连接客户端。')}
-            </Text>
-          </View>
-        </View>
-      )}
-      
       {/* 操作按钮 */}
       <View style={styles.actionsCard}>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.secondaryButton]}
-          onPress={handleEdit}
-        >
-          <Ionicons name="create-outline" size={18} color="#0066cc" />
-          <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
-            {t('common.edit', '编辑')}
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.primaryButton]}
-          onPress={handleGenerateToken}
-        >
-          <Ionicons name="key-outline" size={18} color="#fff" />
-          <Text style={styles.actionButtonText}>
-            {t('agents.generateToken', '生成新令牌')}
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.warningButton]}
-          onPress={handleRestart}
-          disabled={restarting}
-        >
-          {restarting ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <>
-              <Ionicons name="refresh" size={18} color="#fff" />
-              <Text style={styles.actionButtonText}>
-                {t('agents.restart', '重启客户端')}
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-        
         <TouchableOpacity 
           style={[styles.actionButton, styles.dangerButton]}
           onPress={handleDelete}
@@ -679,23 +557,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
   },
-  tokenContainer: {
-    backgroundColor: '#f9f9f9',
-    padding: 16,
-    borderRadius: 8,
-  },
-  tokenValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  tokenHelper: {
-    fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
-  },
   actionsCard: {
     backgroundColor: 'white',
     borderRadius: 12,
@@ -717,20 +578,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'white',
     marginLeft: 8,
-  },
-  primaryButton: {
-    backgroundColor: '#0066cc',
-  },
-  secondaryButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#0066cc',
-  },
-  secondaryButtonText: {
-    color: '#0066cc',
-  },
-  warningButton: {
-    backgroundColor: '#ffb224',
   },
   dangerButton: {
     backgroundColor: '#f76363',

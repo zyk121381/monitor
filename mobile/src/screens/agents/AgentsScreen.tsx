@@ -130,7 +130,7 @@ const AgentsScreen: React.FC = () => {
             // 实际项目中这里需要调用API删除
             console.log('删除客户端:', id);
             const numericId = parseInt(id, 10);
-            const updatedAgents = agents.filter(a => a.id !== numericId);
+            const updatedAgents = agents.filter(a => String(a.id) !== id);
             setAgents(updatedAgents);
             applyFilter(updatedAgents, filter);
           }
@@ -244,13 +244,6 @@ const AgentsScreen: React.FC = () => {
         </Text>
         
         <View style={styles.actionsContainer}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('EditAgent', { agentId: item.id })}
-          >
-            <Ionicons name="create-outline" size={16} color="#666" />
-            <Text style={styles.actionText}>{t('common.edit', '编辑')}</Text>
-          </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}

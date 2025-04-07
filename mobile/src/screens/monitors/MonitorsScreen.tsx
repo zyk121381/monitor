@@ -47,12 +47,6 @@ const MonitorsScreen: React.FC = () => {
       case 'down':
         result = data.filter(m => m.status === 'down');
         break;
-      case 'active':
-        result = data.filter(m => m.active);
-        break;
-      case 'inactive':
-        result = data.filter(m => !m.active);
-        break;
       default:
         break;
     }
@@ -151,12 +145,6 @@ const MonitorsScreen: React.FC = () => {
           </View>
         </View>
       </View>
-      
-      {!item.active && (
-        <View style={styles.inactiveBadge}>
-          <Text style={styles.inactiveText}>{t('monitors.inactive', '已禁用')}</Text>
-        </View>
-      )}
     </TouchableOpacity>
   );
   
@@ -200,24 +188,6 @@ const MonitorsScreen: React.FC = () => {
             <View style={[styles.statusIndicator, { backgroundColor: '#f76363' }]} />
             <Text style={[styles.filterText, filter === 'down' && styles.filterTextActive]}>
               {t('monitors.status_down', '故障')}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.filterButton, filter === 'active' && styles.filterButtonActive]}
-            onPress={() => handleFilterChange('active')}
-          >
-            <Text style={[styles.filterText, filter === 'active' && styles.filterTextActive]}>
-              {t('monitors.filters.active', '已激活')}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.filterButton, filter === 'inactive' && styles.filterButtonActive]}
-            onPress={() => handleFilterChange('inactive')}
-          >
-            <Text style={[styles.filterText, filter === 'inactive' && styles.filterTextActive]}>
-              {t('monitors.filters.inactive', '已暂停')}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -356,19 +326,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
-  },
-  inactiveBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    padding: 4,
-    borderRadius: 12,
-    backgroundColor: '#f76363',
-  },
-  inactiveText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: 'white',
   },
   emptyContainer: {
     flex: 1,

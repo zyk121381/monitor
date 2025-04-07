@@ -3,32 +3,28 @@ import { API_ENDPOINTS } from '../config/api';
 
 // 客户端类型
 export interface Agent {
-  id: string;
+  id: string | number;
   name: string;
   hostname?: string;
   ip_address?: string;
   status: 'online' | 'offline' | 'unknown' | 'active';  // 添加'active'以兼容Dashboard
   lastSeen?: string;
+  last_seen?: string;
   os?: string;
-  cpu?: {
-    model: string;
-    cores: number;
-    usage: number;
-  };
-  memory?: {
-    total: number;
-    used: number;
-    free: number;
-    usage: number;
-  };
-  disk?: {
-    total: number;
-    used: number;
-    free: number;
-    usage: number;
-  };
+  operating_system?: string;
+  version?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+  // 添加资源监控相关属性
+  cpu_usage?: number;
+  memory_usage?: number;
+  disk_usage?: number;
+  memory_total?: number;
+  memory_used?: number;
+  disk_total?: number;
+  disk_used?: number;
+  network_rx?: number;
+  network_tx?: number;
 }
 
 // 创建客户端参数

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import monitorService from '../../api/monitors';
 // 移除 react-native-chart-kit 依赖，使用自定义简单图表
 
 // 简单的自定义图表组件
@@ -85,6 +86,7 @@ interface Monitor {
   uptime: number;
   response_time: number;
   last_check?: string;
+  last_checked?: string;
   created_at: string;
 }
 
@@ -95,64 +97,6 @@ interface MonitorStatusHistory {
   timestamp: string;
   response_time?: number;
 }
-
-// 模拟服务 - 实际项目中应该使用真实的API服务
-const monitorService = {
-  getMonitor: (id: string): Promise<Monitor> => {
-    return Promise.resolve({
-      id,
-      name: 'API服务',
-      url: 'https://api.example.com/health',
-      type: 'http',
-      method: 'GET',
-      interval: 60,
-      timeout: 30,
-      status: Math.random() > 0.2 ? 'up' : 'down',
-      active: true,
-      uptime: 99.8,
-      response_time: Math.floor(Math.random() * 300) + 50,
-      last_check: new Date().toISOString(),
-      created_at: '2023-10-01T00:00:00Z'
-    });
-  },
-  
-  getMonitorHistory: (id: string): Promise<MonitorStatusHistory[]> => {
-    const history: MonitorStatusHistory[] = [];
-    const now = new Date();
-    
-    // 生成过去24小时的历史数据
-    for (let i = 0; i < 24; i++) {
-      const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000).toISOString();
-      const status = Math.random() > 0.1 ? 'up' : 'down';
-      const response_time = status === 'up' ? Math.floor(Math.random() * 300) + 50 : undefined;
-      
-      history.push({
-        id: `hist-${id}-${i}`,
-        status,
-        timestamp,
-        response_time
-      });
-    }
-    
-    return Promise.resolve(history.reverse());
-  },
-  
-  checkNow: (id: string): Promise<{ success: boolean }> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true });
-      }, 2000);
-    });
-  },
-  
-  toggleActive: (id: string, active: boolean): Promise<{ success: boolean }> => {
-    return Promise.resolve({ success: true });
-  },
-  
-  deleteMonitor: (id: string): Promise<{ success: boolean }> => {
-    return Promise.resolve({ success: true });
-  }
-};
 
 // 路由参数类型
 type MonitorDetailRouteProp = RouteProp<{ MonitorDetail: { monitorId: string } }, 'MonitorDetail'>;
@@ -174,11 +118,25 @@ const MonitorDetailScreen: React.FC = () => {
   // 加载监控详情和历史
   const fetchData = async () => {
     try {
-      const monitorData = await monitorService.getMonitor(monitorId);
-      const historyData = await monitorService.getMonitorHistory(monitorId);
+      // 获取监控详情
+      const monitorResult = await monitorService.getMonitorById(monitorId);
+      if (!monitorResult.success || !monitorResult.monitor) {
+        throw new Error(monitorResult.message || '获取监控详情失败');
+      }
       
-      setMonitor(monitorData);
-      setHistory(historyData);
+      // 获取监控历史
+      const historyData = await monitorService.getMonitorHistory(Number(monitorId));
+      
+      // 转换历史数据格式以兼容界面显示
+      const formattedHistory: MonitorStatusHistory[] = historyData.map((item: any) => ({
+        id: String(item.id || `hist-${monitorId}-${Math.random()}`),
+        status: item.status,
+        timestamp: item.timestamp,
+        response_time: item.response_time
+      }));
+      
+      setMonitor(monitorResult.monitor);
+      setHistory(formattedHistory);
     } catch (error) {
       console.error('获取监控详情失败', error);
       Alert.alert(t('common.error', '错误'), t('monitors.fetchDetailFailed', '获取监控详情失败'));
@@ -198,7 +156,7 @@ const MonitorDetailScreen: React.FC = () => {
   const handleCheckNow = async () => {
     setCheckingNow(true);
     try {
-      await monitorService.checkNow(monitorId);
+      await monitorService.checkMonitor(Number(monitorId));
       await fetchData();
       Alert.alert(t('monitors.checkNowSuccess', '检查成功'), t('monitors.checkNowSuccessMessage', '已成功发起检查，请稍后刷新查看结果'));
     } catch (error) {
@@ -212,31 +170,6 @@ const MonitorDetailScreen: React.FC = () => {
   // 编辑监控
   const handleEdit = () => {
     navigation.navigate('EditMonitor', { monitorId });
-  };
-  
-  // 切换激活状态
-  const handleToggleActive = async () => {
-    if (!monitor) return;
-    
-    try {
-      await monitorService.toggleActive(monitorId, !monitor.active);
-      
-      // 更新本地状态
-      setMonitor({
-        ...monitor,
-        active: !monitor.active
-      });
-      
-      Alert.alert(
-        t('common.success', '成功'),
-        monitor.active
-          ? t('monitors.pauseSuccess', '已暂停监控')
-          : t('monitors.activateSuccess', '已激活监控')
-      );
-    } catch (error) {
-      console.error('切换监控状态失败', error);
-      Alert.alert(t('common.error', '错误'), t('monitors.toggleActiveFailed', '切换监控状态失败'));
-    }
   };
   
   // 删除监控
@@ -254,8 +187,12 @@ const MonitorDetailScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await monitorService.deleteMonitor(monitorId);
-              navigation.goBack();
+              const result = await monitorService.deleteMonitor(monitorId);
+              if (result.success) {
+                navigation.goBack();
+              } else {
+                Alert.alert(t('common.error', '错误'), result.message || t('monitors.deleteFailed', '删除监控失败'));
+              }
             } catch (error) {
               console.error('删除监控失败', error);
               Alert.alert(t('common.error', '错误'), t('monitors.deleteFailed', '删除监控失败'));
@@ -371,7 +308,7 @@ const MonitorDetailScreen: React.FC = () => {
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>{t('monitors.type', '类型')}:</Text>
-          <Text style={styles.detailValue}>{monitor.type.toUpperCase()}</Text>
+          <Text style={styles.detailValue}>{monitor.type?.toUpperCase() || 'HTTP'}</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>{t('monitors.method', '方法')}:</Text>
@@ -397,7 +334,7 @@ const MonitorDetailScreen: React.FC = () => {
         <View style={styles.statusContainer}>
           <View style={styles.statusItem}>
             <Text style={styles.statusLabel}>{t('monitors.status.lastCheck', '最后检查')}</Text>
-            <Text style={styles.statusValue}>{formatDate(monitor.last_check)}</Text>
+            <Text style={styles.statusValue}>{formatDate(monitor.last_check || monitor.last_checked)}</Text>
           </View>
           <View style={styles.statusItem}>
             <Text style={styles.statusLabel}>{t('monitors.status.uptime', '在线率')}</Text>
@@ -489,32 +426,6 @@ const MonitorDetailScreen: React.FC = () => {
               </Text>
             </>
           )}
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.secondaryButton]}
-          onPress={handleEdit}
-        >
-          <Ionicons name="create-outline" size={18} color="#0066cc" />
-          <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
-            {t('common.edit', '编辑')}
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, monitor.active ? styles.warningButton : styles.successButton]}
-          onPress={handleToggleActive}
-        >
-          <Ionicons 
-            name={monitor.active ? "pause" : "play"} 
-            size={18} 
-            color={monitor.active ? "#fff" : "#fff"} 
-          />
-          <Text style={styles.actionButtonText}>
-            {monitor.active 
-              ? t('monitors.actions.pause', '暂停监控') 
-              : t('monitors.actions.activate', '激活监控')}
-          </Text>
         </TouchableOpacity>
         
         <TouchableOpacity 

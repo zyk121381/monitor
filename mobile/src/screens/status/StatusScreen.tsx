@@ -68,7 +68,7 @@ const StatusScreen: React.FC = () => {
     }
     
     // 如果所有监控器都正常，但有不活跃的客户端，则系统状态为部分故障
-    const hasInactiveAgent = agents.some(a => a.status === 'inactive');
+    const hasInactiveAgent = agents.some(a => a.status === 'offline' || a.status === 'unknown');
     
     if (hasInactiveAgent) {
       return 'partial';
@@ -233,7 +233,7 @@ const StatusScreen: React.FC = () => {
                   </View>
                   <View style={styles.serviceStatus}>
                     <View style={[styles.statusDot, { backgroundColor: getStatusColor(monitor.status) }]} />
-                    <Text style={styles.serviceUptime}>{monitor.uptime.toFixed(1)}% {t('status.uptime', '在线率')}</Text>
+                    <Text style={styles.serviceUptime}>{(monitor.uptime ?? 0).toFixed(1)}% {t('status.uptime', '在线率')}</Text>
                   </View>
                 </View>
               ))}
