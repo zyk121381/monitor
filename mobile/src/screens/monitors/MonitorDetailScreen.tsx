@@ -135,8 +135,13 @@ const MonitorDetailScreen: React.FC = () => {
         response_time: item.response_time
       }));
       
+      // 对历史记录按时间戳倒序排列
+      const sortedHistory = formattedHistory.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      
       setMonitor(monitorResult.monitor);
-      setHistory(formattedHistory);
+      setHistory(sortedHistory);
     } catch (error) {
       console.error('获取监控详情失败', error);
       Alert.alert(t('common.error', '错误'), t('monitors.fetchDetailFailed', '获取监控详情失败'));
@@ -382,7 +387,7 @@ const MonitorDetailScreen: React.FC = () => {
           {history.length === 0 ? (
             <Text style={styles.emptyText}>{t('monitors.history.empty', '暂无历史记录')}</Text>
           ) : (
-            history.slice(0, 10).map((item, index) => (
+            history.slice(0, 5).map((item, index) => (
               <View key={item.id} style={styles.historyItem}>
                 <View style={[styles.historyStatus, { backgroundColor: getStatusColor(item.status) }]} />
                 <View style={styles.historyContent}>
@@ -396,7 +401,7 @@ const MonitorDetailScreen: React.FC = () => {
             ))
           )}
           
-          {history.length > 10 && (
+          {history.length > 5 && (
             <TouchableOpacity 
               style={styles.viewMoreButton}
               onPress={() => navigation.navigate('MonitorHistory', { monitorId })}

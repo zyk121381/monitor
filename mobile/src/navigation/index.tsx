@@ -1,16 +1,15 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
 import { StatusBar } from 'expo-status-bar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Animated, TextInput } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { navigationRef } from './navigationUtils';
-import { API_BASE_URL, saveApiBaseUrl } from '../config/api';
+import ApiUrlSettings from '../components/ApiUrlSettings';
 
 // Screens - 只引用已实现的屏幕
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
@@ -300,13 +299,25 @@ const AppNavigator = ({ initialApiConfigured }: { initialApiConfigured: boolean 
   const colorScheme = useColorScheme();
   const [apiUrlSettingsVisible, setApiUrlSettingsVisible] = React.useState(!initialApiConfigured);
   
+  // 设置完成回调函数
+  const handleApiSetupComplete = React.useCallback(() => {
+    // 异步设置，避免状态更新导致的闪烁
+    setTimeout(() => {
+      setApiUrlSettingsVisible(false);
+    }, 100);
+  }, []);
+  
   // 如果API基础URL未配置，先显示设置模态框
   if (apiUrlSettingsVisible) {
     return (
       <NavigationContainer ref={navigationRef}>
         <SafeAreaProvider>
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-          <ApiUrlSetupScreen onComplete={() => setApiUrlSettingsVisible(false)} />
+          <ApiUrlSettings 
+            mode="fullscreen"
+            onComplete={handleApiSetupComplete}
+            saveConfigured={true}
+          />
         </SafeAreaProvider>
       </NavigationContainer>
     );
@@ -321,138 +332,5 @@ const AppNavigator = ({ initialApiConfigured }: { initialApiConfigured: boolean 
     </NavigationContainer>
   );
 };
-
-// 添加API URL配置屏幕组件
-interface ApiUrlSetupScreenProps {
-  onComplete: () => void;
-}
-
-const ApiUrlSetupScreen: React.FC<ApiUrlSetupScreenProps> = ({ onComplete }) => {
-  const { t } = useTranslation();
-  const [apiUrl, setApiUrl] = React.useState(API_BASE_URL);
-  const [saving, setSaving] = React.useState(false);
-  
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      await saveApiBaseUrl(apiUrl);
-      
-      // 标记API URL已配置
-      await AsyncStorage.setItem('api_url_configured', 'true');
-      
-      setSaving(false);
-      onComplete();
-    } catch (error) {
-      console.error(t('settings.apiUrlSaveFailed'), error);
-      setSaving(false);
-    }
-  };
-  
-  return (
-    <View style={styles.setupContainer}>
-      <View style={styles.setupContent}>
-        <Text style={styles.setupTitle}>{t('setup.welcome')}</Text>
-        <Text style={styles.setupSubtitle}>{t('setup.firstTimeSetup')}</Text>
-        
-        <Text style={styles.setupLabel}>{t('settings.apiBaseUrl')}</Text>
-        <TextInput
-          style={styles.setupInput}
-          value={apiUrl}
-          onChangeText={setApiUrl}
-          placeholder="http://..."
-          autoCapitalize="none"
-          placeholderTextColor="#999"
-        />
-        
-        <Text style={styles.setupHelper}>
-          {t('settings.apiHelperText')}
-        </Text>
-        
-        <TouchableOpacity 
-          style={styles.setupButton}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.setupButtonText}>
-              {t('setup.continue')}
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-// 添加相关样式
-const styles = StyleSheet.create({
-  setupContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  setupContent: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  setupTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  setupSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  setupLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
-  },
-  setupInput: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 12,
-  },
-  setupHelper: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 32,
-    lineHeight: 18,
-  },
-  setupButton: {
-    backgroundColor: '#0066cc',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  setupButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default AppNavigator; 
