@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Text, Card, Button, TextField, Tabs, Separator, Container, Theme, Switch, Dialog, Select } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Card, Button, TextField, Tabs, Container, Switch, Dialog, Select } from '@radix-ui/themes';
 import { BellIcon, PlusIcon, CheckCircledIcon, CrossCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import '../../styles/components.css';
@@ -16,6 +16,7 @@ import {
   updateNotificationChannel,
   deleteNotificationChannel,
 } from '../../api/notifications';
+import ChannelSelector from '../../components/ChannelSelector';
 
 const NotificationsConfig = () => {
   const [channels, setChannels] = useState<ApiNotificationChannel[]>([]);
@@ -615,6 +616,659 @@ const NotificationsConfig = () => {
     // setIsEditTemplateOpen(true);
   };
   
+
+
+  // 渲染通知渠道标签页
+  const renderChannelsTab = () => {
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    
+    return (
+      <Flex direction="column" gap="5">
+        <Text size="2" color="gray" mb="3">{t('notifications.channels.tabDescription')}</Text>
+        
+        {/* 通知渠道部分 */}
+        <Box>
+          <Flex justify="between" align="center" mb="3">
+            <Heading size="3">{t('notifications.channels.title')}</Heading>
+            <Button 
+              size="3" 
+              color="blue"
+              variant="soft"
+              style={{ padding: '0 16px', fontWeight: 'bold' }}
+              onClick={handleAddChannelClick}
+            >
+              <PlusIcon width="16" height="16" style={{ marginRight: '6px' }} />
+              {t('notifications.channels.add')}
+            </Button>
+          </Flex>
+          
+          <Card>
+            <Box p="3">
+              <Text size="2" color="gray" mb="3">{t('notifications.channels.description')}</Text>
+              
+              {channels.length === 0 ? (
+                <Text color="gray">{t('notifications.channels.noChannels')}</Text>
+              ) : (
+                <Flex direction="column" gap="3">
+                  {channels.map(channel => (
+                    <Card key={channel.id} mb="2" style={{ padding: '12px' }}>
+                      <Flex justify="between" align="center">
+                        <Flex direction="column" gap="1">
+                          <Flex gap="2" align="center">
+                            <Text weight="medium">{channel.name}</Text>
+                            {channel.type === 'telegram' && 
+                             channel.config && 
+                             (() => {
+                               try {
+                                 const config = typeof channel.config === 'string' 
+                                   ? JSON.parse(channel.config) 
+                                   : channel.config;
+                                 return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
+                                        config.chatId === '-1002608818360';
+                               } catch (e) {
+                                 return false;
+                               }
+                             })() && (
+                              <Text size="1" style={{ 
+                                backgroundColor: 'var(--blue-3)', 
+                                color: 'var(--blue-11)', 
+                                padding: '2px 6px', 
+                                borderRadius: '4px' 
+                              }}>
+                                {t('common.default')}
+                              </Text>
+                            )}
+                          </Flex>
+                          <Text size="1" color="gray">{t(`notifications.channels.type.${channel.type}`)}</Text>
+                        </Flex>
+                        <Flex gap="2">
+                          <Button 
+                            variant="soft" 
+                            size="1" 
+                            onClick={() => handleEditChannelClick(channel)}
+                            disabled={
+                              channel.type === 'telegram' && 
+                              channel.config && 
+                              (() => {
+                                try {
+                                  const config = typeof channel.config === 'string' 
+                                    ? JSON.parse(channel.config) 
+                                    : channel.config;
+                                  return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
+                                        config.chatId === '-1002608818360';
+                                } catch (e) {
+                                  return false;
+                                }
+                              })()
+                            }
+                          >
+                            {t('common.edit')}
+                          </Button>
+                          <Button 
+                            variant="soft" 
+                            color="red" 
+                            size="1"
+                            onClick={() => handleDeleteChannelClick(channel.id)}
+                          >
+                            {t('common.delete')}
+                          </Button>
+                        </Flex>
+                      </Flex>
+                    </Card>
+                  ))}
+                </Flex>
+              )}
+            </Box>
+          </Card>
+        </Box>
+      </Flex>
+    );
+  };
+
+  // 渲染通知模板标签页
+  const renderTemplatesTab = () => {
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    
+    return (
+      <Flex direction="column" gap="5">
+        <Text size="2" color="gray" mb="3">{t('notifications.templates.tabDescription')}</Text>
+        
+        {/* 消息模板部分 */}
+        <Box>
+          <Flex justify="between" align="center" mb="3">
+            <Heading size="3">{t('notifications.templates.title')}</Heading>
+            <Button 
+              size="3" 
+              color="blue"
+              variant="soft"
+              style={{ padding: '0 16px', fontWeight: 'bold' }}
+              onClick={handleAddTemplateClick}
+            >
+              <PlusIcon width="16" height="16" style={{ marginRight: '6px' }} />
+              {t('notifications.templates.add')}
+            </Button>
+          </Flex>
+          
+          <Card>
+            <Box p="3">
+              <Text size="2" color="gray" mb="3">{t('notifications.templates.description')}</Text>
+              
+              {templates.length === 0 ? (
+                <Text color="gray">{t('notifications.templates.noTemplates')}</Text>
+              ) : (
+                <Flex direction="column" gap="3">
+                  {templates.map(template => (
+                    <Card key={template.id} mb="3" style={{ padding: '16px' }}>
+                      <Flex direction="column" gap="3">
+                        <Flex justify="between" align="center">
+                          <Flex gap="2" align="center">
+                            <Text weight="medium">{template.name}</Text>
+                            {template.isDefault && (
+                              <Text size="1" style={{ 
+                                backgroundColor: 'var(--blue-3)', 
+                                color: 'var(--blue-11)', 
+                                padding: '2px 6px', 
+                                borderRadius: '4px' 
+                              }}>
+                                {t('notifications.templates.defaultTemplate')}
+                              </Text>
+                            )}
+                          </Flex>
+                          <Flex gap="2">
+                            <Button 
+                              variant="soft" 
+                              size="1" 
+                              onClick={() => handleEditTemplateClick(template)}
+                            >
+                              {t('common.edit')}
+                            </Button>
+                            <Button 
+                              variant="soft" 
+                              color="red" 
+                              size="1" 
+                              disabled={template.isDefault}
+                            >
+                              {t('common.delete')}
+                            </Button>
+                          </Flex>
+                        </Flex>
+                        
+                        <Box>
+                          <Text size="2" weight="medium">{t('notifications.templates.subject')}:</Text>
+                          <Text size="2">{template.subject}</Text>
+                        </Box>
+                        
+                        <Box>
+                          <Text size="2" weight="medium">{t('notifications.templates.content')}:</Text>
+                          <Box 
+                            style={{ 
+                              background: 'var(--gray-2)', 
+                              padding: '12px', 
+                              borderRadius: '6px',
+                              whiteSpace: 'pre-wrap',
+                              fontFamily: 'monospace',
+                              fontSize: '13px'
+                            }}
+                          >
+                            {template.content}
+                          </Box>
+                        </Box>
+                      </Flex>
+                    </Card>
+                  ))}
+                </Flex>
+              )}
+            </Box>
+          </Card>
+        </Box>
+      </Flex>
+    );
+  };
+
+  // 渲染全局通知设置标签页（整合设置、渠道和模板）
+  const renderGlobalSettingsTab = () => {
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    
+    return (
+      <Flex direction="column" gap="5">
+        <Text size="2" color="gray" mb="3">{t('notifications.globalSettings.description')}</Text>
+        
+        {/* 全局监控通知设置 */}
+        <Box>
+          <Heading size="3" mb="3">{t('notifications.settings.monitors')}</Heading>
+          
+          <Card mb="5">
+            <Box p="3">
+              <Flex direction="column" gap="4">
+                <Flex justify="between" align="center">
+                  <Box>
+                    <Text weight="medium">{t('notifications.settings.monitors')}</Text>
+                    <Text size="1" color="gray">{t('notifications.settings.monitors.description')}</Text>
+                  </Box>
+                  <Switch 
+                    checked={settings.monitors.enabled} 
+                    onCheckedChange={(checked) => handleMonitorSettingChange('enabled', checked)}
+                  />
+                </Flex>
+                
+                {settings.monitors.enabled && (
+                  <Box pl="4">
+                    <Flex direction="column" gap="3">
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.monitors.onDown} 
+                          onCheckedChange={(checked) => handleMonitorSettingChange('onDown', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onDownOnly')}</Text>
+                      </Flex>
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.monitors.onRecovery} 
+                          onCheckedChange={(checked) => handleMonitorSettingChange('onRecovery', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onRecovery')}</Text>
+                      </Flex>
+                      
+              
+                      
+                      <Box>
+                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
+                        <ChannelSelector 
+                          channels={channels}
+                          selectedChannelIds={settings.monitors.channels}
+                          onChange={(channelIds) => handleMonitorSettingChange('channels', channelIds)}
+                        />
+                      </Box>
+                    </Flex>
+                  </Box>
+                )}
+              </Flex>
+            </Box>
+          </Card>
+        </Box>
+        
+        {/* 全局客户端通知设置 */}
+        <Box>
+          <Heading size="3" mb="3">{t('notifications.settings.agents')}</Heading>
+          
+          <Card mb="5">
+            <Box p="3">
+              <Flex direction="column" gap="4">
+                <Flex justify="between" align="center">
+                  <Box>
+                    <Text weight="medium">{t('notifications.settings.agents')}</Text>
+                    <Text size="1" color="gray">{t('notifications.settings.agents.description')}</Text>
+                  </Box>
+                  <Switch 
+                    checked={settings.agents.enabled} 
+                    onCheckedChange={(checked) => handleAgentSettingChange('enabled', checked)}
+                  />
+                </Flex>
+                
+                {settings.agents.enabled && (
+                  <Box pl="4">
+                    <Flex direction="column" gap="3">
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.agents.onOffline} 
+                          onCheckedChange={(checked) => handleAgentSettingChange('onOffline', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onOffline')}</Text>
+                      </Flex>
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.agents.onRecovery} 
+                          onCheckedChange={(checked) => handleAgentSettingChange('onRecovery', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onRecoveryAgent')}</Text>
+                      </Flex>
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.agents.onCpuThreshold} 
+                          onCheckedChange={(checked) => handleAgentSettingChange('onCpuThreshold', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onCpuThreshold')}</Text>
+                      </Flex>
+                      
+                      {settings.agents.onCpuThreshold && (
+                        <Flex pl="6" align="center" gap="2">
+                          <Text size="2">{t('notifications.threshold.label')}</Text>
+                          <TextField.Input 
+                            size="1"
+                            type="number" 
+                            min="0"
+                            max="100"
+                            value={settings.agents.cpuThreshold.toString()}
+                            onChange={(e) => handleAgentSettingChange('cpuThreshold', Number(e.target.value))}
+                            style={{ width: '80px' }}
+                          />
+                          <Text size="2">{t('notifications.threshold.percent')}</Text>
+                        </Flex>
+                      )}
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.agents.onMemoryThreshold} 
+                          onCheckedChange={(checked) => handleAgentSettingChange('onMemoryThreshold', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onMemoryThreshold')}</Text>
+                      </Flex>
+                      
+                      {settings.agents.onMemoryThreshold && (
+                        <Flex pl="6" align="center" gap="2">
+                          <Text size="2">{t('notifications.threshold.label')}</Text>
+                          <TextField.Input 
+                            size="1"
+                            type="number" 
+                            min="0"
+                            max="100"
+                            value={settings.agents.memoryThreshold.toString()}
+                            onChange={(e) => handleAgentSettingChange('memoryThreshold', Number(e.target.value))}
+                            style={{ width: '80px' }}
+                          />
+                          <Text size="2">{t('notifications.threshold.percent')}</Text>
+                        </Flex>
+                      )}
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={settings.agents.onDiskThreshold} 
+                          onCheckedChange={(checked) => handleAgentSettingChange('onDiskThreshold', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onDiskThreshold')}</Text>
+                      </Flex>
+                      
+                      {settings.agents.onDiskThreshold && (
+                        <Flex pl="6" align="center" gap="2">
+                          <Text size="2">{t('notifications.threshold.label')}</Text>
+                          <TextField.Input 
+                            size="1"
+                            type="number" 
+                            min="0"
+                            max="100"
+                            value={settings.agents.diskThreshold.toString()}
+                            onChange={(e) => handleAgentSettingChange('diskThreshold', Number(e.target.value))}
+                            style={{ width: '80px' }}
+                          />
+                          <Text size="2">{t('notifications.threshold.percent')}</Text>
+                        </Flex>
+                      )}
+                      
+                      
+                      <Box>
+                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
+                        <ChannelSelector 
+                          channels={channels}
+                          selectedChannelIds={settings.agents.channels}
+                          onChange={(channelIds) => handleAgentSettingChange('channels', channelIds)}
+                        />
+                      </Box>
+                    </Flex>
+                  </Box>
+                )}
+              </Flex>
+            </Box>
+          </Card>
+        </Box>
+      </Flex>
+    );
+  };
+
+  // 渲染特定监控的通知设置
+  const renderSpecificMonitorsTab = () => {
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    if (monitorsLoading) return <Text>{t('common.loading')}...</Text>;
+    
+    if (monitors.length === 0) {
+      return <Text color="gray">{t('monitors.noMonitors')}</Text>;
+    }
+    
+    return (
+      <Flex direction="column" gap="5">
+        <Text size="2" color="gray" mb="3">{t('notifications.specificMonitors.description')}</Text>
+        
+        {monitors.map(monitor => {
+          const monitorId = monitor.id.toString();
+          const specificSettings = settings.specificMonitors[monitorId] || {
+            enabled: false,
+            onDown: false,
+            onRecovery: false,
+            channels: [],
+            overrideGlobal: false
+          };
+          
+          return (
+            <Card key={monitorId} style={{ padding: '16px', marginBottom: '16px' }}>
+              <Flex direction="column" gap="3">
+                <Flex justify="between" align="center">
+                  <Box>
+                    <Text weight="medium" style={{ marginRight: '4px' }}>{monitor.name}</Text>
+                    <Text size="1" color="gray">{monitor.url}</Text>
+                  </Box>
+                  <Flex align="center" gap="2">
+                    <Text size="2">{t('notifications.specificSettings.override')}</Text>
+                    <Switch 
+                      checked={specificSettings.overrideGlobal} 
+                      onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'overrideGlobal', checked)}
+                    />
+                  </Flex>
+                </Flex>
+                
+                {specificSettings.overrideGlobal && (
+                  <Box pl="4">
+                    <Flex direction="column" gap="3">
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onDown} 
+                          onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'onDown', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onDownOnly')}</Text>
+                      </Flex>
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onRecovery} 
+                          onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'onRecovery', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onRecovery')}</Text>
+                      </Flex>
+                      
+                      
+                      
+                      <Box>
+                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
+                        <ChannelSelector 
+                          channels={channels}
+                          selectedChannelIds={specificSettings.channels}
+                          onChange={(channelIds) => handleSpecificMonitorSettingChange(monitorId, 'channels', channelIds)}
+                        />
+                      </Box>
+                    </Flex>
+                  </Box>
+                )}
+              </Flex>
+            </Card>
+          );
+        })}
+      </Flex>
+    );
+  };
+  
+  // 渲染特定客户端的通知设置
+  const renderSpecificAgentsTab = () => {
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    if (agentsLoading) return <Text>{t('common.loading')}...</Text>;
+    
+    if (agents.length === 0) {
+      return <Text color="gray">{t('agents.noAgents')}</Text>;
+    }
+    
+    return (
+      <Flex direction="column" gap="5">
+        <Text size="2" color="gray" mb="3">{t('notifications.specificAgents.description')}</Text>
+        
+        {agents.map(agent => {
+          const agentId = agent.id.toString();
+          const specificSettings = settings.specificAgents[agentId] || {
+            enabled: false,
+            onOffline: false,
+            onRecovery: false,
+            onCpuThreshold: false,
+            cpuThreshold: 90,
+            onMemoryThreshold: false,
+            memoryThreshold: 85,
+            onDiskThreshold: false,
+            diskThreshold: 90,
+            channels: [],
+            overrideGlobal: false
+          };
+          
+          return (
+            <Card key={agentId} style={{ padding: '16px', marginBottom: '16px' }}>
+              <Flex direction="column" gap="3">
+                <Flex justify="between" align="center">
+                  <Box>
+                    <Text weight="medium" style={{ marginRight: '4px' }}>{agent.name}</Text>
+                    <Text size="1" color="gray">{agent.ip_address}</Text>
+                  </Box>
+                  <Flex align="center" gap="2">
+                    <Text size="2">{t('notifications.specificSettings.override')}</Text>
+                    <Switch 
+                      checked={specificSettings.overrideGlobal} 
+                      onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'overrideGlobal', checked)}
+                    />
+                  </Flex>
+                </Flex>
+                
+                {specificSettings.overrideGlobal && (
+                  <Box pl="4">
+                    <Flex direction="column" gap="3">
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onOffline} 
+                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onOffline', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onOffline')}</Text>
+                      </Flex>
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onRecovery} 
+                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onRecovery', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onRecoveryAgent')}</Text>
+                      </Flex>
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onCpuThreshold} 
+                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onCpuThreshold', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onCpuThreshold')}</Text>
+                      </Flex>
+                      
+                      {specificSettings.onCpuThreshold && (
+                        <Flex pl="6" align="center" gap="2">
+                          <Text size="2">{t('notifications.threshold.label')}</Text>
+                          <TextField.Input 
+                            size="1"
+                            type="number" 
+                            min="0"
+                            max="100"
+                            value={specificSettings.cpuThreshold.toString()}
+                            onChange={(e) => handleSpecificAgentSettingChange(agentId, 'cpuThreshold', Number(e.target.value))}
+                            style={{ width: '80px' }}
+                          />
+                          <Text size="2">{t('notifications.threshold.percent')}</Text>
+                        </Flex>
+                      )}
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onMemoryThreshold} 
+                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onMemoryThreshold', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onMemoryThreshold')}</Text>
+                      </Flex>
+                      
+                      {specificSettings.onMemoryThreshold && (
+                        <Flex pl="6" align="center" gap="2">
+                          <Text size="2">{t('notifications.threshold.label')}</Text>
+                          <TextField.Input 
+                            size="1"
+                            type="number" 
+                            min="0"
+                            max="100"
+                            value={specificSettings.memoryThreshold.toString()}
+                            onChange={(e) => handleSpecificAgentSettingChange(agentId, 'memoryThreshold', Number(e.target.value))}
+                            style={{ width: '80px' }}
+                          />
+                          <Text size="2">{t('notifications.threshold.percent')}</Text>
+                        </Flex>
+                      )}
+                      
+                      <Flex align="center" gap="2">
+                        <Switch 
+                          size="1"
+                          checked={specificSettings.onDiskThreshold} 
+                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onDiskThreshold', checked)}
+                        />
+                        <Text size="2">{t('notifications.events.onDiskThreshold')}</Text>
+                      </Flex>
+                      
+                      {specificSettings.onDiskThreshold && (
+                        <Flex pl="6" align="center" gap="2">
+                          <Text size="2">{t('notifications.threshold.label')}</Text>
+                          <TextField.Input 
+                            size="1"
+                            type="number" 
+                            min="0"
+                            max="100"
+                            value={specificSettings.diskThreshold.toString()}
+                            onChange={(e) => handleSpecificAgentSettingChange(agentId, 'diskThreshold', Number(e.target.value))}
+                            style={{ width: '80px' }}
+                          />
+                          <Text size="2">{t('notifications.threshold.percent')}</Text>
+                        </Flex>
+                      )}
+                      
+                      
+                      
+                      <Box>
+                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
+                        <ChannelSelector 
+                          channels={channels}
+                          selectedChannelIds={specificSettings.channels}
+                          onChange={(channelIds) => handleSpecificAgentSettingChange(agentId, 'channels', channelIds)}
+                        />
+                      </Box>
+                    </Flex>
+                  </Box>
+                )}
+              </Flex>
+            </Card>
+          );
+        })}
+      </Flex>
+    );
+  };
+
   // 渲染添加/编辑渠道对话框
   const renderChannelDialog = () => {
     const isOpen = isAddChannelOpen || isEditChannelOpen;
@@ -624,7 +1278,7 @@ const NotificationsConfig = () => {
     
     // 如果是编辑模式，确保表单中显示的是完整的现有配置
     // 所有的配置字段都已经在handleEditChannelClick函数中被正确解析并设置
-    return (
+  return (
       <Dialog.Root 
         open={isOpen} 
         onOpenChange={(open) => {
@@ -641,7 +1295,7 @@ const NotificationsConfig = () => {
           </Dialog.Description>
 
           <Flex direction="column" gap="3">
-            <Box>
+    <Box>
               <Text as="label" size="2" mb="1" weight="medium">
                 {t('notifications.channels.name')}
               </Text>
@@ -876,707 +1530,8 @@ const NotificationsConfig = () => {
     );
   };
 
-  // 渲染全局通知设置标签页（整合设置、渠道和模板）
-  const renderGlobalSettingsTab = () => {
-    if (!settings) return <Text>{t('common.loading')}...</Text>;
-    
-    return (
-      <Flex direction="column" gap="5">
-        <Text size="2" color="gray" mb="3">{t('notifications.globalSettings.description')}</Text>
-        
-        {/* 通知渠道部分 */}
-        <Box>
-          <Flex justify="between" align="center" mb="3">
-            <Heading size="3">{t('notifications.channels.title')}</Heading>
-            <Button 
-              size="3" 
-              color="blue"
-              variant="soft"
-              style={{ padding: '0 16px', fontWeight: 'bold' }}
-              onClick={handleAddChannelClick}
-            >
-              <PlusIcon width="16" height="16" style={{ marginRight: '6px' }} />
-              {t('notifications.channels.add')}
-            </Button>
-          </Flex>
-          
-          <Card mb="5">
-            <Box p="3">
-              <Text size="2" color="gray" mb="3">{t('notifications.channels.description')}</Text>
-              
-              {channels.length === 0 ? (
-                <Text color="gray">{t('notifications.channels.noChannels')}</Text>
-              ) : (
-                <Flex direction="column" gap="3">
-                  {channels.map(channel => (
-                    <Card key={channel.id} mb="2" style={{ padding: '12px' }}>
-                      <Flex justify="between" align="center">
-                        <Flex direction="column" gap="1">
-                          <Flex gap="2" align="center">
-                            <Text weight="medium">{channel.name}</Text>
-                            {channel.type === 'telegram' && 
-                             channel.config && 
-                             (() => {
-                               try {
-                                 const config = typeof channel.config === 'string' 
-                                   ? JSON.parse(channel.config) 
-                                   : channel.config;
-                                 return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                                        config.chatId === '-1002608818360';
-                               } catch (e) {
-                                 return false;
-                               }
-                             })() && (
-                              <Text size="1" style={{ 
-                                backgroundColor: 'var(--blue-3)', 
-                                color: 'var(--blue-11)', 
-                                padding: '2px 6px', 
-                                borderRadius: '4px' 
-                              }}>
-                                {t('common.default')}
-                              </Text>
-                            )}
-                          </Flex>
-                          <Text size="1" color="gray">{t(`notifications.channels.type.${channel.type}`)}</Text>
-                        </Flex>
-                        <Flex gap="2">
-                          <Button 
-                            variant="soft" 
-                            size="1" 
-                            onClick={() => handleEditChannelClick(channel)}
-                            disabled={
-                              channel.type === 'telegram' && 
-                              channel.config && 
-                              (() => {
-                                try {
-                                  const config = typeof channel.config === 'string' 
-                                    ? JSON.parse(channel.config) 
-                                    : channel.config;
-                                  return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                                        config.chatId === '-1002608818360';
-                                } catch (e) {
-                                  return false;
-                                }
-                              })()
-                            }
-                          >
-                            {t('common.edit')}
-                          </Button>
-                          <Button 
-                            variant="soft" 
-                            color="red" 
-                            size="1"
-                            onClick={() => handleDeleteChannelClick(channel.id)}
-                          >
-                            {t('common.delete')}
-                          </Button>
-                        </Flex>
-                      </Flex>
-                    </Card>
-                  ))}
-                </Flex>
-              )}
-            </Box>
-          </Card>
-        </Box>
-        
-        {/* 全局监控通知设置 */}
-        <Box>
-          <Heading size="3" mb="3">{t('notifications.settings.monitors')}</Heading>
-          
-          <Card mb="5">
-            <Box p="3">
-              <Flex direction="column" gap="4">
-                <Flex justify="between" align="center">
-                  <Box>
-                    <Text weight="medium">{t('notifications.settings.monitors')}</Text>
-                    <Text size="1" color="gray">{t('notifications.settings.monitors.description')}</Text>
-                  </Box>
-                  <Switch 
-                    checked={settings.monitors.enabled} 
-                    onCheckedChange={(checked) => handleMonitorSettingChange('enabled', checked)}
-                  />
-                </Flex>
-                
-                {settings.monitors.enabled && (
-                  <Box pl="4">
-                    <Flex direction="column" gap="3">
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.monitors.onDown} 
-                          onCheckedChange={(checked) => handleMonitorSettingChange('onDown', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onDownOnly')}</Text>
-                      </Flex>
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.monitors.onRecovery} 
-                          onCheckedChange={(checked) => handleMonitorSettingChange('onRecovery', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onRecovery')}</Text>
-                      </Flex>
-                      
-                      <Separator my="3" />
-                      
-                      <Box>
-                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
-                        <Flex direction="column" gap="2">
-                          {channels.length === 0 ? (
-                            <Text size="1" color="gray">{t('notifications.channels.noChannels')}</Text>
-                          ) : (
-                            channels.map(channel => (
-                              <Flex key={channel.id} align="center" gap="2">
-                                <Switch 
-                                  size="1"
-                                  checked={settings.monitors.channels.includes(channel.id)} 
-                                  onCheckedChange={(checked) => {
-                                    const updatedChannels = checked 
-                                      ? [...settings.monitors.channels, channel.id]
-                                      : settings.monitors.channels.filter(id => id !== channel.id);
-                                    handleMonitorSettingChange('channels', updatedChannels);
-                                  }}
-                                />
-                                <Text size="2">{channel.name}</Text>
-                                <Text size="1" color="gray">({t(`notifications.channels.type.${channel.type}`)})</Text>
-                              </Flex>
-                            ))
-                          )}
-                        </Flex>
-                      </Box>
-                    </Flex>
-                  </Box>
-                )}
-              </Flex>
-            </Box>
-          </Card>
-        </Box>
-        
-        {/* 全局客户端通知设置 */}
-        <Box>
-          <Heading size="3" mb="3">{t('notifications.settings.agents')}</Heading>
-          
-          <Card mb="5">
-            <Box p="3">
-              <Flex direction="column" gap="4">
-                <Flex justify="between" align="center">
-                  <Box>
-                    <Text weight="medium">{t('notifications.settings.agents')}</Text>
-                    <Text size="1" color="gray">{t('notifications.settings.agents.description')}</Text>
-                  </Box>
-                  <Switch 
-                    checked={settings.agents.enabled} 
-                    onCheckedChange={(checked) => handleAgentSettingChange('enabled', checked)}
-                  />
-                </Flex>
-                
-                {settings.agents.enabled && (
-                  <Box pl="4">
-                    <Flex direction="column" gap="3">
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.agents.onOffline} 
-                          onCheckedChange={(checked) => handleAgentSettingChange('onOffline', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onOffline')}</Text>
-                      </Flex>
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.agents.onRecovery} 
-                          onCheckedChange={(checked) => handleAgentSettingChange('onRecovery', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onRecoveryAgent')}</Text>
-                      </Flex>
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.agents.onCpuThreshold} 
-                          onCheckedChange={(checked) => handleAgentSettingChange('onCpuThreshold', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onCpuThreshold')}</Text>
-                      </Flex>
-                      
-                      {settings.agents.onCpuThreshold && (
-                        <Flex pl="6" align="center" gap="2">
-                          <Text size="2">{t('notifications.threshold.label')}</Text>
-                          <TextField.Input 
-                            size="1"
-                            type="number" 
-                            min="0"
-                            max="100"
-                            value={settings.agents.cpuThreshold.toString()}
-                            onChange={(e) => handleAgentSettingChange('cpuThreshold', Number(e.target.value))}
-                            style={{ width: '80px' }}
-                          />
-                          <Text size="2">{t('notifications.threshold.percent')}</Text>
-                        </Flex>
-                      )}
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.agents.onMemoryThreshold} 
-                          onCheckedChange={(checked) => handleAgentSettingChange('onMemoryThreshold', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onMemoryThreshold')}</Text>
-                      </Flex>
-                      
-                      {settings.agents.onMemoryThreshold && (
-                        <Flex pl="6" align="center" gap="2">
-                          <Text size="2">{t('notifications.threshold.label')}</Text>
-                          <TextField.Input 
-                            size="1"
-                            type="number" 
-                            min="0"
-                            max="100"
-                            value={settings.agents.memoryThreshold.toString()}
-                            onChange={(e) => handleAgentSettingChange('memoryThreshold', Number(e.target.value))}
-                            style={{ width: '80px' }}
-                          />
-                          <Text size="2">{t('notifications.threshold.percent')}</Text>
-                        </Flex>
-                      )}
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={settings.agents.onDiskThreshold} 
-                          onCheckedChange={(checked) => handleAgentSettingChange('onDiskThreshold', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onDiskThreshold')}</Text>
-                      </Flex>
-                      
-                      {settings.agents.onDiskThreshold && (
-                        <Flex pl="6" align="center" gap="2">
-                          <Text size="2">{t('notifications.threshold.label')}</Text>
-                          <TextField.Input 
-                            size="1"
-                            type="number" 
-                            min="0"
-                            max="100"
-                            value={settings.agents.diskThreshold.toString()}
-                            onChange={(e) => handleAgentSettingChange('diskThreshold', Number(e.target.value))}
-                            style={{ width: '80px' }}
-                          />
-                          <Text size="2">{t('notifications.threshold.percent')}</Text>
-                        </Flex>
-                      )}
-                      
-                      <Separator my="3" />
-                      
-                      <Box>
-                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
-                        <Flex direction="column" gap="2">
-                          {channels.length === 0 ? (
-                            <Text size="1" color="gray">{t('notifications.channels.noChannels')}</Text>
-                          ) : (
-                            channels.map(channel => (
-                              <Flex key={channel.id} align="center" gap="2">
-                                <Switch 
-                                  size="1"
-                                  checked={settings.agents.channels.includes(channel.id)} 
-                                  onCheckedChange={(checked) => {
-                                    const updatedChannels = checked 
-                                      ? [...settings.agents.channels, channel.id]
-                                      : settings.agents.channels.filter(id => id !== channel.id);
-                                    handleAgentSettingChange('channels', updatedChannels);
-                                  }}
-                                />
-                                <Text size="2">{channel.name}</Text>
-                                <Text size="1" color="gray">({t(`notifications.channels.type.${channel.type}`)})</Text>
-                              </Flex>
-                            ))
-                          )}
-                        </Flex>
-                      </Box>
-                    </Flex>
-                  </Box>
-                )}
-              </Flex>
-            </Box>
-          </Card>
-        </Box>
-        
-        {/* 消息模板部分 */}
-        <Box>
-          <Flex justify="between" align="center" mb="3">
-            <Heading size="3">{t('notifications.templates.title')}</Heading>
-            <Button 
-              size="3" 
-              color="blue"
-              variant="soft"
-              style={{ padding: '0 16px', fontWeight: 'bold' }}
-              onClick={handleAddTemplateClick}
-            >
-              <PlusIcon width="16" height="16" style={{ marginRight: '6px' }} />
-              {t('notifications.templates.add')}
-            </Button>
-          </Flex>
-          
-          <Card>
-            <Box p="3">
-              <Text size="2" color="gray" mb="3">{t('notifications.templates.description')}</Text>
-              
-              {templates.length === 0 ? (
-                <Text color="gray">{t('notifications.templates.noTemplates')}</Text>
-              ) : (
-                <Flex direction="column" gap="3">
-                  {templates.map(template => (
-                    <Card key={template.id} mb="3" style={{ padding: '16px' }}>
-                      <Flex direction="column" gap="3">
-                        <Flex justify="between" align="center">
-                          <Flex gap="2" align="center">
-                            <Text weight="medium">{template.name}</Text>
-                            {template.isDefault && (
-                              <Text size="1" style={{ 
-                                backgroundColor: 'var(--blue-3)', 
-                                color: 'var(--blue-11)', 
-                                padding: '2px 6px', 
-                                borderRadius: '4px' 
-                              }}>
-                                {t('notifications.templates.defaultTemplate')}
-                              </Text>
-                            )}
-                          </Flex>
-                          <Flex gap="2">
-                            <Button 
-                              variant="soft" 
-                              size="1" 
-                              onClick={() => handleEditTemplateClick(template)}
-                            >
-                              {t('common.edit')}
-                            </Button>
-                            <Button 
-                              variant="soft" 
-                              color="red" 
-                              size="1" 
-                              disabled={template.isDefault}
-                            >
-                              {t('common.delete')}
-                            </Button>
-                          </Flex>
-                        </Flex>
-                        
-                        <Box>
-                          <Text size="2" weight="medium">{t('notifications.templates.subject')}:</Text>
-                          <Text size="2">{template.subject}</Text>
-                        </Box>
-                        
-                        <Box>
-                          <Text size="2" weight="medium">{t('notifications.templates.content')}:</Text>
-                          <Box 
-                            style={{ 
-                              background: 'var(--gray-2)', 
-                              padding: '12px', 
-                              borderRadius: '6px',
-                              whiteSpace: 'pre-wrap',
-                              fontFamily: 'monospace',
-                              fontSize: '13px'
-                            }}
-                          >
-                            {template.content}
-                          </Box>
-                        </Box>
-                      </Flex>
-                    </Card>
-                  ))}
-                </Flex>
-              )}
-            </Box>
-          </Card>
-        </Box>
-      </Flex>
-    );
-  };
-
-  // 渲染特定监控的通知设置
-  const renderSpecificMonitorsTab = () => {
-    if (!settings) return <Text>{t('common.loading')}...</Text>;
-    if (monitorsLoading) return <Text>{t('common.loading')}...</Text>;
-    
-    if (monitors.length === 0) {
-      return <Text color="gray">{t('monitors.noMonitors')}</Text>;
-    }
-    
-    return (
-      <Flex direction="column" gap="5">
-        <Text size="2" color="gray" mb="3">{t('notifications.specificMonitors.description')}</Text>
-        
-        {monitors.map(monitor => {
-          const monitorId = monitor.id.toString();
-          const specificSettings = settings.specificMonitors[monitorId] || {
-            enabled: false,
-            onDown: false,
-            onRecovery: false,
-            channels: [],
-            overrideGlobal: false
-          };
-          
-          return (
-            <Card key={monitorId} style={{ padding: '16px', marginBottom: '16px' }}>
-              <Flex direction="column" gap="3">
-                <Flex justify="between" align="center">
-                  <Box>
-                    <Text weight="medium">{monitor.name}</Text>
-                    <Text size="1" color="gray">{monitor.url}</Text>
-                  </Box>
-                  <Flex align="center" gap="2">
-                    <Text size="2">{t('notifications.specificSettings.override')}</Text>
-                    <Switch 
-                      checked={specificSettings.overrideGlobal} 
-                      onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'overrideGlobal', checked)}
-                    />
-                  </Flex>
-                </Flex>
-                
-                {specificSettings.overrideGlobal && (
-                  <Box pl="4">
-                    <Flex direction="column" gap="3">
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onDown} 
-                          onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'onDown', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onDownOnly')}</Text>
-                      </Flex>
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onRecovery} 
-                          onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'onRecovery', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onRecovery')}</Text>
-                      </Flex>
-                      
-                      <Separator my="3" />
-                      
-                      <Box>
-                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
-                        <Flex direction="column" gap="2">
-                          {channels.length === 0 ? (
-                            <Text size="1" color="gray">{t('notifications.channels.noChannels')}</Text>
-                          ) : (
-                            channels.map(channel => (
-                              <Flex key={channel.id} align="center" gap="2">
-                                <Switch 
-                                  size="1"
-                                  checked={specificSettings.channels.includes(channel.id)} 
-                                  onCheckedChange={(checked) => {
-                                    const updatedChannels = checked 
-                                      ? [...specificSettings.channels, channel.id]
-                                      : specificSettings.channels.filter(id => id !== channel.id);
-                                    handleSpecificMonitorSettingChange(monitorId, 'channels', updatedChannels);
-                                  }}
-                                />
-                                <Text size="2">{channel.name}</Text>
-                                <Text size="1" color="gray">({t(`notifications.channels.type.${channel.type}`)})</Text>
-                              </Flex>
-                            ))
-                          )}
-                        </Flex>
-                      </Box>
-                    </Flex>
-                  </Box>
-                )}
-              </Flex>
-            </Card>
-          );
-        })}
-      </Flex>
-    );
-  };
-  
-  // 渲染特定客户端的通知设置
-  const renderSpecificAgentsTab = () => {
-    if (!settings) return <Text>{t('common.loading')}...</Text>;
-    if (agentsLoading) return <Text>{t('common.loading')}...</Text>;
-    
-    if (agents.length === 0) {
-      return <Text color="gray">{t('agents.noAgents')}</Text>;
-    }
-    
-    return (
-      <Flex direction="column" gap="5">
-        <Text size="2" color="gray" mb="3">{t('notifications.specificAgents.description')}</Text>
-        
-        {agents.map(agent => {
-          const agentId = agent.id.toString();
-          const specificSettings = settings.specificAgents[agentId] || {
-            enabled: false,
-            onOffline: false,
-            onRecovery: false,
-            onCpuThreshold: false,
-            cpuThreshold: 90,
-            onMemoryThreshold: false,
-            memoryThreshold: 85,
-            onDiskThreshold: false,
-            diskThreshold: 90,
-            channels: [],
-            overrideGlobal: false
-          };
-          
-          return (
-            <Card key={agentId} style={{ padding: '16px', marginBottom: '16px' }}>
-              <Flex direction="column" gap="3">
-                <Flex justify="between" align="center">
-                  <Box>
-                    <Text weight="medium">{agent.name}</Text>
-                    <Text size="1" color="gray">{agent.hostname || agent.ip_address}</Text>
-                  </Box>
-                  <Flex align="center" gap="2">
-                    <Text size="2">{t('notifications.specificSettings.override')}</Text>
-                    <Switch 
-                      checked={specificSettings.overrideGlobal} 
-                      onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'overrideGlobal', checked)}
-                    />
-                  </Flex>
-                </Flex>
-                
-                {specificSettings.overrideGlobal && (
-                  <Box pl="4">
-                    <Flex direction="column" gap="3">
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onOffline} 
-                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onOffline', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onOffline')}</Text>
-                      </Flex>
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onRecovery} 
-                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onRecovery', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onRecoveryAgent')}</Text>
-                      </Flex>
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onCpuThreshold} 
-                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onCpuThreshold', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onCpuThreshold')}</Text>
-                      </Flex>
-                      
-                      {specificSettings.onCpuThreshold && (
-                        <Flex pl="6" align="center" gap="2">
-                          <Text size="2">{t('notifications.threshold.label')}</Text>
-                          <TextField.Input 
-                            size="1"
-                            type="number" 
-                            min="0"
-                            max="100"
-                            value={specificSettings.cpuThreshold.toString()}
-                            onChange={(e) => handleSpecificAgentSettingChange(agentId, 'cpuThreshold', Number(e.target.value))}
-                            style={{ width: '80px' }}
-                          />
-                          <Text size="2">{t('notifications.threshold.percent')}</Text>
-                        </Flex>
-                      )}
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onMemoryThreshold} 
-                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onMemoryThreshold', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onMemoryThreshold')}</Text>
-                      </Flex>
-                      
-                      {specificSettings.onMemoryThreshold && (
-                        <Flex pl="6" align="center" gap="2">
-                          <Text size="2">{t('notifications.threshold.label')}</Text>
-                          <TextField.Input 
-                            size="1"
-                            type="number" 
-                            min="0"
-                            max="100"
-                            value={specificSettings.memoryThreshold.toString()}
-                            onChange={(e) => handleSpecificAgentSettingChange(agentId, 'memoryThreshold', Number(e.target.value))}
-                            style={{ width: '80px' }}
-                          />
-                          <Text size="2">{t('notifications.threshold.percent')}</Text>
-                        </Flex>
-                      )}
-                      
-                      <Flex align="center" gap="2">
-                        <Switch 
-                          size="1"
-                          checked={specificSettings.onDiskThreshold} 
-                          onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'onDiskThreshold', checked)}
-                        />
-                        <Text size="2">{t('notifications.events.onDiskThreshold')}</Text>
-                      </Flex>
-                      
-                      {specificSettings.onDiskThreshold && (
-                        <Flex pl="6" align="center" gap="2">
-                          <Text size="2">{t('notifications.threshold.label')}</Text>
-                          <TextField.Input 
-                            size="1"
-                            type="number" 
-                            min="0"
-                            max="100"
-                            value={specificSettings.diskThreshold.toString()}
-                            onChange={(e) => handleSpecificAgentSettingChange(agentId, 'diskThreshold', Number(e.target.value))}
-                            style={{ width: '80px' }}
-                          />
-                          <Text size="2">{t('notifications.threshold.percent')}</Text>
-                        </Flex>
-                      )}
-                      
-                      <Separator my="3" />
-                      
-                      <Box>
-                        <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
-                        <Flex direction="column" gap="2">
-                          {channels.length === 0 ? (
-                            <Text size="1" color="gray">{t('notifications.channels.noChannels')}</Text>
-                          ) : (
-                            channels.map(channel => (
-                              <Flex key={channel.id} align="center" gap="2">
-                                <Switch 
-                                  size="1"
-                                  checked={specificSettings.channels.includes(channel.id)} 
-                                  onCheckedChange={(checked) => {
-                                    const updatedChannels = checked 
-                                      ? [...specificSettings.channels, channel.id]
-                                      : specificSettings.channels.filter(id => id !== channel.id);
-                                    handleSpecificAgentSettingChange(agentId, 'channels', updatedChannels);
-                                  }}
-                                />
-                                <Text size="2">{channel.name}</Text>
-                                <Text size="1" color="gray">({t(`notifications.channels.type.${channel.type}`)})</Text>
-                              </Flex>
-                            ))
-                          )}
-                        </Flex>
-                      </Box>
-                    </Flex>
-                  </Box>
-                )}
-              </Flex>
-            </Card>
-          );
-        })}
-      </Flex>
-    );
-  };
-
   return (
     <Box>
-      <Theme appearance="light" accentColor="blue">
         <Container>
           <div className="page-container detail-page">
             {/* 美化顶部导航栏 */}
@@ -1601,6 +1556,8 @@ const NotificationsConfig = () => {
                   <Tabs.Root defaultValue="global" className="config-tabs">
                     <Tabs.List className="config-tabs-list">
                       <Tabs.Trigger value="global" className="tab-trigger">{t('notifications.tabs.global')}</Tabs.Trigger>
+                    <Tabs.Trigger value="channels" className="tab-trigger">{t('notifications.tabs.channels')}</Tabs.Trigger>
+                    <Tabs.Trigger value="templates" className="tab-trigger">{t('notifications.tabs.templates')}</Tabs.Trigger>
                       <Tabs.Trigger value="specificMonitors" className="tab-trigger">{t('notifications.tabs.specificMonitors')}</Tabs.Trigger>
                       <Tabs.Trigger value="specificAgents" className="tab-trigger">{t('notifications.tabs.specificAgents')}</Tabs.Trigger>
                     </Tabs.List>
@@ -1608,6 +1565,14 @@ const NotificationsConfig = () => {
                     <Box pt="5" px="2" className="tab-content-container">
                       <Tabs.Content value="global" className="tab-content">
                         {renderGlobalSettingsTab()}
+                      </Tabs.Content>
+                    
+                    <Tabs.Content value="channels" className="tab-content">
+                      {renderChannelsTab()}
+                    </Tabs.Content>
+                    
+                    <Tabs.Content value="templates" className="tab-content">
+                      {renderTemplatesTab()}
                       </Tabs.Content>
                       
                       <Tabs.Content value="specificMonitors" className="tab-content">
@@ -1663,7 +1628,6 @@ const NotificationsConfig = () => {
             )}
           </Toast.Provider>
         </Container>
-      </Theme>
       
       {/* 渠道管理对话框 */}
       {renderChannelDialog()}
