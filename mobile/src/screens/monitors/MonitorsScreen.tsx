@@ -85,11 +85,11 @@ const MonitorsScreen: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'up':
-        return t('monitors.status_up', '正常');
+        return t('monitors.statusDetails.up', '正常');
       case 'down':
-        return t('monitors.status_down', '故障');
+        return t('monitors.statusDetails.down', '故障');
       case 'pending':
-        return t('monitors.status_pending', '等待');
+        return t('monitors.statusDetails.pending', '等待');
       default:
         return status;
     }
@@ -177,7 +177,7 @@ const MonitorsScreen: React.FC = () => {
           >
             <View style={[styles.statusIndicator, { backgroundColor: '#30c85e' }]} />
             <Text style={[styles.filterText, filter === 'up' && styles.filterTextActive]}>
-              {t('monitors.status_up', '正常')}
+              {t('monitors.statusDetails.up', '正常')}
             </Text>
           </TouchableOpacity>
           
@@ -187,7 +187,7 @@ const MonitorsScreen: React.FC = () => {
           >
             <View style={[styles.statusIndicator, { backgroundColor: '#f76363' }]} />
             <Text style={[styles.filterText, filter === 'down' && styles.filterTextActive]}>
-              {t('monitors.status_down', '故障')}
+              {t('monitors.statusDetails.down', '故障')}
             </Text>
           </TouchableOpacity>
         </ScrollView>

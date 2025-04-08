@@ -82,7 +82,6 @@ const browserDirectLogout = () => {
 // 应用设置类型
 interface AppSettings {
   language: string;
-  theme: 'light' | 'dark' | 'system';
   notifications: {
     monitorAlerts: boolean;
     agentAlerts: boolean;
@@ -92,7 +91,6 @@ interface AppSettings {
 // 默认设置
 const defaultSettings: AppSettings = {
   language: 'zh',
-  theme: 'light',
   notifications: {
     monitorAlerts: true,
     agentAlerts: true
@@ -107,7 +105,6 @@ const SettingsScreen: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [appVersion, setAppVersion] = useState<string>('');
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
-  const [themeModalVisible, setThemeModalVisible] = useState(false);
   
   // 加载设置
   const loadSettings = async () => {
@@ -154,15 +151,6 @@ const SettingsScreen: React.FC = () => {
       console.error('切换语言失败', error);
       Alert.alert(t('common.error', '错误'), t('settings.languageChangeFailed', '切换语言失败'));
     }
-  };
-  
-  // 切换主题
-  const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
-    const newSettings = { ...settings, theme };
-    saveSettings(newSettings);
-    setThemeModalVisible(false);
-    
-    // 实际项目中这里需要应用主题变更
   };
   
   // 打开监控告警设置页面
@@ -250,11 +238,6 @@ const SettingsScreen: React.FC = () => {
     setLanguageModalVisible(true);
   };
   
-  // 打开主题选择器
-  const handleOpenThemeSelector = () => {
-    setThemeModalVisible(true);
-  };
-  
   // 组件挂载时加载设置
   useEffect(() => {
     loadSettings();
@@ -338,110 +321,6 @@ const SettingsScreen: React.FC = () => {
                 >
                   <Text style={styles.languageOptionText}>English</Text>
                   {settings.language === 'en' && (
-                    <Ionicons name="checkmark" size={22} color="#0066cc" />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        
-        {/* 外观设置 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.appearance', '外观')}</Text>
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={handleOpenThemeSelector}
-          >
-            <View style={styles.menuItemContent}>
-              <Ionicons 
-                name={
-                  settings.theme === 'light' 
-                    ? 'sunny-outline' 
-                    : settings.theme === 'dark' 
-                      ? 'moon-outline' 
-                      : 'contrast-outline'
-                } 
-                size={22} 
-                color={
-                  settings.theme === 'light' 
-                    ? '#ffb224' 
-                    : settings.theme === 'dark' 
-                      ? '#666' 
-                      : '#0066cc'
-                } 
-              />
-              <Text style={styles.menuItemText}>{t('settings.theme', '主题')}</Text>
-            </View>
-            <View style={styles.menuItemValueContainer}>
-              <Text style={styles.menuItemValue}>
-                {settings.theme === 'light' 
-                  ? t('settings.themeLight', '浅色') 
-                  : settings.theme === 'dark' 
-                    ? t('settings.themeDark', '深色') 
-                    : t('settings.themeSystem', '跟随系统')
-                }
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </View>
-          </TouchableOpacity>
-        </View>
-        
-        {/* 主题选择器弹出框 */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={themeModalVisible}
-          onRequestClose={() => setThemeModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{t('settings.selectTheme', '选择主题')}</Text>
-                <TouchableOpacity 
-                  style={styles.closeButton}
-                  onPress={() => setThemeModalVisible(false)}
-                >
-                  <Ionicons name="close" size={24} color="#333" />
-                </TouchableOpacity>
-              </View>
-              
-              <View style={styles.themeOptions}>
-                <TouchableOpacity 
-                  style={[styles.themeOption, settings.theme === 'light' && styles.selectedThemeOption]}
-                  onPress={() => handleThemeChange('light')}
-                >
-                  <View style={styles.themeOptionContent}>
-                    <Ionicons name="sunny-outline" size={22} color="#ffb224" />
-                    <Text style={styles.themeOptionText}>{t('settings.themeLight', '浅色')}</Text>
-                  </View>
-                  {settings.theme === 'light' && (
-                    <Ionicons name="checkmark" size={22} color="#0066cc" />
-                  )}
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.themeOption, settings.theme === 'dark' && styles.selectedThemeOption]}
-                  onPress={() => handleThemeChange('dark')}
-                >
-                  <View style={styles.themeOptionContent}>
-                    <Ionicons name="moon-outline" size={22} color="#666" />
-                    <Text style={styles.themeOptionText}>{t('settings.themeDark', '深色')}</Text>
-                  </View>
-                  {settings.theme === 'dark' && (
-                    <Ionicons name="checkmark" size={22} color="#0066cc" />
-                  )}
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.themeOption, settings.theme === 'system' && styles.selectedThemeOption]}
-                  onPress={() => handleThemeChange('system')}
-                >
-                  <View style={styles.themeOptionContent}>
-                    <Ionicons name="contrast-outline" size={22} color="#0066cc" />
-                    <Text style={styles.themeOptionText}>{t('settings.themeSystem', '跟随系统')}</Text>
-                  </View>
-                  {settings.theme === 'system' && (
                     <Ionicons name="checkmark" size={22} color="#0066cc" />
                   )}
                 </TouchableOpacity>
@@ -683,28 +562,6 @@ const styles = StyleSheet.create({
   },
   languageOptionText: {
     fontSize: 16,
-  },
-  themeOptions: {
-    marginTop: 10,
-  },
-  themeOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  selectedThemeOption: {
-    backgroundColor: 'rgba(0, 102, 204, 0.05)',
-  },
-  themeOptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  themeOptionText: {
-    fontSize: 16,
-    marginLeft: 12,
   },
   spacer: {
     height: 40,

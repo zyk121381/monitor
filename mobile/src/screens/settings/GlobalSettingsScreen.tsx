@@ -75,19 +75,19 @@ const GlobalSettingsScreen: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        console.log('开始加载全局通知设置...');
+        console.log('Loading global notification settings...');
         
-        // 获取通知配置
+        // Get notification config
         const configResponse = await getNotificationConfig();
         if (configResponse.success && configResponse.data) {
           setSettings(configResponse.data.settings);
           setChannels(configResponse.data.channels || []);
         } else {
-          console.error('获取通知配置失败:', configResponse.message);
+          console.error('Failed to get notification config:', configResponse.message);
           setError(configResponse.message || t('notifications.loadFailed'));
         }
       } catch (error) {
-        console.error('加载数据失败', error);
+        console.error('Failed to load data', error);
         setError(typeof error === 'string' ? error : t('common.unknownError'));
       } finally {
         setLoading(false);
@@ -103,7 +103,7 @@ const GlobalSettingsScreen: React.FC = () => {
     
     try {
       setSaving(true);
-      console.log('开始保存全局通知设置...');
+      console.log('Saving global notification settings...');
       
       const response = await saveNotificationSettings(settings);
       
@@ -121,7 +121,7 @@ const GlobalSettingsScreen: React.FC = () => {
         );
       }
     } catch (error) {
-      console.error('保存设置异常:', error);
+      console.error('Error saving settings:', error);
       Alert.alert(t('common.error'), t('notifications.save.error'));
     } finally {
       setSaving(false);
@@ -159,22 +159,22 @@ const GlobalSettingsScreen: React.FC = () => {
         contentContainerStyle={[styles.scrollContent, { paddingTop: 16 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* 全局通知设置说明 */}
+        {/* Global notification settings description */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notifications.settings.global', '全局设置')}</Text>
+          <Text style={styles.sectionTitle}>{t('notifications.globalSettingsConfig.global', '全局设置')}</Text>
           <Text style={styles.sectionDescription}>
-            {t('notifications.settings.globalDescription', '配置系统级别的全局通知设置，这些设置将作为默认值应用于所有监控和客户端。')}
+            {t('notifications.globalSettingsConfig.globalDescription', '配置系统级别的全局通知设置，这些设置将作为默认值应用于所有监控和客户端。')}
           </Text>
           
           <View style={styles.infoCard}>
             <Ionicons name="information-circle-outline" size={24} color="#0066cc" />
             <Text style={styles.infoText}>
-              {t('notifications.settings.globalInfo', '在此页面配置全局默认通知设置，包括监控告警和客户端告警的基本配置。您可以在各自的设置页面中配置特定监控或客户端的通知。')}
+              {t('notifications.globalSettingsConfig.globalInfo', '在此页面配置全局默认通知设置，包括监控告警和客户端告警的基本配置。您可以在各自的设置页面中配置特定监控或客户端的通知。')}
             </Text>
           </View>
         </View>
         
-        {/* 全局监控告警设置 */}
+        {/* Global monitor alert settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('settings.notificationsMonitor', '全局监控告警通知')}</Text>
           <Text style={styles.sectionDescription}>
@@ -183,7 +183,7 @@ const GlobalSettingsScreen: React.FC = () => {
           
           <View style={styles.settingItem}>
             <View style={styles.settingItemContent}>
-              <Text style={styles.settingItemText}>{t('notifications.settings.enabled', '启用监控告警')}</Text>
+              <Text style={styles.settingItemText}>{t('notifications.monitorAlertEnabled', '启用监控告警')}</Text>
               <Text style={styles.settingItemDescription}>{t('notifications.monitors.enabledDescription', '开启后将接收所有监控的告警通知。')}</Text>
             </View>
             <Switch
@@ -284,7 +284,7 @@ const GlobalSettingsScreen: React.FC = () => {
           )}
         </View>
         
-        {/* 全局客户端告警设置 */}
+        {/* Global agent alert settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('settings.notificationsAgent', '全局客户端告警通知')}</Text>
           <Text style={styles.sectionDescription}>
@@ -293,7 +293,7 @@ const GlobalSettingsScreen: React.FC = () => {
           
           <View style={styles.settingItem}>
             <View style={styles.settingItemContent}>
-              <Text style={styles.settingItemText}>{t('notifications.settings.enabled', '启用客户端告警')}</Text>
+              <Text style={styles.settingItemText}>{t('notifications.agentAlertEnabled', '启用客户端告警')}</Text>
               <Text style={styles.settingItemDescription}>{t('notifications.agents.enabledDescription', '开启后将接收所有客户端的告警通知。')}</Text>
             </View>
             <Switch
@@ -547,11 +547,11 @@ const GlobalSettingsScreen: React.FC = () => {
           )}
         </View>
         
-        {/* 底部安全区域 */}
+        {/* Bottom safe area */}
         <View style={styles.safeArea} />
       </ScrollView>
       
-      {/* 导航按钮和保存按钮 */}
+      {/* Navigation and save buttons */}
       <View style={styles.footer}>
         <TouchableOpacity 
           style={styles.footerBackButton}

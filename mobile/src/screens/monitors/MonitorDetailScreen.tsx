@@ -226,13 +226,13 @@ const MonitorDetailScreen: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'up':
-        return t('monitors.status.up', '正常');
+        return t('monitors.statusDetails.up', '正常');
       case 'down':
-        return t('monitors.status.down', '故障');
+        return t('monitors.statusDetails.down', '故障');
       case 'pending':
-        return t('monitors.status.pending', '待检');
+        return t('monitors.statusDetails.pending', '待检');
       default:
-        return t('monitors.status.unknown', '未知');
+        return t('monitors.statusDetails.unknown', '未知');
     }
   };
   
@@ -274,7 +274,7 @@ const MonitorDetailScreen: React.FC = () => {
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={60} color="#f76363" />
         <Text style={styles.errorText}>
-          {t('monitors.notFound', '找不到监控信息')}
+          {t('monitors.monitorNotFound', '找不到监控信息')}
         </Text>
         <TouchableOpacity
           style={styles.errorButton}
@@ -335,29 +335,29 @@ const MonitorDetailScreen: React.FC = () => {
       
       {/* 状态卡片 */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t('monitors.status.title', '当前状态')}</Text>
+        <Text style={styles.cardTitle}>{t('monitors.statusDetails.title', '当前状态')}</Text>
         <View style={styles.statusContainer}>
           <View style={styles.statusItem}>
-            <Text style={styles.statusLabel}>{t('monitors.status.lastCheck', '最后检查')}</Text>
+            <Text style={styles.statusLabel}>{t('monitors.statusDetails.lastCheck', '最后检查')}</Text>
             <Text style={styles.statusValue}>{formatDate(monitor.last_check || monitor.last_checked)}</Text>
           </View>
           <View style={styles.statusItem}>
-            <Text style={styles.statusLabel}>{t('monitors.status.uptime', '在线率')}</Text>
+            <Text style={styles.statusLabel}>{t('monitors.statusDetails.uptime', '在线率')}</Text>
             <Text style={styles.statusValue}>{monitor.uptime.toFixed(2)}%</Text>
           </View>
           <View style={styles.statusItem}>
-            <Text style={styles.statusLabel}>{t('monitors.status.responseTime', '响应时间')}</Text>
+            <Text style={styles.statusLabel}>{t('monitors.statusDetails.responseTime', '响应时间')}</Text>
             <Text style={styles.statusValue}>{monitor.response_time}ms</Text>
           </View>
           <View style={styles.statusItem}>
-            <Text style={styles.statusLabel}>{t('monitors.status.active', '活动状态')}</Text>
+            <Text style={styles.statusLabel}>{t('monitors.statusDetails.active', '活动状态')}</Text>
             <Text style={[
               styles.statusValue, 
               { color: monitor.active ? '#30c85e' : '#f76363' }
             ]}>
               {monitor.active 
-                ? t('monitors.status.activeState', '活跃') 
-                : t('monitors.status.pausedState', '已暂停')}
+                ? t('monitors.statusDetails.activeState', '活跃') 
+                : t('monitors.statusDetails.pausedState', '已暂停')}
             </Text>
           </View>
         </View>
@@ -382,10 +382,10 @@ const MonitorDetailScreen: React.FC = () => {
       
       {/* 历史记录 */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t('monitors.history.title', '历史记录')}</Text>
+        <Text style={styles.cardTitle}>{t('monitors.historyRecords.title', '历史记录')}</Text>
         <View style={styles.historyList}>
           {history.length === 0 ? (
-            <Text style={styles.emptyText}>{t('monitors.history.empty', '暂无历史记录')}</Text>
+            <Text style={styles.emptyText}>{t('monitors.historyRecords.empty', '暂无历史记录')}</Text>
           ) : (
             history.slice(0, 5).map((item, index) => (
               <View key={item.id} style={styles.historyItem}>
@@ -407,7 +407,7 @@ const MonitorDetailScreen: React.FC = () => {
               onPress={() => navigation.navigate('MonitorHistory', { monitorId })}
             >
               <Text style={styles.viewMoreText}>
-                {t('monitors.history.viewMore', '查看更多历史')}
+                {t('monitors.historyRecords.viewMore', '查看更多历史')}
               </Text>
             </TouchableOpacity>
           )}

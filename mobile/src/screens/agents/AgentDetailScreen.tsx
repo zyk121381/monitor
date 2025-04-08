@@ -51,7 +51,18 @@ const AgentDetailScreen: React.FC = () => {
         throw new Error(agentResponse.message || t('common.error.fetch', '获取数据失败'));
       }
       
-      setAgent(agentResponse.agent);
+      const agentData = agentResponse.agent;
+      
+      // 计算资源使用百分比（如果后端未计算）
+      if (agentData.memory_total && agentData.memory_used && agentData.memory_usage === undefined) {
+        agentData.memory_usage = (agentData.memory_used / agentData.memory_total) * 100;
+      }
+      
+      if (agentData.disk_total && agentData.disk_used && agentData.disk_usage === undefined) {
+        agentData.disk_usage = (agentData.disk_used / agentData.disk_total) * 100;
+      }
+      
+      setAgent(agentData);
       
       // 后续可以添加获取历史资源数据的API调用
       // 暂时不获取resourceHistory数据，因为API似乎还没有提供
@@ -120,6 +131,47 @@ const AgentDetailScreen: React.FC = () => {
     if (usage > 80) return '#f76363';
     if (usage > 60) return '#ffb224';
     return '#30c85e';
+  };
+  
+  // 格式化网络流量单位
+  const formatNetworkSpeed = (value?: number): string => {
+    if (value === undefined) return t('common.unknown', '未知');
+    
+    // 当值小于 1024 KB/s 时，显示 KB/s
+    if (value < 1024) {
+      return `${value.toFixed(1)} KB/s`;
+    } 
+    // 当值大于等于 1024 KB/s 时，显示 MB/s
+    else {
+      const valueMB = value / 1024;
+      return `${valueMB.toFixed(1)} MB/s`;
+    }
+  };
+  
+  // 计算内存使用百分比
+  const calculateMemoryUsage = (agent: Agent): number => {
+    if (agent.memory_usage !== undefined) {
+      return agent.memory_usage;
+    }
+    
+    if (agent.memory_total && agent.memory_used) {
+      return (agent.memory_used / agent.memory_total) * 100;
+    }
+    
+    return 0;
+  };
+  
+  // 计算磁盘使用百分比
+  const calculateDiskUsage = (agent: Agent): number => {
+    if (agent.disk_usage !== undefined) {
+      return agent.disk_usage;
+    }
+    
+    if (agent.disk_total && agent.disk_used) {
+      return (agent.disk_used / agent.disk_total) * 100;
+    }
+    
+    return 0;
   };
   
   // 格式化日期
@@ -307,9 +359,9 @@ const AgentDetailScreen: React.FC = () => {
               <Text style={styles.resourceLabel}>{t('agents.memory', '内存')}</Text>
               <Text style={[
                 styles.resourceValue, 
-                { color: getResourceColor(agent.memory_usage || 0) }
+                { color: getResourceColor(calculateMemoryUsage(agent)) }
               ]}>
-                {formatSize(agent.memory_used)} / {formatSize(agent.memory_total)} ({agent.memory_usage?.toFixed(1) || 0}%)
+                {calculateMemoryUsage(agent).toFixed(1)}%
               </Text>
             </View>
             <View style={styles.progressBarContainer}>
@@ -317,8 +369,8 @@ const AgentDetailScreen: React.FC = () => {
                 style={[
                   styles.progressBar, 
                   { 
-                    width: `${agent.memory_usage || 0}%`,
-                    backgroundColor: getResourceColor(agent.memory_usage || 0)
+                    width: `${calculateMemoryUsage(agent)}%`,
+                    backgroundColor: getResourceColor(calculateMemoryUsage(agent))
                   }
                 ]} 
               />
@@ -330,9 +382,9 @@ const AgentDetailScreen: React.FC = () => {
               <Text style={styles.resourceLabel}>{t('agents.disk', '磁盘')}</Text>
               <Text style={[
                 styles.resourceValue, 
-                { color: getResourceColor(agent.disk_usage || 0) }
+                { color: getResourceColor(calculateDiskUsage(agent)) }
               ]}>
-                {formatSize(agent.disk_used)} / {formatSize(agent.disk_total)} ({agent.disk_usage?.toFixed(1) || 0}%)
+                {calculateDiskUsage(agent).toFixed(1)}%
               </Text>
             </View>
             <View style={styles.progressBarContainer}>
@@ -340,8 +392,8 @@ const AgentDetailScreen: React.FC = () => {
                 style={[
                   styles.progressBar, 
                   { 
-                    width: `${agent.disk_usage || 0}%`,
-                    backgroundColor: getResourceColor(agent.disk_usage || 0)
+                    width: `${calculateDiskUsage(agent)}%`,
+                    backgroundColor: getResourceColor(calculateDiskUsage(agent))
                   }
                 ]} 
               />
@@ -353,12 +405,12 @@ const AgentDetailScreen: React.FC = () => {
               <View style={styles.networkItem}>
                 <Ionicons name="arrow-down-outline" size={16} color="#30c85e" />
                 <Text style={styles.networkLabel}>{t('agents.networkRx', '下载')}</Text>
-                <Text style={styles.networkValue}>{agent.network_rx.toFixed(1)} MB/s</Text>
+                <Text style={styles.networkValue}>{formatNetworkSpeed(agent.network_rx)}</Text>
               </View>
               <View style={styles.networkItem}>
                 <Ionicons name="arrow-up-outline" size={16} color="#0066cc" />
                 <Text style={styles.networkLabel}>{t('agents.networkTx', '上传')}</Text>
-                <Text style={styles.networkValue}>{agent.network_tx.toFixed(1)} MB/s</Text>
+                <Text style={styles.networkValue}>{formatNetworkSpeed(agent.network_tx)}</Text>
               </View>
             </View>
           )}

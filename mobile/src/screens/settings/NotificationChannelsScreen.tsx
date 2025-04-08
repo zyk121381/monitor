@@ -77,7 +77,7 @@ const NotificationChannelsScreen: React.FC = () => {
           setChannels(configResponse.data.channels);
         } else {
           console.error('获取通知渠道失败:', configResponse.message);
-          setError(configResponse.message || t('notifications.channels.loadFailed'));
+          setError(configResponse.message || t('notifications.channelSettings.loadFailed'));
         }
       } catch (error) {
         console.error('加载通知渠道失败', error);
@@ -124,24 +124,24 @@ const NotificationChannelsScreen: React.FC = () => {
   const handleSaveChannel = async () => {
     try {
       if (!channelForm.name.trim()) {
-        Alert.alert(t('common.error'), t('notifications.channels.nameRequired'));
+        Alert.alert(t('common.error'), t('notifications.channelSettings.nameRequired'));
         return;
       }
       
       // 根据渠道类型验证必要的配置
       if (channelForm.type === 'email' && !channelForm.config.email) {
-        Alert.alert(t('common.error'), t('notifications.channels.emailRequired'));
+        Alert.alert(t('common.error'), t('notifications.channelSettings.emailRequired'));
         return;
       }
       
       if (channelForm.type === 'webhook' && !channelForm.config.webhook_url) {
-        Alert.alert(t('common.error'), t('notifications.channels.webhookUrlRequired'));
+        Alert.alert(t('common.error'), t('notifications.channelSettings.webhookUrlRequired'));
         return;
       }
       
       if ((channelForm.type === 'telegram' || channelForm.type === 'slack') && 
           (!channelForm.config.token || !channelForm.config.chatId)) {
-        Alert.alert(t('common.error'), t('notifications.channels.tokenAndChatIdRequired'));
+        Alert.alert(t('common.error'), t('notifications.channelSettings.tokenAndChatIdRequired'));
         return;
       }
       
@@ -149,7 +149,7 @@ const NotificationChannelsScreen: React.FC = () => {
         // 创建新渠道
         const response = await createNotificationChannel(channelForm);
         if (response.success) {
-          Alert.alert(t('common.success'), t('notifications.channels.addSuccess'));
+          Alert.alert(t('common.success'), t('notifications.channelSettings.addSuccess'));
           setIsAddModalVisible(false);
           
           // 刷新渠道列表
@@ -158,13 +158,13 @@ const NotificationChannelsScreen: React.FC = () => {
             setChannels(configResponse.data.channels);
           }
         } else {
-          Alert.alert(t('common.error'), response.message || t('notifications.channels.addFailed'));
+          Alert.alert(t('common.error'), response.message || t('notifications.channelSettings.addFailed'));
         }
       } else if (isEditModalVisible && currentChannel) {
         // 更新现有渠道
         const response = await updateNotificationChannel(currentChannel.id, channelForm);
         if (response.success) {
-          Alert.alert(t('common.success'), t('notifications.channels.updateSuccess'));
+          Alert.alert(t('common.success'), t('notifications.channelSettings.updateSuccess'));
           setIsEditModalVisible(false);
           
           // 刷新渠道列表
@@ -173,20 +173,20 @@ const NotificationChannelsScreen: React.FC = () => {
             setChannels(configResponse.data.channels);
           }
         } else {
-          Alert.alert(t('common.error'), response.message || t('notifications.channels.updateFailed'));
+          Alert.alert(t('common.error'), response.message || t('notifications.channelSettings.updateFailed'));
         }
       }
     } catch (error) {
       console.error('保存通知渠道失败', error);
-      Alert.alert(t('common.error'), t('notifications.channels.saveFailed'));
+      Alert.alert(t('common.error'), t('notifications.channelSettings.saveFailed'));
     }
   };
   
   // 删除渠道
   const handleDeleteChannel = (channel: NotificationChannel) => {
     Alert.alert(
-      t('notifications.channels.deleteConfirm'),
-      t('notifications.channels.deleteConfirmMessage'),
+      t('notifications.channelSettings.deleteConfirm'),
+      t('notifications.channelSettings.deleteConfirmMessage'),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
@@ -196,16 +196,16 @@ const NotificationChannelsScreen: React.FC = () => {
             try {
               const response = await deleteNotificationChannel(channel.id);
               if (response.success) {
-                Alert.alert(t('common.success'), t('notifications.channels.deleteSuccess'));
+                Alert.alert(t('common.success'), t('notifications.channelSettings.deleteSuccess'));
                 
                 // 从列表中移除该渠道
                 setChannels(channels.filter(c => c.id !== channel.id));
               } else {
-                Alert.alert(t('common.error'), response.message || t('notifications.channels.deleteFailed'));
+                Alert.alert(t('common.error'), response.message || t('notifications.channelSettings.deleteFailed'));
               }
             } catch (error) {
               console.error('删除通知渠道失败', error);
-              Alert.alert(t('common.error'), t('notifications.channels.deleteFailed'));
+              Alert.alert(t('common.error'), t('notifications.channelSettings.deleteFailed'));
             }
           }
         }
@@ -231,9 +231,9 @@ const NotificationChannelsScreen: React.FC = () => {
       >
         {/* 通知渠道说明 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notifications.channels.title', '通知渠道')}</Text>
+          <Text style={styles.sectionTitle}>{t('notifications.channelSettings.title', '通知渠道')}</Text>
           <Text style={styles.sectionDescription}>
-            {t('notifications.channels.description', '配置不同的通知渠道，用于接收监控和系统的告警通知。')}
+            {t('notifications.channelSettings.description', '配置不同的通知渠道，用于接收监控和系统的告警通知。')}
           </Text>
           
           <TouchableOpacity 
@@ -241,7 +241,7 @@ const NotificationChannelsScreen: React.FC = () => {
             onPress={handleAddChannel}
           >
             <Ionicons name="add-circle-outline" size={20} color="white" />
-            <Text style={styles.addButtonText}>{t('notifications.channels.add', '添加渠道')}</Text>
+            <Text style={styles.addButtonText}>{t('notifications.channelSettings.add', '添加渠道')}</Text>
           </TouchableOpacity>
         </View>
         
@@ -250,8 +250,8 @@ const NotificationChannelsScreen: React.FC = () => {
           {channels.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Ionicons name="notifications-off-outline" size={40} color="#999" />
-              <Text style={styles.emptyText}>{t('notifications.channels.noChannels', '没有可用的通知渠道')}</Text>
-              <Text style={styles.emptySubText}>{t('notifications.channels.addPrompt', '点击上方按钮添加一个渠道')}</Text>
+              <Text style={styles.emptyText}>{t('notifications.channelSettings.noChannels', '没有可用的通知渠道')}</Text>
+              <Text style={styles.emptySubText}>{t('notifications.channelSettings.addPrompt', '点击上方按钮添加一个渠道')}</Text>
             </View>
           ) : (
             channels.map(channel => (
@@ -261,7 +261,7 @@ const NotificationChannelsScreen: React.FC = () => {
                     <Text style={styles.channelName}>{channel.name}</Text>
                     <View style={styles.channelTypeBadge}>
                       <Text style={styles.channelTypeText}>
-                        {t(`notifications.channels.type.${channel.type}`, 
+                        {t(`notifications.channelSettings.typeOptions.${channel.type}`, 
                            channel.type === 'app' ? '应用内' : 
                            channel.type === 'email' ? '邮件' : 
                            channel.type === 'wechat' ? '微信' : 
@@ -287,12 +287,12 @@ const NotificationChannelsScreen: React.FC = () => {
                                 channels.map(c => c.id === channel.id ? { ...c, enabled } : c)
                               );
                             } else {
-                              Alert.alert(t('common.error'), response.message || t('notifications.channels.updateFailed'));
+                              Alert.alert(t('common.error'), response.message || t('notifications.channelSettings.updateFailed'));
                             }
                           })
                           .catch(error => {
                             console.error('更新通知渠道状态失败', error);
-                            Alert.alert(t('common.error'), t('notifications.channels.updateFailed'));
+                            Alert.alert(t('common.error'), t('notifications.channelSettings.updateFailed'));
                           });
                       }}
                       trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
@@ -304,13 +304,13 @@ const NotificationChannelsScreen: React.FC = () => {
                 <View style={styles.channelDetails}>
                   {channel.type === 'email' && channel.config.email && (
                     <Text style={styles.channelConfigText}>
-                      <Text style={styles.channelConfigLabel}>{t('notifications.channels.email')}:</Text> {channel.config.email}
+                      <Text style={styles.channelConfigLabel}>{t('notifications.channelSettings.email')}:</Text> {channel.config.email}
                     </Text>
                   )}
                   
                   {channel.type === 'webhook' && channel.config.webhook_url && (
                     <Text style={styles.channelConfigText}>
-                      <Text style={styles.channelConfigLabel}>{t('notifications.channels.webhookUrl')}:</Text> {channel.config.webhook_url}
+                      <Text style={styles.channelConfigLabel}>{t('notifications.channelSettings.webhookUrl')}:</Text> {channel.config.webhook_url}
                     </Text>
                   )}
                 </View>
@@ -367,8 +367,8 @@ const NotificationChannelsScreen: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {isAddModalVisible 
-                  ? t('notifications.channels.add', '添加渠道') 
-                  : t('notifications.channels.edit', '编辑渠道')}
+                  ? t('notifications.channelSettings.add', '添加渠道') 
+                  : t('notifications.channelSettings.edit', '编辑渠道')}
               </Text>
               <TouchableOpacity 
                 style={styles.modalCloseButton}
@@ -384,18 +384,18 @@ const NotificationChannelsScreen: React.FC = () => {
             <ScrollView style={styles.modalContent}>
               {/* 渠道名称 */}
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>{t('notifications.channels.name', '渠道名称')}</Text>
+                <Text style={styles.formLabel}>{t('notifications.channelSettings.name', '渠道名称')}</Text>
                 <TextInput
                   style={styles.formInput}
                   value={channelForm.name}
                   onChangeText={(text) => setChannelForm({ ...channelForm, name: text })}
-                  placeholder={t('notifications.channels.namePlaceholder', '请输入渠道名称')}
+                  placeholder={t('notifications.channelSettings.namePlaceholder', '请输入渠道名称')}
                 />
               </View>
               
               {/* 渠道类型 */}
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>{t('notifications.channels.type', '渠道类型')}</Text>
+                <Text style={styles.formLabel}>{t('notifications.channelSettings.channelType', '渠道类型')}</Text>
                 <View style={styles.typeSelector}>
                   {channelTypes.map(type => (
                     <TouchableOpacity
@@ -412,7 +412,7 @@ const NotificationChannelsScreen: React.FC = () => {
                           channelForm.type === type.id && styles.typeButtonTextSelected
                         ]}
                       >
-                        {type.name}
+                        {t(`notifications.channelSettings.typeOptions.${type.id}`, type.name)}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -422,7 +422,7 @@ const NotificationChannelsScreen: React.FC = () => {
               {/* 渠道配置 - 根据类型显示不同的配置选项 */}
               {channelForm.type === 'email' && (
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>{t('notifications.channels.email', '邮箱地址')}</Text>
+                  <Text style={styles.formLabel}>{t('notifications.channelSettings.email', '邮箱地址')}</Text>
                   <TextInput
                     style={styles.formInput}
                     value={channelForm.config.email}
@@ -438,7 +438,7 @@ const NotificationChannelsScreen: React.FC = () => {
               
               {channelForm.type === 'webhook' && (
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>{t('notifications.channels.webhookUrl', 'Webhook URL')}</Text>
+                  <Text style={styles.formLabel}>{t('notifications.channelSettings.webhookUrl', 'Webhook URL')}</Text>
                   <TextInput
                     style={styles.formInput}
                     value={channelForm.config.webhook_url}
@@ -454,7 +454,7 @@ const NotificationChannelsScreen: React.FC = () => {
               {(channelForm.type === 'telegram' || channelForm.type === 'slack') && (
                 <>
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>{t('notifications.channels.token', 'Token')}</Text>
+                    <Text style={styles.formLabel}>{t('notifications.channelSettings.token', 'Token')}</Text>
                     <TextInput
                       style={styles.formInput}
                       value={channelForm.config.token}
@@ -467,7 +467,7 @@ const NotificationChannelsScreen: React.FC = () => {
                   </View>
                   
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>{t('notifications.channels.chatId', 'Chat ID')}</Text>
+                    <Text style={styles.formLabel}>{t('notifications.channelSettings.chatId', 'Chat ID')}</Text>
                     <TextInput
                       style={styles.formInput}
                       value={channelForm.config.chatId}
@@ -484,7 +484,7 @@ const NotificationChannelsScreen: React.FC = () => {
               {/* 渠道状态 */}
               <View style={styles.formGroup}>
                 <View style={styles.enabledContainer}>
-                  <Text style={styles.formLabel}>{t('notifications.channels.enabled', '启用状态')}</Text>
+                  <Text style={styles.formLabel}>{t('notifications.channelSettings.enabled', '启用状态')}</Text>
                   <Switch
                     value={channelForm.enabled}
                     onValueChange={(enabled) => setChannelForm({ ...channelForm, enabled })}

@@ -93,19 +93,10 @@ const MainTabNavigator = () => {
   const { t } = useTranslation();
   
   const tabBarStyle = {
-    height: 75,
-    position: 'absolute' as const,
-    bottom: 25,
-    left: 20,
-    right: 20,
-    borderRadius: 28,
-    paddingTop: 5,
-    paddingBottom: 10,
-    paddingHorizontal: 5,
+    height: 60,
     backgroundColor: '#ffffff',
-    boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.08)',
-    elevation: 10,
-    borderTopWidth: 0
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0'
   };
   
   return (
@@ -123,14 +114,7 @@ const MainTabNavigator = () => {
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '500',
-          marginTop: 2,
-          marginBottom: 3,
-          textAlign: 'center'
-        },
-        tabBarItemStyle: {
-          flex: 1,
-          paddingHorizontal: 0,
-          minWidth: 60
+          marginBottom: 5
         }
       }}
     >
