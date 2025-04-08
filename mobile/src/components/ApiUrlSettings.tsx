@@ -52,32 +52,23 @@ const ApiUrlSettings: React.FC<ApiUrlSettingsProps> = ({
     try {
       setSaving(true);
       
-      // 构建需要执行的异步任务
-      const tasks: Promise<any>[] = [saveApiBaseUrl(apiUrl)];
+      // 先保存API URL
+      await saveApiBaseUrl(apiUrl);
       
-      // 如果需要保存配置标记，添加到任务列表
+      // 成功后再保存配置标志
       if (saveConfigured) {
-        tasks.push(AsyncStorage.setItem('api_url_configured', 'true'));
+        await AsyncStorage.setItem('api_url_configured', 'true');
       }
-      
-      // 并行执行所有任务
-      await Promise.all(tasks);
-      
-      // 成功后调用完成回调
-      onComplete();
       
       // 如果是模态框模式，重置状态
       if (mode === 'modal') {
         resetState();
       }
+      
+      // 最后才调用完成回调
+      onComplete();
     } catch (error) {
       console.error('保存API URL失败:', error);
-      
-      // 显示错误提示
-      Alert.alert(
-        t('common.error'),
-        t('settings.apiUrlSaveFailed')
-      );
     } finally {
       setSaving(false);
     }

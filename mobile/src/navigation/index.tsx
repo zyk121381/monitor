@@ -285,33 +285,31 @@ const AppNavigator = ({ initialApiConfigured }: { initialApiConfigured: boolean 
   
   // 设置完成回调函数
   const handleApiSetupComplete = React.useCallback(() => {
-    // 异步设置，避免状态更新导致的闪烁
+    // 添加延迟以确保所有状态已正确保存
     setTimeout(() => {
       setApiUrlSettingsVisible(false);
-    }, 100);
+    }, 300);
   }, []);
   
-  // 如果API基础URL未配置，先显示设置模态框
-  if (apiUrlSettingsVisible) {
-    return (
-      <NavigationContainer ref={navigationRef}>
-        <SafeAreaProvider>
-          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-          <ApiUrlSettings 
-            mode="fullscreen"
-            onComplete={handleApiSetupComplete}
-            saveConfigured={true}
-          />
-        </SafeAreaProvider>
-      </NavigationContainer>
-    );
-  }
+  // 使用 useMemo 优化渲染内容
+  const navigationContent = React.useMemo(() => {
+    if (apiUrlSettingsVisible) {
+      return (
+        <ApiUrlSettings 
+          mode="fullscreen"
+          onComplete={handleApiSetupComplete}
+          saveConfigured={true}
+        />
+      );
+    }
+    return <RootNavigator />;
+  }, [apiUrlSettingsVisible, handleApiSetupComplete]);
   
   return (
     <NavigationContainer ref={navigationRef}>
       <SafeAreaProvider>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-        <RootNavigator />
+        {navigationContent}
       </SafeAreaProvider>
     </NavigationContainer>
   );
