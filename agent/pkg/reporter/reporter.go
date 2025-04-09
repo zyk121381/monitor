@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/xugou/agent/pkg/collector"
@@ -21,6 +22,7 @@ type Reporter interface {
 type HTTPReporter struct {
 	serverURL      string
 	apiToken       string
+	proxyURL       string
 	client         *http.Client
 	lastNetworkRX  uint64    // 上次网络接收字节数
 	lastNetworkTX  uint64    // 上次网络发送字节数
@@ -29,13 +31,29 @@ type HTTPReporter struct {
 }
 
 // NewHTTPReporter 创建一个新的HTTP数据上报器
-func NewHTTPReporter(serverURL, apiToken string) Reporter {
+func NewHTTPReporter(serverURL, apiToken, proxyURL string) Reporter {
+	// 创建HTTP客户端
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// 如果设置了代理，配置代理
+	if proxyURL != "" {
+		proxy, err := url.Parse(proxyURL)
+		if err != nil {
+			fmt.Printf("警告: 代理URL解析失败: %v，将不使用代理\n", err)
+		} else {
+			client.Transport = &http.Transport{
+				Proxy: http.ProxyURL(proxy),
+			}
+		}
+	}
+
 	return &HTTPReporter{
-		serverURL: normalizeURL(serverURL),
-		apiToken:  apiToken,
-		client: &http.Client{
-			Timeout: 10 * time.Second,
-		},
+		serverURL:      normalizeURL(serverURL),
+		apiToken:       apiToken,
+		proxyURL:       proxyURL,
+		client:         client,
 		lastUpdateTime: time.Now(),
 		registered:     false,
 	}
