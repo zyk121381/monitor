@@ -80,7 +80,19 @@ export async function checkMonitor(db: Bindings['DB'], monitor: Monitor) {
     const responseTime = Date.now() - startTime;
     
     // 检查状态码是否符合预期
-    const isExpectedStatus = response.status === (monitor.expected_status || 200);
+    let isExpectedStatus = false;
+    const expectedStatus = monitor.expected_status || 200;
+    
+    // 处理范围状态码：如果预期状态码为个位数（1-5），则视为范围检查
+    if (expectedStatus >= 1 && expectedStatus <= 5) {
+      // 例如，当预期状态码为2时，匹配所有2xx状态码
+      const statusCodeFirstDigit = Math.floor(response.status / 100);
+      isExpectedStatus = statusCodeFirstDigit === expectedStatus;
+    } else {
+      // 精确匹配状态码
+      isExpectedStatus = response.status === expectedStatus;
+    }
+    
     const status = isExpectedStatus ? 'up' : 'down';
     
     // 记录状态历史
@@ -93,7 +105,7 @@ export async function checkMonitor(db: Bindings['DB'], monitor: Monitor) {
       status, 
       responseTime, 
       response.status, 
-      isExpectedStatus ? null : `状态码不符合预期: ${response.status}, 预期: ${monitor.expected_status || 200}`
+      isExpectedStatus ? null : `状态码不符合预期: ${response.status}, 预期: ${getExpectedStatusDisplay(expectedStatus)}`
     );
     
     // 更新监控状态
@@ -105,7 +117,7 @@ export async function checkMonitor(db: Bindings['DB'], monitor: Monitor) {
       previous_status: previousStatus,
       responseTime,
       statusCode: response.status,
-      error: isExpectedStatus ? null : `状态码不符合预期: ${response.status}, 预期: ${monitor.expected_status || 200}`
+      error: isExpectedStatus ? null : `状态码不符合预期: ${response.status}, 预期: ${getExpectedStatusDisplay(expectedStatus)}`
     };
   } catch (error) {
     console.error(`检查监控出错 (${monitor.name}):`, error);
@@ -632,4 +644,16 @@ export async function manualCheckMonitor(
       status: 500
     };
   }
+}
+
+/**
+ * 获取预期状态码的显示文本
+ * @param expectedStatus 预期状态码
+ * @returns 显示文本
+ */
+function getExpectedStatusDisplay(expectedStatus: number): string {
+  if (expectedStatus >= 1 && expectedStatus <= 5) {
+    return `${expectedStatus}xx`;
+  }
+  return String(expectedStatus);
 } 
