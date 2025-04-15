@@ -167,7 +167,7 @@ export async function addSampleAgents(env: Bindings): Promise<void> {
     // 主服务器
     await env.DB.prepare(
       `INSERT INTO agents (name, token, created_by, status, created_at, updated_at, cpu_usage, memory_total, memory_used, disk_total, disk_used, network_rx, network_tx, hostname, ip_addresses, os, version)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       '主服务器',
       'primary-server-token-123456',
@@ -191,7 +191,7 @@ export async function addSampleAgents(env: Bindings): Promise<void> {
     // 备份服务器
     await env.DB.prepare(
       `INSERT INTO agents (name, token, created_by, status, created_at, updated_at, cpu_usage, memory_total, memory_used, disk_total, disk_used, network_rx, network_tx, hostname, ip_addresses, os, version)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       '备份服务器',
       'backup-server-token-789012',
