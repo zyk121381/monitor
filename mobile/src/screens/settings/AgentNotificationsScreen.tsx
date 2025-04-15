@@ -63,7 +63,7 @@ interface Agent {
   id: string;
   name: string;
   hostname?: string;
-  ip_address?: string;
+  ip_addresses?: string; // JSON 字符串，存储 IP 地址列表
   status?: string;
   os?: string;
   cpu?: {
@@ -145,7 +145,7 @@ const AgentNotificationsScreen: React.FC = () => {
       id: '1',
       name: t('agents.title', '应用服务器'),
       hostname: 'app-server-01',
-      ip_address: '192.168.1.10',
+      ip_addresses: '192.168.1.10',
       status: 'active',
       os: 'Linux',
       cpu: { usage: 32.5, cores: 4, model: 'Intel i7' },
@@ -159,7 +159,7 @@ const AgentNotificationsScreen: React.FC = () => {
       id: '2',
       name: t('dashboard.title', '数据库服务器'),
       hostname: 'db-server-01',
-      ip_address: '192.168.1.20',
+      ip_addresses: '192.168.1.20',
       status: 'active',
       os: 'Ubuntu',
       cpu: { usage: 65.2, cores: 8, model: 'AMD Ryzen' },
@@ -430,7 +430,7 @@ const AgentNotificationsScreen: React.FC = () => {
                   <View style={styles.specificSettingTitleContainer}>
                     <Text style={styles.specificSettingTitle}>{agent.name}</Text>
                     <Text style={styles.specificSettingDescription}>
-                      {agent.hostname || agent.ip_address || t('common.unknown', 'Unknown')}
+                      {agent.hostname || t('common.unknown', 'Unknown')}
                     </Text>
                   </View>
                   <View style={[

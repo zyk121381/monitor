@@ -163,10 +163,19 @@ const AgentsScreen: React.FC = () => {
           <Text style={styles.infoText}>{item.os || t('common.unknown', '未知')}</Text>
         </View>
         
-        {item.ip_address && (
+        {item.ip_addresses && (
           <View style={styles.infoItem}>
             <Ionicons name="wifi-outline" size={14} color="#666" />
-            <Text style={styles.infoText}>{item.ip_address}</Text>
+            <Text style={styles.infoText}>{(() => {
+              try {
+                const ipArray = JSON.parse(String(item.ip_addresses));
+                return Array.isArray(ipArray) && ipArray.length > 0 
+                  ? ipArray.join(', ') // 显示所有 IP
+                  : String(item.ip_addresses);
+              } catch (e) {
+                return String(item.ip_addresses);
+              }
+            })()}</Text>
           </View>
         )}
         

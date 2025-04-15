@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Badge, Tabs, Grid, Avatar } from '@radix-ui/themes';
-import { ArrowLeftIcon, Pencil1Icon, Cross2Icon, ReloadIcon, ClockIcon, InfoCircledIcon, LapTimerIcon, DesktopIcon, GlobeIcon, LaptopIcon } from '@radix-ui/react-icons';
+import { ArrowLeftIcon, Pencil1Icon, Cross2Icon, ReloadIcon, ClockIcon, InfoCircledIcon, LapTimerIcon, DesktopIcon, GlobeIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getAgent, Agent, deleteAgent } from '../../api/agents';
 import ClientResourceSection from '../../components/ClientResourceSection';
@@ -258,7 +258,14 @@ const AgentDetail = () => {
                 <Heading size="5">{agent.name}</Heading>
                 <Text color="gray" size="2">
                   {agent.hostname ? agent.hostname : ''}
-                  {agent.hostname && agent.ip_address ? ` (${agent.ip_address})` : ''}
+                  {agent.hostname && agent.ip_addresses ? (() => {
+                    try {
+                      const ipArray = JSON.parse(String(agent.ip_addresses));
+                      return ipArray.length > 0 ? ` (${ipArray[0]})` : '';
+                    } catch (e) {
+                      return ` (${String(agent.ip_addresses)})`;
+                    }
+                  })() : ''}
                 </Text>
               </Box>
             </Flex>
@@ -315,13 +322,25 @@ const AgentDetail = () => {
                         </Flex>
                       </Box>
                       
-                      <Box>
-                        <Flex align="center" gap="2">
-                          <LaptopIcon />
-                          <Text as="div" size="2" weight="bold">{t('agent.ipAddress')}:</Text>
-                          <Text as="div" size="2">{agent.ip_address || t('common.notFound')}</Text>
-                        </Flex>
-                      </Box>
+                      <Flex direction="column" gap="1">
+                        <Text size="2" weight="bold">{t('agent.ipAddress')}:</Text>
+                        {agent.ip_addresses ? (
+                          <Flex direction="column" gap="1">
+                            {(() => {
+                              try {
+                                const ipArray = JSON.parse(String(agent.ip_addresses));
+                                return Array.isArray(ipArray) 
+                                  ? ipArray.map((ip, index) => <Text key={index} size="2">{ip}</Text>)
+                                  : <Text size="2">{String(agent.ip_addresses)}</Text>;
+                              } catch (e) {
+                                return <Text size="2">{String(agent.ip_addresses)}</Text>;
+                              }
+                            })()}
+                          </Flex>
+                        ) : (
+                          <Text size="2" color="gray">{t('common.unknown')}</Text>
+                        )}
+                      </Flex>
                     </Flex>
                   </Card>
 

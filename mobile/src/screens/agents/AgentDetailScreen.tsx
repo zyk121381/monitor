@@ -302,12 +302,27 @@ const AgentDetailScreen: React.FC = () => {
           <Text style={styles.detailLabel}>{t('agents.hostname', '主机名')}:</Text>
           <Text style={styles.detailValue}>{agent.hostname || t('common.unknown', '未知')}</Text>
         </View>
-        {agent.ip_address && (
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>{t('agents.ipAddress', 'IP地址')}:</Text>
-            <Text style={styles.detailValue}>{agent.ip_address}</Text>
-          </View>
-        )}
+        <View style={styles.detailItem}>
+          <Text style={styles.detailLabel}>{t('agents.ipAddress', 'IP地址')}:</Text>
+          {agent.ip_addresses ? (
+            <View>
+              {(() => {
+                try {
+                  const ipArray = JSON.parse(String(agent.ip_addresses));
+                  return Array.isArray(ipArray) ? 
+                    ipArray.map((ip: string, index: number) => (
+                      <Text key={index} style={styles.detailValue}>{ip}</Text>
+                    ))
+                    : <Text style={styles.detailValue}>{String(agent.ip_addresses)}</Text>;
+                } catch (e) {
+                  return <Text style={styles.detailValue}>{String(agent.ip_addresses)}</Text>;
+                }
+              })()}
+            </View>
+          ) : (
+            <Text style={styles.detailValue}>{t('common.unknown', 'unknown')}</Text>
+          )}
+        </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>{t('agents.os', '操作系统')}:</Text>
           <Text style={styles.detailValue}>{agent.operating_system || agent.os || t('common.unknown', '未知')}</Text>
