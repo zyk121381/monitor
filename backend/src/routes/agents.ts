@@ -215,7 +215,7 @@ agents.post('/token/generate', async (c) => {
 // 客户端自注册接口
 agents.post('/register', async (c) => {
   try {
-    const { token, name, hostname, ip_address, os, version } = await c.req.json();
+    const { token, name, hostname, ip_addresses, os, version } = await c.req.json();
     
     if (!token) {
       return c.json({ success: false, message: '缺少注册令牌' }, 400);
@@ -252,9 +252,9 @@ agents.post('/register', async (c) => {
       adminId,
       'active',
       hostname || null,
-      ip_address || null,
       os || null,
-      version || null
+      version || null,
+      ip_addresses // 新增 ip_addresses 字段
     );
     
     return c.json({ 
@@ -285,7 +285,7 @@ agents.post('/status', async (c) => {
       network_rx, 
       network_tx,
       hostname,
-      ip_address,
+      ip_addresses,
       os,
       version
     } = await c.req.json();
@@ -311,7 +311,7 @@ agents.post('/status', async (c) => {
       network_rx,
       network_tx,
       hostname,
-      ip_address,
+      ip_addresses, // 新增 ip_addresses 字段
       os,
       version
     });

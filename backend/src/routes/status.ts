@@ -370,7 +370,7 @@ app.get('/data', async (c) => {
         network_rx: agent.network_rx || 0,       // 使用数据库中的网络下载速率
         network_tx: agent.network_tx || 0,       // 使用数据库中的网络上传速率
         hostname: agent.hostname || "未知主机",
-        ip_address: agent.ip_address || "0.0.0.0",
+        ip_addresses: agent.ip_addresses || "0.0.0.0",
         os: agent.os || "未知系统",
         version: agent.version || "未知版本"
       };
@@ -394,7 +394,7 @@ app.get('/data', async (c) => {
           network_rx: agent.network_rx,
           network_tx: agent.network_tx,
           hostname: agent.hostname,
-          ip_address: agent.ip_address,
+          ip_addresses: agent.ip_addresses,
           os: agent.os,
           version: agent.version
         }))
@@ -480,7 +480,7 @@ async function createDefaultStatusPageData(c: any) {
         network_rx: agent.network_rx || 0,
         network_tx: agent.network_tx || 0,
         hostname: agent.hostname || "未知主机",
-        ip_address: agent.ip_address || "0.0.0.0",
+        ip_addresses: agent.ip_addresses || "0.0.0.0",
         os: agent.os || "未知系统",
         version: agent.version || "未知版本"
       };
@@ -502,7 +502,7 @@ async function createDefaultStatusPageData(c: any) {
         network_rx: agent.network_rx,
         network_tx: agent.network_tx,
         hostname: agent.hostname,
-        ip_address: agent.ip_address,
+        ip_addresses: agent.ip_addresses,
         os: agent.os,
         version: agent.version
       }))

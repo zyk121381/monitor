@@ -70,28 +70,28 @@ func normalizeURL(url string) string {
 
 // StatusPayload 定义上报到后端的数据结构
 type StatusPayload struct {
-	Token       string  `json:"token"` // API令牌
-	CPUUsage    float64 `json:"cpu_usage"`
-	MemoryTotal uint64  `json:"memory_total"`
-	MemoryUsed  uint64  `json:"memory_used"`
-	DiskTotal   uint64  `json:"disk_total"`
-	DiskUsed    uint64  `json:"disk_used"`
-	NetworkRX   uint64  `json:"network_rx"`
-	NetworkTX   uint64  `json:"network_tx"`
-	Hostname    string  `json:"hostname"`   // 主机名
-	IPAddress   string  `json:"ip_address"` // IP地址
-	OS          string  `json:"os"`         // 操作系统
-	Version     string  `json:"version"`    // 操作系统版本
+	Token       string   `json:"token"` // API令牌
+	CPUUsage    float64  `json:"cpu_usage"`
+	MemoryTotal uint64   `json:"memory_total"`
+	MemoryUsed  uint64   `json:"memory_used"`
+	DiskTotal   uint64   `json:"disk_total"`
+	DiskUsed    uint64   `json:"disk_used"`
+	NetworkRX   uint64   `json:"network_rx"`
+	NetworkTX   uint64   `json:"network_tx"`
+	Hostname    string   `json:"hostname"`     // 主机名
+	IPAddresses []string `json:"ip_addresses"` // IP地址列表
+	OS          string   `json:"os"`           // 操作系统
+	Version     string   `json:"version"`      // 操作系统版本
 }
 
 // RegisterPayload 定义注册到后端的数据结构
 type RegisterPayload struct {
-	Token     string `json:"token"`      // API令牌
-	Name      string `json:"name"`       // 客户端名称
-	Hostname  string `json:"hostname"`   // 主机名
-	IPAddress string `json:"ip_address"` // IP地址
-	OS        string `json:"os"`         // 操作系统
-	Version   string `json:"version"`    // 操作系统版本
+	Token       string   `json:"token"`        // API令牌
+	Name        string   `json:"name"`         // 客户端名称
+	Hostname    string   `json:"hostname"`     // 主机名
+	IPAddresses []string `json:"ip_addresses"` // IP地址列表
+	OS          string   `json:"os"`           // 操作系统
+	Version     string   `json:"version"`      // 操作系统版本
 }
 
 // RegisterResponse 定义注册响应结构
@@ -111,12 +111,12 @@ func (r *HTTPReporter) ensureRegistered(ctx context.Context, info *collector.Sys
 
 	// 构建注册的数据结构
 	payload := RegisterPayload{
-		Token:     r.apiToken,
-		Name:      info.Hostname,
-		Hostname:  info.Hostname,
-		IPAddress: getLocalIP(),
-		OS:        info.OS,
-		Version:   info.Version,
+		Token:       r.apiToken,
+		Name:        info.Hostname,
+		Hostname:    info.Hostname,
+		IPAddresses: getLocalIPs(),
+		OS:          info.OS,
+		Version:     info.Version,
 	}
 
 	// 将数据转换为JSON
@@ -233,9 +233,9 @@ func (r *HTTPReporter) reportStatus(ctx context.Context, info *collector.SystemI
 		NetworkRX:   uint64(networkRXRate),        // 网络接收速率（KB/s）
 		NetworkTX:   uint64(networkTXRate),        // 网络发送速率（KB/s）
 		Hostname:    info.Hostname,                // 添加主机名
-		OS:          info.OS,                      // 添加操作系统信息
-		Version:     info.Version,                 // 添加操作系统版本
-		IPAddress:   getLocalIP(),                 // 获取本地IP地址
+		IPAddresses: getLocalIPs(),
+		OS:          info.OS,      // 添加操作系统信息
+		Version:     info.Version, // 添加操作系统版本
 	}
 
 	// 将数据转换为JSON
@@ -295,21 +295,26 @@ func (r *HTTPReporter) Report(ctx context.Context, info *collector.SystemInfo) e
 	return nil
 }
 
-// getLocalIP 获取本地IP地址
-func getLocalIP() string {
+// getLocalIPs 获取所有本地IPv4地址
+func getLocalIPs() []string {
+	ips := []string{}
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		return "未知"
+		return append(ips, "unknown")
 	}
 
 	for _, addr := range addrs {
 		// 检查IP地址类型
 		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
+				ips = append(ips, ipnet.IP.String())
 			}
 		}
 	}
 
-	return "未知"
+	if len(ips) == 0 {
+		return append(ips, "unknown")
+	}
+
+	return ips
 }

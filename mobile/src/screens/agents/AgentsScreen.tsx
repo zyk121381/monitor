@@ -163,10 +163,10 @@ const AgentsScreen: React.FC = () => {
           <Text style={styles.infoText}>{item.os || t('common.unknown', '未知')}</Text>
         </View>
         
-        {item.ip_address && (
+        {item.ip_addresses && (
           <View style={styles.infoItem}>
             <Ionicons name="wifi-outline" size={14} color="#666" />
-            <Text style={styles.infoText}>{item.ip_address}</Text>
+            <Text style={styles.infoText}>{item.ip_addresses}</Text>
           </View>
         )}
         
