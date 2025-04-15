@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import SafeAreaWrapper from '../../components/SafeAreaWrapper';
 
 // 引入API服务
 import { getNotificationConfig, saveNotificationSettings } from '../../api/notifications';
@@ -401,169 +402,174 @@ const MonitorNotificationsScreen: React.FC = () => {
   
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0066cc" />
-        <Text style={styles.loadingText}>{t('common.loading', '加载中')}...</Text>
-      </View>
+      <SafeAreaWrapper>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0066cc" />
+          <Text style={styles.loadingText}>{t('common.loading', '加载中')}...</Text>
+        </View>
+      </SafeAreaWrapper>
     );
   }
   
   if (!settings) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="#f76363" />
-        <Text style={styles.errorText}>{error || t('notifications.loadFailed', '加载失败')}</Text>
-        <TouchableOpacity 
-          style={styles.retryButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.retryButtonText}>{t('common.goBack', '返回')}</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaWrapper>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={60} color="#f76363" />
+          <Text style={styles.errorText}>{error || t('notifications.loadFailed', '加载失败')}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.retryButtonText}>{t('common.goBack', '返回')}</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaWrapper>
     );
   }
   
   return (
-    <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollContainer}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: 16 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Specific monitor notification settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notifications.specificSettings.title', '特定监控通知设置')}</Text>
-          <Text style={styles.sectionDescription}>
-            {t('notifications.specificSettings.description', '为每个具体的监控项目配置单独的通知设置。')}
-          </Text>
-          
-          {monitors.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="alert-circle-outline" size={40} color="#999" />
-              <Text style={styles.emptyStateText}>{t('notifications.specificSettings.noMonitors', '没有可用的监控项目')}</Text>
-            </View>
-          ) : (
-            monitors.map(monitor => (
-              <View key={monitor.id} style={styles.specificSettingItem}>
-                <View style={styles.specificSettingHeader}>
-                  <View style={styles.specificSettingTitleContainer}>
-                    <Text style={styles.specificSettingTitle}>{monitor.name}</Text>
-                    <Text style={styles.specificSettingDescription}>
-                      {monitor.url}
-                    </Text>
-                  </View>
-                  <View style={[
-                    styles.statusBadge, 
-                    { backgroundColor: monitor.status === 'up' ? '#4caf50' : '#f44336' }
-                  ]}>
-                    <Text style={styles.statusText}>
-                      {monitor.status === 'up' ? t('monitors.status.up', '正常') : t('monitors.status.down', '故障')}
-                    </Text>
-                  </View>
-                </View>
-                
-                <View style={styles.specificSettings}>
-                  <View style={styles.settingItem}>
-                    <View style={styles.settingItemContent}>
-                      <Text style={styles.settingItemText}>{t('notifications.enabled', '启用通知')}</Text>
+    <SafeAreaWrapper>
+      <View style={styles.container}>
+        {/* 顶部导航栏 */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.headerBackButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#0066cc" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t('notifications.specificSettings.title', '特定监控通知设置')}</Text>
+          <TouchableOpacity 
+            style={styles.headerSaveButton}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Text style={styles.headerSaveButtonText}>
+              {saving ? t('common.saving', '保存中...') : t('common.save', '保存')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView 
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Specific monitor notification settings */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('notifications.specificSettings.title', '特定监控通知设置')}</Text>
+            <Text style={styles.sectionDescription}>
+              {t('notifications.specificSettings.description', '为每个具体的监控项目配置单独的通知设置。')}
+            </Text>
+            
+            {monitors.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="alert-circle-outline" size={40} color="#999" />
+                <Text style={styles.emptyStateText}>{t('notifications.specificSettings.noMonitors', '没有可用的监控项目')}</Text>
+              </View>
+            ) : (
+              monitors.map(monitor => (
+                <View key={monitor.id} style={styles.specificSettingItem}>
+                  <View style={styles.specificSettingHeader}>
+                    <View style={styles.specificSettingTitleContainer}>
+                      <Text style={styles.specificSettingTitle}>{monitor.name}</Text>
+                      <Text style={styles.specificSettingDescription}>
+                        {monitor.url}
+                      </Text>
                     </View>
-                    <Switch
-                      value={Boolean(settings.specificMonitors[monitor.id]?.enabled)}
-                      onValueChange={(value) => handleSpecificMonitorSettingChange(monitor.id, 'enabled', value)}
-                      trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                      thumbColor={settings.specificMonitors[monitor.id]?.enabled ? '#0066cc' : '#ccc'}
-                    />
+                    <View style={[
+                      styles.statusBadge, 
+                      { backgroundColor: monitor.status === 'up' ? '#4caf50' : '#f44336' }
+                    ]}>
+                      <Text style={styles.statusText}>
+                        {monitor.status === 'up' ? t('monitors.status.up', '正常') : t('monitors.status.down', '故障')}
+                      </Text>
+                    </View>
                   </View>
                   
-                  {Boolean(settings.specificMonitors[monitor.id]?.enabled) && (
-                    <>
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onDown', '监控故障时通知')}</Text>
-                        </View>
-                        <Switch
-                          value={Boolean(settings.specificMonitors[monitor.id]?.onDown)}
-                          onValueChange={(value) => handleSpecificMonitorSettingChange(monitor.id, 'onDown', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificMonitors[monitor.id]?.onDown ? '#0066cc' : '#ccc'}
-                        />
+                  <View style={styles.specificSettings}>
+                    <View style={styles.settingItem}>
+                      <View style={styles.settingItemContent}>
+                        <Text style={styles.settingItemText}>{t('notifications.enabled', '启用通知')}</Text>
                       </View>
-                      
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onRecovery', '恢复正常时通知')}</Text>
+                      <Switch
+                        value={Boolean(settings.specificMonitors[monitor.id]?.enabled)}
+                        onValueChange={(value) => handleSpecificMonitorSettingChange(monitor.id, 'enabled', value)}
+                        trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                        thumbColor={settings.specificMonitors[monitor.id]?.enabled ? '#0066cc' : '#ccc'}
+                      />
+                    </View>
+                    
+                    {Boolean(settings.specificMonitors[monitor.id]?.enabled) && (
+                      <>
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onDown', '监控故障时通知')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificMonitors[monitor.id]?.onDown)}
+                            onValueChange={(value) => handleSpecificMonitorSettingChange(monitor.id, 'onDown', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificMonitors[monitor.id]?.onDown ? '#0066cc' : '#ccc'}
+                          />
                         </View>
-                        <Switch
-                          value={Boolean(settings.specificMonitors[monitor.id]?.onRecovery)}
-                          onValueChange={(value) => handleSpecificMonitorSettingChange(monitor.id, 'onRecovery', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificMonitors[monitor.id]?.onRecovery ? '#0066cc' : '#ccc'}
-                        />
-                      </View>
-
-                      {/* Notification channels setting */}
-                      <View style={styles.channelsContainer}>
-                        <Text style={styles.channelsTitle}>{t('notifications.specificSettings.channels', '通知渠道')}</Text>
                         
-                        {channels.length === 0 ? (
-                          <Text style={styles.noChannelsText}>{t('notifications.channelSettings.noChannels', '没有可用的通知渠道')}</Text>
-                        ) : (
-                          channels.map(channel => (
-                            <View key={channel.id} style={styles.channelItem}>
-                              <View style={styles.channelItemContent}>
-                                <Text style={styles.channelItemName}>{channel.name}</Text>
-                                <Text style={styles.channelItemType}>({t(`notifications.channelSettings.typeOptions.${channel.type}`, channel.type)})</Text>
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onRecovery', '恢复正常时通知')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificMonitors[monitor.id]?.onRecovery)}
+                            onValueChange={(value) => handleSpecificMonitorSettingChange(monitor.id, 'onRecovery', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificMonitors[monitor.id]?.onRecovery ? '#0066cc' : '#ccc'}
+                          />
+                        </View>
+
+                        {/* Notification channels setting */}
+                        <View style={styles.channelsContainer}>
+                          <Text style={styles.channelsTitle}>{t('notifications.specificSettings.channels', '通知渠道')}</Text>
+                          
+                          {channels.length === 0 ? (
+                            <Text style={styles.noChannelsText}>{t('notifications.channelSettings.noChannels', '没有可用的通知渠道')}</Text>
+                          ) : (
+                            channels.map(channel => (
+                              <View key={channel.id} style={styles.channelItem}>
+                                <View style={styles.channelItemContent}>
+                                  <Text style={styles.channelItemName}>{channel.name}</Text>
+                                  <Text style={styles.channelItemType}>({t(`notifications.channelSettings.typeOptions.${channel.type}`, channel.type)})</Text>
+                                </View>
+                                <Switch
+                                  value={settings.specificMonitors[monitor.id]?.channels?.includes(channel.id)}
+                                  onValueChange={(checked) => {
+                                    const currentChannels = settings.specificMonitors[monitor.id]?.channels || [];
+                                    const updatedChannels = checked 
+                                      ? [...currentChannels, channel.id]
+                                      : currentChannels.filter(id => id !== channel.id);
+                                    
+                                    handleSpecificMonitorSettingChange(monitor.id, 'channels', updatedChannels);
+                                  }}
+                                  trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                                  thumbColor={settings.specificMonitors[monitor.id]?.channels?.includes(channel.id) ? '#0066cc' : '#ccc'}
+                                />
                               </View>
-                              <Switch
-                                value={settings.specificMonitors[monitor.id]?.channels?.includes(channel.id)}
-                                onValueChange={(checked) => {
-                                  const currentChannels = settings.specificMonitors[monitor.id]?.channels || [];
-                                  const updatedChannels = checked 
-                                    ? [...currentChannels, channel.id]
-                                    : currentChannels.filter(id => id !== channel.id);
-                                  
-                                  handleSpecificMonitorSettingChange(monitor.id, 'channels', updatedChannels);
-                                }}
-                                trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                                thumbColor={settings.specificMonitors[monitor.id]?.channels?.includes(channel.id) ? '#0066cc' : '#ccc'}
-                              />
-                            </View>
-                          ))
-                        )}
-                      </View>
-                    </>
-                  )}
+                            ))
+                          )}
+                        </View>
+                      </>
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))
-          )}
-        </View>
-        
-        {/* Bottom safe area */}
-        <View style={styles.safeArea} />
-      </ScrollView>
-      
-      {/* Save button */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerBackButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#0066cc" />
-          <Text style={styles.backButtonText}>{t('common.goBack', '返回')}</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerSaveButton}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Text style={styles.footerSaveButtonText}>
-            {saving ? t('common.saving', '保存中...') : t('common.save', '保存')}
-          </Text>
-        </TouchableOpacity>
+              ))
+            )}
+          </View>
+          
+          {/* 底部安全区域 */}
+          <View style={styles.safeArea} />
+        </ScrollView>
       </View>
-    </View>
+    </SafeAreaWrapper>
   );
 };
 
@@ -571,6 +577,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerBackButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#333',
+  },
+  headerSaveButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#0066cc',
+    borderRadius: 6,
+  },
+  headerSaveButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
   },
   loadingContainer: {
     flex: 1,
@@ -607,19 +642,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '500',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   scrollContainer: {
     flex: 1,
@@ -708,63 +730,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   safeArea: {
-    height: 40,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  footerBackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 8,
-    color: '#0066cc',
-  },
-  footerSaveButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    backgroundColor: '#0066cc',
-    borderRadius: 6,
-  },
-  footerSaveButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  thresholdContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: 32,
-    marginBottom: 16,
-  },
-  thresholdLabel: {
-    fontSize: 14,
-    color: '#333',
-    marginRight: 8,
-  },
-  thresholdInput: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    width: 60,
-    textAlign: 'center',
-  },
-  thresholdUnit: {
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 8,
+    height: 20,
   },
   specificSettingItem: {
     backgroundColor: '#f9f9f9',

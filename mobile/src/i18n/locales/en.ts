@@ -150,7 +150,7 @@ export default {
       pausedState: 'Paused',
     },
     charts: {
-      responseTime: 'Response Time Trend',
+      statusHistory: 'Status History',
     },
     historyRecords: {
       title: 'History',

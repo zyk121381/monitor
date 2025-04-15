@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import SafeAreaWrapper from '../../components/SafeAreaWrapper';
 
 // 引入API服务
 import { getNotificationConfig, saveNotificationSettings } from '../../api/notifications';
@@ -382,247 +383,252 @@ const AgentNotificationsScreen: React.FC = () => {
   
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0066cc" />
-        <Text style={styles.loadingText}>{t('common.loading', '加载中')}...</Text>
-      </View>
+      <SafeAreaWrapper>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0066cc" />
+          <Text style={styles.loadingText}>{t('common.loading', '加载中')}...</Text>
+        </View>
+      </SafeAreaWrapper>
     );
   }
   
   if (!settings) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="#f76363" />
-        <Text style={styles.errorText}>{error || t('notifications.loadFailed', '加载失败')}</Text>
-        <TouchableOpacity 
-          style={styles.retryButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.retryButtonText}>{t('common.goBack', '返回')}</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaWrapper>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={60} color="#f76363" />
+          <Text style={styles.errorText}>{error || t('notifications.loadFailed', '加载失败')}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.retryButtonText}>{t('common.goBack', '返回')}</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaWrapper>
     );
   }
   
   return (
-    <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollContainer}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: 16 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Specific client notification settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notifications.specificSettings.title', 'Specific Client Notification Settings')}</Text>
-          <Text style={styles.sectionDescription}>
-            {t('notifications.specificSettings.description', 'Configure separate notification settings for each specific client.')}
-          </Text>
-          
-          {agents.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="alert-circle-outline" size={40} color="#999" />
-              <Text style={styles.emptyStateText}>{t('notifications.specificSettings.noAgents', 'No agents available')}</Text>
-            </View>
-          ) : (
-            agents.map(agent => (
-              <View key={agent.id} style={styles.specificSettingItem}>
-                <View style={styles.specificSettingHeader}>
-                  <View style={styles.specificSettingTitleContainer}>
-                    <Text style={styles.specificSettingTitle}>{agent.name}</Text>
-                    <Text style={styles.specificSettingDescription}>
-                      {agent.hostname || t('common.unknown', 'Unknown')}
-                    </Text>
-                  </View>
-                  <View style={[
-                    styles.statusBadge, 
-                    { backgroundColor: agent.status === 'active' ? '#4caf50' : '#f44336' }
-                  ]}>
-                    <Text style={styles.statusText}>
-                      {agent.status === 'active' ? t('agents.status.active', 'Online') : t('agents.status.inactive', 'Offline')}
-                    </Text>
-                  </View>
-                </View>
-                
-                <View style={styles.specificSettings}>
-                  <View style={styles.settingItem}>
-                    <View style={styles.settingItemContent}>
-                      <Text style={styles.settingItemText}>{t('notifications.settings.enabled', 'Enable Notification')}</Text>
+    <SafeAreaWrapper>
+      <View style={styles.container}>
+        {/* 顶部导航栏 */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.headerBackButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#0066cc" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t('notifications.specificAgentSettings.title', '特定客户端通知设置')}</Text>
+          <TouchableOpacity 
+            style={styles.headerSaveButton}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Text style={styles.headerSaveButtonText}>
+              {saving ? t('common.saving', '保存中...') : t('common.save', '保存')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView 
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Specific client notification settings */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('notifications.specificSettings.title', 'Specific Client Notification Settings')}</Text>
+            <Text style={styles.sectionDescription}>
+              {t('notifications.specificSettings.description', 'Configure separate notification settings for each specific client.')}
+            </Text>
+            
+            {agents.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="alert-circle-outline" size={40} color="#999" />
+                <Text style={styles.emptyStateText}>{t('notifications.specificSettings.noAgents', 'No agents available')}</Text>
+              </View>
+            ) : (
+              agents.map(agent => (
+                <View key={agent.id} style={styles.specificSettingItem}>
+                  <View style={styles.specificSettingHeader}>
+                    <View style={styles.specificSettingTitleContainer}>
+                      <Text style={styles.specificSettingTitle}>{agent.name}</Text>
+                      <Text style={styles.specificSettingDescription}>
+                        {agent.hostname || t('common.unknown', 'Unknown')}
+                      </Text>
                     </View>
-                    <Switch
-                      value={Boolean(settings.specificAgents[agent.id]?.enabled)}
-                      onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'enabled', value)}
-                      trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                      thumbColor={settings.specificAgents[agent.id]?.enabled ? '#0066cc' : '#ccc'}
-                    />
+                    <View style={[
+                      styles.statusBadge, 
+                      { backgroundColor: agent.status === 'active' ? '#4caf50' : '#f44336' }
+                    ]}>
+                      <Text style={styles.statusText}>
+                        {agent.status === 'active' ? t('agents.status.active', 'Online') : t('agents.status.inactive', 'Offline')}
+                      </Text>
+                    </View>
                   </View>
                   
-                  {Boolean(settings.specificAgents[agent.id]?.enabled) && (
-                    <>
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onOffline', 'Notify when client is offline')}</Text>
-                        </View>
-                        <Switch
-                          value={Boolean(settings.specificAgents[agent.id]?.onOffline)}
-                          onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onOffline', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificAgents[agent.id]?.onOffline ? '#0066cc' : '#ccc'}
-                        />
+                  <View style={styles.specificSettings}>
+                    <View style={styles.settingItem}>
+                      <View style={styles.settingItemContent}>
+                        <Text style={styles.settingItemText}>{t('notifications.settings.enabled', 'Enable Notification')}</Text>
                       </View>
-                      
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onRecovery', 'Notify when client recovers online')}</Text>
-                        </View>
-                        <Switch
-                          value={Boolean(settings.specificAgents[agent.id]?.onRecovery)}
-                          onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onRecovery', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificAgents[agent.id]?.onRecovery ? '#0066cc' : '#ccc'}
-                        />
-                      </View>
-                      
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onCpuThreshold', 'CPU Usage Alert')}</Text>
-                        </View>
-                        <Switch
-                          value={Boolean(settings.specificAgents[agent.id]?.onCpuThreshold)}
-                          onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onCpuThreshold', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificAgents[agent.id]?.onCpuThreshold ? '#0066cc' : '#ccc'}
-                        />
-                      </View>
-                      
-                      {Boolean(settings.specificAgents[agent.id]?.onCpuThreshold) && (
-                        <View style={styles.thresholdContainer}>
-                          <Text style={styles.thresholdLabel}>{t('notifications.threshold.label', 'Threshold')}</Text>
-                          <TextInput
-                            style={styles.thresholdInput}
-                            value={String(settings.specificAgents[agent.id]?.cpuThreshold || '')}
-                            onChangeText={(text) => handleSpecificAgentSettingChange(agent.id, 'cpuThreshold', parseInt(text) || 0)}
-                            keyboardType="numeric"
-                            maxLength={3}
+                      <Switch
+                        value={Boolean(settings.specificAgents[agent.id]?.enabled)}
+                        onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'enabled', value)}
+                        trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                        thumbColor={settings.specificAgents[agent.id]?.enabled ? '#0066cc' : '#ccc'}
+                      />
+                    </View>
+                    
+                    {Boolean(settings.specificAgents[agent.id]?.enabled) && (
+                      <>
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onOffline', 'Notify when client is offline')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificAgents[agent.id]?.onOffline)}
+                            onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onOffline', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificAgents[agent.id]?.onOffline ? '#0066cc' : '#ccc'}
                           />
-                          <Text style={styles.thresholdUnit}>{t('notifications.threshold.percent', '%')}</Text>
                         </View>
-                      )}
-                      
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onMemoryThreshold', 'Memory Usage Alert')}</Text>
-                        </View>
-                        <Switch
-                          value={Boolean(settings.specificAgents[agent.id]?.onMemoryThreshold)}
-                          onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onMemoryThreshold', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificAgents[agent.id]?.onMemoryThreshold ? '#0066cc' : '#ccc'}
-                        />
-                      </View>
-                      
-                      {Boolean(settings.specificAgents[agent.id]?.onMemoryThreshold) && (
-                        <View style={styles.thresholdContainer}>
-                          <Text style={styles.thresholdLabel}>{t('notifications.threshold.label', 'Threshold')}</Text>
-                          <TextInput
-                            style={styles.thresholdInput}
-                            value={String(settings.specificAgents[agent.id]?.memoryThreshold || '')}
-                            onChangeText={(text) => handleSpecificAgentSettingChange(agent.id, 'memoryThreshold', parseInt(text) || 0)}
-                            keyboardType="numeric"
-                            maxLength={3}
-                          />
-                          <Text style={styles.thresholdUnit}>{t('notifications.threshold.percent', '%')}</Text>
-                        </View>
-                      )}
-                      
-                      <View style={styles.settingItem}>
-                        <View style={styles.settingItemContent}>
-                          <Text style={styles.settingItemText}>{t('notifications.events.onDiskThreshold', 'Disk Usage Alert')}</Text>
-                        </View>
-                        <Switch
-                          value={Boolean(settings.specificAgents[agent.id]?.onDiskThreshold)}
-                          onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onDiskThreshold', value)}
-                          trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                          thumbColor={settings.specificAgents[agent.id]?.onDiskThreshold ? '#0066cc' : '#ccc'}
-                        />
-                      </View>
-                      
-                      {Boolean(settings.specificAgents[agent.id]?.onDiskThreshold) && (
-                        <View style={styles.thresholdContainer}>
-                          <Text style={styles.thresholdLabel}>{t('notifications.threshold.label', 'Threshold')}</Text>
-                          <TextInput
-                            style={styles.thresholdInput}
-                            value={String(settings.specificAgents[agent.id]?.diskThreshold || '')}
-                            onChangeText={(text) => handleSpecificAgentSettingChange(agent.id, 'diskThreshold', parseInt(text) || 0)}
-                            keyboardType="numeric"
-                            maxLength={3}
-                          />
-                          <Text style={styles.thresholdUnit}>{t('notifications.threshold.percent', '%')}</Text>
-                        </View>
-                      )}
-                      
-                      {/* Notification channel settings */}
-                      <View style={styles.channelsContainer}>
-                        <Text style={styles.channelsTitle}>{t('notifications.specificSettings.channels', 'Notification Channels')}</Text>
                         
-                        {channels.length === 0 ? (
-                          <Text style={styles.noChannelsText}>{t('notifications.channels.noChannels', 'No notification channels available')}</Text>
-                        ) : (
-                          channels.map(channel => (
-                            <View key={channel.id} style={styles.channelItem}>
-                              <View style={styles.channelItemContent}>
-                                <Text style={styles.channelItemName}>{channel.name}</Text>
-                                <Text style={styles.channelItemType}>({t(`notifications.channels.type.${channel.type}`, channel.type)})</Text>
-                              </View>
-                              <Switch
-                                value={settings.specificAgents[agent.id]?.channels?.includes(channel.id)}
-                                onValueChange={(checked) => {
-                                  const currentChannels = settings.specificAgents[agent.id]?.channels || [];
-                                  const updatedChannels = checked 
-                                    ? [...currentChannels, channel.id]
-                                    : currentChannels.filter(id => id !== channel.id);
-                                  
-                                  handleSpecificAgentSettingChange(agent.id, 'channels', updatedChannels);
-                                }}
-                                trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
-                                thumbColor={settings.specificAgents[agent.id]?.channels?.includes(channel.id) ? '#0066cc' : '#ccc'}
-                              />
-                            </View>
-                          ))
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onRecovery', 'Notify when client recovers online')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificAgents[agent.id]?.onRecovery)}
+                            onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onRecovery', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificAgents[agent.id]?.onRecovery ? '#0066cc' : '#ccc'}
+                          />
+                        </View>
+                        
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onCpuThreshold', 'CPU Usage Alert')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificAgents[agent.id]?.onCpuThreshold)}
+                            onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onCpuThreshold', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificAgents[agent.id]?.onCpuThreshold ? '#0066cc' : '#ccc'}
+                          />
+                        </View>
+                        
+                        {Boolean(settings.specificAgents[agent.id]?.onCpuThreshold) && (
+                          <View style={styles.thresholdContainer}>
+                            <Text style={styles.thresholdLabel}>{t('notifications.threshold.label', 'Threshold')}</Text>
+                            <TextInput
+                              style={styles.thresholdInput}
+                              value={String(settings.specificAgents[agent.id]?.cpuThreshold || '')}
+                              onChangeText={(text) => handleSpecificAgentSettingChange(agent.id, 'cpuThreshold', parseInt(text) || 0)}
+                              keyboardType="numeric"
+                              maxLength={3}
+                            />
+                            <Text style={styles.thresholdUnit}>{t('notifications.threshold.percent', '%')}</Text>
+                          </View>
                         )}
-                      </View>
-                    </>
-                  )}
+                        
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onMemoryThreshold', 'Memory Usage Alert')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificAgents[agent.id]?.onMemoryThreshold)}
+                            onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onMemoryThreshold', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificAgents[agent.id]?.onMemoryThreshold ? '#0066cc' : '#ccc'}
+                          />
+                        </View>
+                        
+                        {Boolean(settings.specificAgents[agent.id]?.onMemoryThreshold) && (
+                          <View style={styles.thresholdContainer}>
+                            <Text style={styles.thresholdLabel}>{t('notifications.threshold.label', 'Threshold')}</Text>
+                            <TextInput
+                              style={styles.thresholdInput}
+                              value={String(settings.specificAgents[agent.id]?.memoryThreshold || '')}
+                              onChangeText={(text) => handleSpecificAgentSettingChange(agent.id, 'memoryThreshold', parseInt(text) || 0)}
+                              keyboardType="numeric"
+                              maxLength={3}
+                            />
+                            <Text style={styles.thresholdUnit}>{t('notifications.threshold.percent', '%')}</Text>
+                          </View>
+                        )}
+                        
+                        <View style={styles.settingItem}>
+                          <View style={styles.settingItemContent}>
+                            <Text style={styles.settingItemText}>{t('notifications.events.onDiskThreshold', 'Disk Usage Alert')}</Text>
+                          </View>
+                          <Switch
+                            value={Boolean(settings.specificAgents[agent.id]?.onDiskThreshold)}
+                            onValueChange={(value) => handleSpecificAgentSettingChange(agent.id, 'onDiskThreshold', value)}
+                            trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                            thumbColor={settings.specificAgents[agent.id]?.onDiskThreshold ? '#0066cc' : '#ccc'}
+                          />
+                        </View>
+                        
+                        {Boolean(settings.specificAgents[agent.id]?.onDiskThreshold) && (
+                          <View style={styles.thresholdContainer}>
+                            <Text style={styles.thresholdLabel}>{t('notifications.threshold.label', 'Threshold')}</Text>
+                            <TextInput
+                              style={styles.thresholdInput}
+                              value={String(settings.specificAgents[agent.id]?.diskThreshold || '')}
+                              onChangeText={(text) => handleSpecificAgentSettingChange(agent.id, 'diskThreshold', parseInt(text) || 0)}
+                              keyboardType="numeric"
+                              maxLength={3}
+                            />
+                            <Text style={styles.thresholdUnit}>{t('notifications.threshold.percent', '%')}</Text>
+                          </View>
+                        )}
+                        
+                        {/* Notification channel settings */}
+                        <View style={styles.channelsContainer}>
+                          <Text style={styles.channelsTitle}>{t('notifications.specificSettings.channels', 'Notification Channels')}</Text>
+                          
+                          {channels.length === 0 ? (
+                            <Text style={styles.noChannelsText}>{t('notifications.channels.noChannels', 'No notification channels available')}</Text>
+                          ) : (
+                            channels.map(channel => (
+                              <View key={channel.id} style={styles.channelItem}>
+                                <View style={styles.channelItemContent}>
+                                  <Text style={styles.channelItemName}>{channel.name}</Text>
+                                  <Text style={styles.channelItemType}>({t(`notifications.channels.type.${channel.type}`, channel.type)})</Text>
+                                </View>
+                                <Switch
+                                  value={settings.specificAgents[agent.id]?.channels?.includes(channel.id)}
+                                  onValueChange={(checked) => {
+                                    const currentChannels = settings.specificAgents[agent.id]?.channels || [];
+                                    const updatedChannels = checked 
+                                      ? [...currentChannels, channel.id]
+                                      : currentChannels.filter(id => id !== channel.id);
+                                    
+                                    handleSpecificAgentSettingChange(agent.id, 'channels', updatedChannels);
+                                  }}
+                                  trackColor={{ false: '#f0f0f0', true: '#bde0ff' }}
+                                  thumbColor={settings.specificAgents[agent.id]?.channels?.includes(channel.id) ? '#0066cc' : '#ccc'}
+                                />
+                              </View>
+                            ))
+                          )}
+                        </View>
+                      </>
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))
-          )}
-        </View>
-        
-        {/* Bottom safe area */}
-        <View style={styles.safeArea} />
-      </ScrollView>
-      
-      {/* Save button */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerBackButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#0066cc" />
-          <Text style={styles.backButtonText}>{t('common.goBack', 'Return')}</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerSaveButton}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Text style={styles.footerSaveButtonText}>
-            {saving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
-          </Text>
-        </TouchableOpacity>
+              ))
+            )}
+          </View>
+          
+          {/* 底部安全区域 */}
+          <View style={styles.safeArea} />
+        </ScrollView>
       </View>
-    </View>
+    </SafeAreaWrapper>
   );
 };
 
@@ -630,6 +636,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerBackButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#333',
+  },
+  headerSaveButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#0066cc',
+    borderRadius: 6,
+  },
+  headerSaveButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
   },
   loadingContainer: {
     flex: 1,
@@ -665,33 +700,6 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '500',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerBackButton: {
-    padding: 4,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  headerSaveButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#0066cc',
-    borderRadius: 6,
-  },
-  headerSaveButtonText: {
-    color: 'white',
-    fontSize: 14,
     fontWeight: '500',
   },
   scrollContainer: {
@@ -841,7 +849,7 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
   },
   safeArea: {
-    height: 40,
+    height: 20,
   },
   specificSettingItem: {
     backgroundColor: '#f9f9f9',
@@ -884,36 +892,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     marginBottom: 12,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  footerBackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 8,
-    color: '#0066cc',
-  },
-  footerSaveButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    backgroundColor: '#0066cc',
-    borderRadius: 6,
-  },
-  footerSaveButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
   },
   emptyState: {
     flex: 1,

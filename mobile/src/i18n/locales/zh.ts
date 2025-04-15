@@ -150,7 +150,7 @@ export default {
       pausedState: '已暂停',
     },
     charts: {
-      responseTime: '响应时间趋势',
+      statusHistory: '状态历史',
     },
     historyRecords: {
       title: '历史记录',

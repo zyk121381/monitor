@@ -13,7 +13,12 @@
  * 2. 确保后端服务器设置了正确的CORS配置
  * 3. 如果使用HTTPS，确保证书有效
  */
-export let API_BASE_URL = 'http://localhost:8787';
+import { Platform } from 'react-native';
+
+// 根据平台设置默认API_BASE_URL
+export let API_BASE_URL = Platform.OS === 'android' 
+  ? 'http://10.0.2.2:8787'  // Android模拟器访问本机服务
+  : 'http://localhost:8787'; // iOS模拟器和其他环境
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
