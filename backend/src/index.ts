@@ -3,7 +3,7 @@ import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
 import { Bindings } from './models/db';
 import { prettyJSON } from 'hono/pretty-json';
-import { checkAndInitializeDatabase } from './setup/initCheck';
+import { checkAndInitializeDatabase } from './initialization/initCheck';
 import { ExecutionContext } from 'hono';
 
 // 添加全局变量声明
@@ -12,14 +12,14 @@ declare global {
 }
 
 // 导入路由
-import authRoutes from './routes/auth';
-import monitorRoutes from './routes/monitors';
-import agentRoutes from './routes/agents';
-import userRoutes from './routes/users';
-import statusRoutes from './routes/status';
-import initDbRoutes from './setup/database';
-import { monitorTask, runScheduledTasks } from './tasks';
-import { notifications } from './routes/notifications';
+import authRoutes from './api/auth';
+import monitorRoutes from './api/monitors';
+import agentRoutes from './api/agents';
+import userRoutes from './api/users';
+import statusRoutes from './api/status';
+import initDbRoutes from './initialization/database';
+import { monitorTask, runScheduledTasks } from './jobs';
+import { notifications } from './api/notifications';
 
 // 创建Hono应用
 const app = new Hono<{ Bindings: Bindings }>();

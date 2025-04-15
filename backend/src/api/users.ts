@@ -11,8 +11,8 @@ import {
   createUser,
   updateUser,
   updateUserPassword,
-  deleteUser
-} from '../db/users';
+  deleteUser,
+} from '../repositories/users';
 
 // 用户类型定义
 interface User {

@@ -3,7 +3,7 @@ import { jwt } from 'hono/jwt';
 import bcrypt from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
 import { getJwtSecret } from '../utils/jwt';
-import { getUserByUsername, createUser, getUserById } from '../db/auth';
+import { getUserByUsername, createUser, getUserById } from '../repositories/auth';
 
 // 导入 D1 数据库类型
 type Bindings = {

@@ -3,7 +3,7 @@ import { jwt } from 'hono/jwt';
 import { Bindings } from '../models/db';
 import { Monitor, MonitorStatusHistory } from '../models/monitor';
 import { getJwtSecret } from '../utils/jwt';
-import * as monitorDb from '../db/monitor';
+import * as monitorDb from '../repositories/monitor';
 
 const monitors = new Hono<{ Bindings: Bindings }>();
 

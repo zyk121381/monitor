@@ -23,7 +23,7 @@ import {
   getAgentsByIds,
   getAdminUserId,
   createDefaultConfig
-} from '../db/status';
+} from '../repositories/status';
 import { getJwtSecret } from '../utils/jwt';
 // 状态页配置接口
 interface StatusPageConfig {

@@ -8,7 +8,7 @@ import {
   getNotificationChannelById, 
   getNotificationTemplateById,
   createNotificationHistory 
-} from '../db/notification';
+} from '../repositories/notification';
 
 // 通知渠道配置接口定义
 interface TelegramConfig {

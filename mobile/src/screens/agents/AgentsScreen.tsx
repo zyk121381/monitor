@@ -166,7 +166,16 @@ const AgentsScreen: React.FC = () => {
         {item.ip_addresses && (
           <View style={styles.infoItem}>
             <Ionicons name="wifi-outline" size={14} color="#666" />
-            <Text style={styles.infoText}>{item.ip_addresses}</Text>
+            <Text style={styles.infoText}>{(() => {
+              try {
+                const ipArray = JSON.parse(String(item.ip_addresses));
+                return Array.isArray(ipArray) && ipArray.length > 0 
+                  ? ipArray.join(', ') // 显示所有 IP
+                  : String(item.ip_addresses);
+              } catch (e) {
+                return String(item.ip_addresses);
+              }
+            })()}</Text>
           </View>
         )}
         

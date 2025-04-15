@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { Bindings } from '../models/db';
 import { Monitor } from '../models/monitor';
-import * as monitorDb from '../db/monitor';
+import * as monitorDb from '../repositories/monitor';
 import { shouldSendNotification, sendNotification } from '../utils/notification';
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();

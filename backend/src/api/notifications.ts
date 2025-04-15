@@ -17,7 +17,7 @@ import {
   getNotificationConfig,
   createOrUpdateSettings,
   getNotificationHistory
-} from '../db/notification';
+} from '../repositories/notification';
 import { Context, Next } from 'hono';
 
 const notifications = new Hono<{ Bindings: Bindings }>();

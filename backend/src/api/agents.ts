@@ -15,7 +15,7 @@ import {
   updateAgentToken, 
   getAgentByToken,
   getAdminUserId
-} from '../db/agent';
+} from '../repositories/agent';
 
 const agents = new Hono<{ Bindings: Bindings; Variables: { agent: Agent; jwtPayload: any } }>();
 
@@ -317,7 +317,7 @@ agents.post('/status', async (c) => {
     });
     
     // 动态导入阈值通知函数以避免循环依赖
-    const { handleAgentThresholdNotification } = await import('../tasks/agent-task');
+    const { handleAgentThresholdNotification } = await import('../jobs/agent-task');
     
     // 检查CPU使用率是否需要通知
     if (typeof cpu_usage === 'number') {

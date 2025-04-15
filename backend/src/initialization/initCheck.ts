@@ -12,7 +12,7 @@ import {
   createNotificationTemplates,
   createNotificationChannelsAndSettings
 } from './database';
-import { migrateFrom003To004 } from './migrate-0.0.3-to-0.0.4';
+import { migrateFrom003To004 } from '../migrations/migrate-0.0.3-to-0.0.4';
 
 // 检查表是否存在
 async function tableExists(env: Bindings, tableName: string): Promise<boolean> {
