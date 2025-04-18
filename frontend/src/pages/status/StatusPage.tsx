@@ -205,14 +205,6 @@ const StatusPage = () => {
                           <Heading as="h3" size="3" mb="1">{agent.name}</Heading>
                           <Text as="div" size="2" color="gray">
                             {agent.hostname}
-                            {agent.ip_addresses && (() => {
-                              try {
-                                const ipArray = JSON.parse(String(agent.ip_addresses));
-                                return ipArray.length > 0 ? ` (${ipArray[0]})` : '';
-                              } catch (e) {
-                                return ` (${String(agent.ip_addresses)})`;
-                              }
-                            })()}
                           </Text>
                         </Box>
                         <Badge 
@@ -262,18 +254,6 @@ const StatusPage = () => {
                               
                               <Text size="2" style={{ color: 'var(--gray-9)' }}>{t('agent.hostname')}:</Text>
                               <Text size="2">{agent.hostname || t('common.unknown')}</Text>
-                              
-                              <Text size="2" style={{ color: 'var(--gray-9)' }}>{t('agent.ipAddress')}:</Text>
-                              <Text size="2">{agent.ip_addresses ? (() => {
-                                try {
-                                  const ipArray = JSON.parse(String(agent.ip_addresses));
-                                  return Array.isArray(ipArray) && ipArray.length > 0 
-                                    ? ipArray.join(', ') 
-                                    : String(agent.ip_addresses);
-                                } catch (e) {
-                                  return String(agent.ip_addresses);
-                                }
-                              })() : t('common.unknown')}</Text>
                             </Grid>
                           </Box>
                         )}
