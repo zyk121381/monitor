@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../providers/AuthProvider';
 import { useTranslation } from 'react-i18next';
 
 const Login = () => {

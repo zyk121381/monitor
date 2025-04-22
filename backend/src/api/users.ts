@@ -120,4 +120,4 @@ users.post('/:id/change-password', async (c) => {
   }
 });
 
-export default users; 
+export { users }; 

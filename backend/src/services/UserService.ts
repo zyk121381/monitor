@@ -5,16 +5,7 @@
 
 import { compare, hash } from 'bcryptjs';
 import { Bindings } from '../models/db';
-import { 
-  getAllUsers, 
-  getUserById, 
-  getFullUserById, 
-  checkUserExists, 
-  createUser,
-  updateUser,
-  updateUserPassword,
-  deleteUser,
-} from '../repositories/users';
+import * as repositories from '../repositories';
 
 /**
  * 获取所有用户
@@ -30,7 +21,7 @@ export async function getAllUsersService(env: { DB: Bindings['DB'] }, userRole: 
     }
     
     // 查询所有用户，不包括密码
-    const result = await getAllUsers(env.DB);
+    const result = await repositories.getAllUsers(env.DB);
     
     return { success: true, users: result.results, status: 200 };
   } catch (error) {
@@ -60,7 +51,7 @@ export async function getUserByIdService(
     }
     
     // 查询用户，不包括密码
-    const user = await getUserById(env.DB, id);
+    const user = await repositories.getUserById(env.DB, id);
     
     if (!user) {
       return { success: false, message: '用户不存在', status: 404 };
@@ -102,7 +93,7 @@ export async function createUserService(
     }
     
     // 检查用户名是否已存在
-    const existingUser = await checkUserExists(env.DB, userData.username);
+    const existingUser = await repositories.checkUserExists(env.DB, userData.username);
     
     if (existingUser) {
       return { success: false, message: '用户名已存在', status: 400 };
@@ -118,7 +109,7 @@ export async function createUserService(
     const hashedPassword = await hash(userData.password, 10);
     
     // 插入新用户
-    const newUser = await createUser(
+    const newUser = await repositories.createUser(
       env.DB, 
       userData.username, 
       hashedPassword, 
@@ -161,7 +152,7 @@ export async function updateUserService(
     }
     
     // 检查用户是否存在
-    const user = await getFullUserById(env.DB, id);
+    const user = await repositories.getFullUserById(env.DB, id);
     
     if (!user) {
       return { success: false, message: '用户不存在', status: 404 };
@@ -177,7 +168,7 @@ export async function updateUserService(
     
     if (updateData.username !== undefined && updateData.username !== user.username) {
       // 检查新用户名是否已存在
-      const existingUser = await checkUserExists(env.DB, updateData.username, id);
+      const existingUser = await repositories.checkUserExists(env.DB, updateData.username, id);
       
       if (existingUser) {
         return { success: false, message: '用户名已存在', status: 400 };
@@ -201,7 +192,7 @@ export async function updateUserService(
     
     // 执行更新
     try {
-      const updatedUser = await updateUser(env.DB, id, updates);
+      const updatedUser = await repositories.updateUser(env.DB, id, updates);
       return { success: true, user: updatedUser, status: 200 };
     } catch (err) {
       if (err instanceof Error && err.message === '没有提供要更新的字段') {
@@ -241,14 +232,14 @@ export async function deleteUserService(
     }
     
     // 检查用户是否存在
-    const user = await getUserById(env.DB, id);
+    const user = await repositories.getUserById(env.DB, id);
     
     if (!user) {
       return { success: false, message: '用户不存在', status: 404 };
     }
     
     // 执行删除
-    await deleteUser(env.DB, id);
+    await repositories.deleteUser(env.DB, id);
     
     return { success: true, message: '用户已删除', status: 200 };
   } catch (error) {
@@ -292,7 +283,7 @@ export async function changePasswordService(
     }
     
     // 获取用户
-    const user = await getFullUserById(env.DB, id);
+    const user = await repositories.getFullUserById(env.DB, id);
     
     if (!user) {
       return { success: false, message: '用户不存在', status: 404 };
@@ -310,7 +301,7 @@ export async function changePasswordService(
     const hashedPassword = await hash(passwordData.newPassword, 10);
     
     // 更新密码
-    await updateUserPassword(env.DB, id, hashedPassword);
+    await repositories.updateUserPassword(env.DB, id, hashedPassword);
     
     return { success: true, message: '密码已更新', status: 200 };
   } catch (error) {

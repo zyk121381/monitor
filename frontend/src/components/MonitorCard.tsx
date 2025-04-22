@@ -1,12 +1,16 @@
 import { Box, Card, Flex, Text, Badge } from '@radix-ui/themes';
 import { CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
-import { Monitor } from '../api/monitors';
+import { Monitor } from '../types/monitors';
 import HeartbeatGrid from './HeartbeatGrid';
 import '../styles/components.css';
 import { useTranslation } from 'react-i18next';
 
 interface MonitorCardProps {
-  monitor: Monitor;
+  monitor: Monitor & { 
+    response_time?: number; 
+    uptime?: number; 
+    history?: any[] 
+  };
 }
 
 /**
@@ -67,7 +71,7 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
           
         <Box pt="2" style={{ width: '100%' }}>
           <HeartbeatGrid 
-            uptime={monitor.uptime} 
+            uptime={monitor.uptime || monitor.uptime_percentage || 0} 
             history={monitor.history} 
           />
         </Box>
@@ -76,4 +80,4 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
   );
 };
 
-export default MonitorCard;
+export default MonitorCard; 

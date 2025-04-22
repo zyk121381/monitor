@@ -4,8 +4,10 @@ import { BellIcon, PlusIcon, CheckCircledIcon, CrossCircledIcon, InfoCircledIcon
 import * as Toast from '@radix-ui/react-toast';
 import '../../styles/components.css';
 import { useTranslation } from 'react-i18next';
-import { getAllMonitors, Monitor } from '../../api/monitors';
-import { getAllAgents, Agent } from '../../api/agents';
+import { getAllMonitors } from '../../services/api/monitors';
+import { Monitor } from '../../types/monitors';
+import { getAllAgents } from '../../services/api/agents';
+import { Agent } from '../../types/agents';
 import { 
   NotificationChannel as ApiNotificationChannel, 
   NotificationTemplate as ApiNotificationTemplate, 
@@ -15,7 +17,7 @@ import {
   createNotificationChannel,
   updateNotificationChannel,
   deleteNotificationChannel,
-} from '../../api/notifications';
+} from '../../services/api/notifications';
 import ChannelSelector from '../../components/ChannelSelector';
 
 const NotificationsConfig = () => {
@@ -164,8 +166,7 @@ const NotificationsConfig = () => {
       enabled: false,
       onDown: false,
       onRecovery: false,
-      channels: [],
-      overrideGlobal: false
+      channels: []
     };
     
     // 当自定义设置开关打开时，自动设置启用状态为true
@@ -174,10 +175,6 @@ const NotificationsConfig = () => {
       [key]: value
     };
     
-    // 如果是打开overrideGlobal开关，则自动设置enabled为true
-    if (key === 'overrideGlobal' && value === true) {
-      updatedSettings.enabled = true;
-    }
     
     setSettings({
       ...settings,
@@ -202,8 +199,7 @@ const NotificationsConfig = () => {
       memoryThreshold: 85,
       onDiskThreshold: false,
       diskThreshold: 90,
-      channels: [],
-      overrideGlobal: false
+      channels: []
     };
     
     // 当自定义设置开关打开时，自动设置启用状态为true
@@ -211,11 +207,6 @@ const NotificationsConfig = () => {
       ...currentSettings,
       [key]: value
     };
-    
-    // 如果是打开overrideGlobal开关，则自动设置enabled为true
-    if (key === 'overrideGlobal' && value === true) {
-      updatedSettings.enabled = true;
-    }
     
     setSettings({
       ...settings,
@@ -879,7 +870,7 @@ const NotificationsConfig = () => {
                         <ChannelSelector 
                           channels={channels}
                           selectedChannelIds={settings.monitors.channels}
-                          onChange={(channelIds) => handleMonitorSettingChange('channels', channelIds)}
+                          onChange={(channelIds: string[]) => handleMonitorSettingChange('channels', channelIds)}
                         />
                       </Box>
                     </Flex>
@@ -1043,8 +1034,7 @@ const NotificationsConfig = () => {
             enabled: false,
             onDown: false,
             onRecovery: false,
-            channels: [],
-            overrideGlobal: false
+            channels: []
           };
           
           return (
@@ -1055,16 +1045,13 @@ const NotificationsConfig = () => {
                     <Text weight="medium" style={{ marginRight: '4px' }}>{monitor.name}</Text>
                     <Text size="1" color="gray">{monitor.url}</Text>
                   </Box>
-                  <Flex align="center" gap="2">
-                    <Text size="2">{t('notifications.specificSettings.override')}</Text>
-                    <Switch 
-                      checked={specificSettings.overrideGlobal} 
-                      onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'overrideGlobal', checked)}
-                    />
-                  </Flex>
+                  <Switch 
+                    checked={specificSettings.enabled} 
+                    onCheckedChange={(checked) => handleSpecificMonitorSettingChange(monitorId, 'enabled', checked)}
+                  />
                 </Flex>
                 
-                {specificSettings.overrideGlobal && (
+                {specificSettings.enabled && (
                   <Box pl="4">
                     <Flex direction="column" gap="3">
                       <Flex align="center" gap="2">
@@ -1084,8 +1071,6 @@ const NotificationsConfig = () => {
                         />
                         <Text size="2">{t('notifications.events.onRecovery')}</Text>
                       </Flex>
-                      
-                      
                       
                       <Box>
                         <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>
@@ -1131,8 +1116,7 @@ const NotificationsConfig = () => {
             memoryThreshold: 85,
             onDiskThreshold: false,
             diskThreshold: 90,
-            channels: [],
-            overrideGlobal: false
+            channels: []
           };
           
           return (
@@ -1152,16 +1136,13 @@ const NotificationsConfig = () => {
                       }
                     })()}</Text>
                   </Box>
-                  <Flex align="center" gap="2">
-                    <Text size="2">{t('notifications.specificSettings.override')}</Text>
-                    <Switch 
-                      checked={specificSettings.overrideGlobal} 
-                      onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'overrideGlobal', checked)}
-                    />
-                  </Flex>
+                  <Switch 
+                    checked={specificSettings.enabled} 
+                    onCheckedChange={(checked) => handleSpecificAgentSettingChange(agentId, 'enabled', checked)}
+                  />
                 </Flex>
                 
-                {specificSettings.overrideGlobal && (
+                {specificSettings.enabled && (
                   <Box pl="4">
                     <Flex direction="column" gap="3">
                       <Flex align="center" gap="2">
@@ -1256,8 +1237,6 @@ const NotificationsConfig = () => {
                           <Text size="2">{t('notifications.threshold.percent')}</Text>
                         </Flex>
                       )}
-                      
-                      
                       
                       <Box>
                         <Text size="2" weight="medium" mb="2">{t('notifications.specificSettings.channels')}</Text>

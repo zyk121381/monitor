@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, TextField, Select, TextArea, Table, IconButton } from '@radix-ui/themes';
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import { createMonitor } from '../../api/monitors';
+import { createMonitor } from '../../services/api/monitors';
 import StatusCodeSelect from '../../components/StatusCodeSelect';
 import { useTranslation } from 'react-i18next';
 
@@ -57,13 +57,15 @@ const CreateMonitor = () => {
     }
   };
   
-  // 将键值对转换为JSON对象
-  const headersToJson = () => {
+  // 将键值对转换为对象
+  const headersToObject = () => {
     const result: Record<string, string> = {};
     
     headers.forEach(({ key, value }) => {
-      if (key.trim()) {
-        result[key.trim()] = value;
+      const trimmedKey = key.trim();
+      // 只处理有效的键值对
+      if (trimmedKey && !trimmedKey.includes('\\')) {
+        result[trimmedKey] = value;
       }
     });
     
@@ -80,6 +82,9 @@ const CreateMonitor = () => {
     setLoading(true);
 
     try {
+      // 获取处理后的请求头数据（直接用对象）
+      const headersData = headersToObject();
+      
       // 调用实际API，将分钟转换为秒
       const response = await createMonitor({
         name: formData.name,
@@ -87,8 +92,8 @@ const CreateMonitor = () => {
         method: formData.method,
         interval: formData.interval * 60, // 转换为秒
         timeout: formData.timeout,
-        expectedStatus: formData.expectedStatus,
-        headers: headersToJson(),
+        expected_status: formData.expectedStatus,
+        headers: headersData, // 直接使用对象
         body: formData.body
       });
 

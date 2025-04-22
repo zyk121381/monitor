@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Grid, Badge, Tabs, Table } from '@radix-ui/themes';
 import { CheckCircledIcon, CrossCircledIcon, ArrowLeftIcon, Pencil1Icon, TrashIcon, ReloadIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
-import { getMonitor, deleteMonitor, checkMonitor, Monitor, MonitorStatusHistory } from '../../api/monitors';
+import { getMonitor, deleteMonitor, checkMonitor } from '../../services/api/monitors';
+import { Monitor, MonitorStatusHistory } from '../../types/monitors';
 import { useTranslation } from 'react-i18next';
 
 // 将范围状态码转换为可读形式（2 -> 2xx, 3 -> 3xx 等）
-const formatStatusCode = (code: number): string => {
-  // 对于2、3、4、5这些值，显示为2xx、3xx等
-  if (code >= 2 && code <= 5) {
+const formatStatusCode = (code: number | undefined): string => {
+  if (code === undefined) return '200';
+  
+  // 对于1-5这些值，显示为1xx、2xx、3xx等
+  if (code >= 1 && code <= 5) {
     return `${code}xx`;
   }
   // 其他正常显示数字
@@ -55,8 +58,9 @@ const StatusBar = ({ status, history = [] }: { status: string, uptime: number, h
     displayHistory = [{
       id: 0,
       monitor_id: 0,
-      status: status,
-      timestamp: new Date().toISOString()
+      status: status as 'up' | 'down',
+      response_time: 0,
+      created_at: new Date().toISOString()
     }];
   }
   
@@ -82,7 +86,7 @@ const StatusBar = ({ status, history = [] }: { status: string, uptime: number, h
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = getColor(item.status);
           }}
-          title={`${t('common.status')}: ${item.status === 'up' ? t('monitor.status.normal') : item.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}\n${t('monitor.history.time')}: ${new Date(item.timestamp).toLocaleString()}`}
+          title={`${t('common.status')}: ${item.status === 'up' ? t('monitor.status.normal') : item.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}\n${t('monitor.history.time')}: ${new Date(item.created_at).toLocaleString()}`}
         />
       ))}
     </Flex>
@@ -283,10 +287,10 @@ const MonitorDetail = () => {
                       </Flex>
                       <Text>{t('monitor.uptime')}:</Text>
                       <Box style={{ gridColumn: "2" }}>
-                        <StatusBar status={monitor.status} uptime={monitor.uptime} history={monitor.history} />
+                        <StatusBar status={monitor.status} uptime={monitor.uptime_percentage || monitor.uptime || 0} history={monitor.history || []} />
                       </Box>
                       <Text>{t('monitor.responseTime')}:</Text>
-                      <Text>{monitor.response_time}ms</Text>
+                      <Text>{monitor.response_time ? `${monitor.response_time}ms` : '-'}</Text>
                       <Text>{t('monitor.lastCheck')}:</Text>
                       <Text>{monitor.last_checked || t('monitor.notChecked')}</Text>
                     </Grid>
@@ -332,7 +336,7 @@ const MonitorDetail = () => {
                     <Table.Body>
                       {monitor.checks.map((check) => (
                         <Table.Row key={check.id}>
-                          <Table.Cell>{new Date(check.checked_at).toLocaleString()}</Table.Cell>
+                          <Table.Cell>{new Date(check.checked_at || check.created_at).toLocaleString()}</Table.Cell>
                           <Table.Cell>
                             <Flex align="center" gap="1">
                               <StatusIcon status={check.status} />
@@ -341,8 +345,8 @@ const MonitorDetail = () => {
                               </Badge>
                             </Flex>
                           </Table.Cell>
-                          <Table.Cell>{check.response_time}ms</Table.Cell>
-                          <Table.Cell>{check.status_code}</Table.Cell>
+                          <Table.Cell>{check.response_time ? `${check.response_time}ms` : '-'}</Table.Cell>
+                          <Table.Cell>{check.status_code || '-'}</Table.Cell>
                           <Table.Cell>{check.error || '-'}</Table.Cell>
                         </Table.Row>
                       ))}
@@ -377,7 +381,7 @@ const MonitorDetail = () => {
                   <Text>{t('monitor.body')}:</Text>
                   <Text style={{ overflowWrap: 'break-word' }}>{monitor.body || '-'}</Text>
                   <Text>{t('common.status')}:</Text>
-                  <Text>{monitor.active ? t('monitor.active') : t('monitor.inactive')}</Text>
+                  <Text>{(monitor.active === 1 || monitor.status === 'up' || monitor.status === 'down') ? t('monitor.active') : t('monitor.inactive')}</Text>
                 </Grid>
               </Card>
             </Tabs.Content>

@@ -1,12 +1,6 @@
 import { Bindings } from '../models/db';
 import { Agent } from '../models/agent';
 
-// 定义操作结果的元数据类型
-interface DbResultMeta {
-  changes?: number;
-  [key: string]: any;
-}
-
 /**
  * 客户端相关的数据库操作
  */

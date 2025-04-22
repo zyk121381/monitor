@@ -229,4 +229,4 @@ agents.post('/status', async (c) => {
   }
 });
 
-export default agents; 
+export { agents }; 

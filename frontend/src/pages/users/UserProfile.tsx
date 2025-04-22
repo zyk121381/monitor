@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button, Card, Flex, Heading, Text, TextField, Box } from '@radix-ui/themes';
-import { useAuth } from '../../contexts/AuthContext';
-import { updateUser, changePassword, UpdateUserRequest, ChangePasswordRequest } from '../../api/users';
+import { useAuth } from '../../providers/AuthProvider';
+import { updateUser, changePassword } from '../../services/api/users';
+import { UpdateUserRequest, ChangePasswordRequest } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 
 const UserProfile = () => {

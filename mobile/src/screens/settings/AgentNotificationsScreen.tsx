@@ -38,8 +38,7 @@ interface AgentNotificationSettings {
   memoryThreshold: number;
   onDiskThreshold: boolean;
   diskThreshold: number;
-  channels: string[];
-  overrideGlobal?: boolean;
+  channels: string[]
 }
 
 interface NotificationSettings {
@@ -117,8 +116,7 @@ const mockSettings: NotificationSettings = {
       memoryThreshold: 85,
       onDiskThreshold: false,
       diskThreshold: 90,
-      channels: ['1'],
-      overrideGlobal: true
+      channels: ['1']
     }
   }
 };
@@ -356,21 +354,14 @@ const AgentNotificationsScreen: React.FC = () => {
       memoryThreshold: 85,
       onDiskThreshold: false,
       diskThreshold: 90,
-      channels: [],
-      overrideGlobal: true
+      channels: []
     };
     
     // Update settings
     let updatedSettings = {
       ...currentSettings,
-      [key]: value,
-      overrideGlobal: true
+      [key]: value
     };
-    
-    // If notification is enabled, also set overrideGlobal to true
-    if (key === 'enabled' && value === true) {
-      updatedSettings.overrideGlobal = true;
-    }
     
     setSettings({
       ...settings,

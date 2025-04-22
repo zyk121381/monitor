@@ -17,7 +17,7 @@ interface StatusPageConfig {
 }
 
 // 创建API路由
-const app = new Hono<{ Bindings: Bindings }>();
+const status = new Hono<{ Bindings: Bindings }>();
 
 
 // 创建管理员路由组
@@ -61,7 +61,7 @@ adminRoutes.post('/config', async (c) => {
 
 // 公共路由
 // 获取状态页数据（公开访问）
-app.get('/data', async (c) => {
+status.get('/data', async (c) => {
   try {
     const result = await getStatusPagePublicData(c.env);
     return c.json(result);
@@ -72,6 +72,6 @@ app.get('/data', async (c) => {
 });
 
 // 使用路由组
-app.route('/', adminRoutes);
+status.route('/', adminRoutes);
 
-export default app; 
+export { status }; 

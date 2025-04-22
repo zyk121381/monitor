@@ -1,27 +1,7 @@
 import api from './index';
+import { Agent, AgentResponse, AgentsResponse } from '../../types/agents';
 
-export interface Agent {
-  id: number;
-  name: string;
-  status?: string;
-  created_at: string;
-  updated_at: string;
-  cpu_usage: number;
-  memory_total: number;
-  memory_used: number;
-  disk_total: number;
-  disk_used: number;
-  network_rx: number;
-  network_tx: number;
-  hostname?: string;
-  ip_addresses?: string;
-  os?: string;
-  version?: string;
-  token?: string;
-  created_by?: number;
-}
-
-export const generateToken = async () => {
+export const generateToken = async (): Promise<{ success: boolean; token?: string; message?: string }> => {
   try {
     const response = await api.post('/api/agents/token/generate');
     return response.data;
@@ -34,7 +14,7 @@ export const generateToken = async () => {
   }
 };
 
-export const getAllAgents = async () => {
+export const getAllAgents = async (): Promise<AgentsResponse> => {
   try {
     const response = await api.get('/api/agents');
     return response.data;
@@ -55,7 +35,7 @@ export const updateAgentStatus = async (id: number, metrics: {
   disk_used: number;
   network_rx: number;
   network_tx: number;
-}) => {
+}): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await api.post(`/api/agents/${id}/status`, metrics);
     return response.data;
@@ -68,7 +48,7 @@ export const updateAgentStatus = async (id: number, metrics: {
   }
 };
 
-export const getAgent = async (id: number) => {
+export const getAgent = async (id: number): Promise<AgentResponse> => {
   try {
     const response = await api.get(`/api/agents/${id}`);
     return response.data;
@@ -81,7 +61,7 @@ export const getAgent = async (id: number) => {
   }
 };
 
-export const deleteAgent = async (id: number) => {
+export const deleteAgent = async (id: number): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await api.delete(`/api/agents/${id}`);
     return response.data;
@@ -94,14 +74,7 @@ export const deleteAgent = async (id: number) => {
   }
 };
 
-export const updateAgent = async (id: number, data: {
-  name?: string;
-  hostname?: string;
-  ip_addresses?: string;
-  os?: string;
-  version?: string;
-  status?: string;
-}) => {
+export const updateAgent = async (id: number, data: Partial<Agent>): Promise<AgentResponse> => {
   try {
     const response = await api.put(`/api/agents/${id}`, data);
     return response.data;

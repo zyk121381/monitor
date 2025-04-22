@@ -50,4 +50,4 @@ const StatusSummaryCard = ({ title, items }: StatusSummaryCardProps) => {
   );
 };
 
-export default StatusSummaryCard;
+export default StatusSummaryCard; 

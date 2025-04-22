@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Table, Text, Flex, Heading, AlertDialog, Box } from '@radix-ui/themes';
-import { getAllUsers, deleteUser } from '../../api/users';
-import { User } from '../../api/auth';
+import { getAllUsers, deleteUser } from '../../services/api/users';
+import { User } from '../../types/auth';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 

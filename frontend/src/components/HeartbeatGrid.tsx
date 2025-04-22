@@ -1,5 +1,5 @@
 import { Box, Flex, Text } from '@radix-ui/themes';
-import { MonitorStatusHistory } from '../api/monitors';
+import { MonitorStatusHistory } from '../types/monitors';
 import { useTranslation } from 'react-i18next';
 
 // 心跳网格组件 - 类似uptime-kuma的点阵网格

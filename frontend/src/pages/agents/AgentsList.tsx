@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Table, Badge, IconButton, Dialog, Grid, Tabs } from '@radix-ui/themes';
-import { PlusIcon, Cross2Icon, Pencil1Icon, InfoCircledIcon, ReloadIcon, LayoutIcon, ViewGridIcon } from '@radix-ui/react-icons';
-import { getAllAgents, deleteAgent, Agent } from '../../api/agents';
+import { PlusIcon, Pencil1Icon, InfoCircledIcon, ReloadIcon, LayoutIcon, ViewGridIcon, TrashIcon } from '@radix-ui/react-icons';
+import { getAllAgents, deleteAgent } from "../../services/api/agents";
+import { ClientWithStatus, Agent } from "../../types/agents";
 import AgentCard from '../../components/AgentCard';
 import { useTranslation } from 'react-i18next';
 
@@ -13,10 +14,6 @@ const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
   connecting: "yellow",
   unknown: "gray"
 };
-
-interface ClientWithStatus extends Agent {
-  status?: 'active' | 'inactive' | 'connecting';
-}
 
 const AgentsList = () => {
   const navigate = useNavigate();
@@ -138,7 +135,7 @@ const AgentsList = () => {
                 <Pencil1Icon />
               </IconButton>
               <IconButton variant="ghost" size="1" color="red" onClick={() => handleDeleteClick(agent.id)} title={t('agent.delete')}>
-                <Cross2Icon />
+                <TrashIcon />
               </IconButton>
             </Flex>
           </Box>
@@ -210,7 +207,7 @@ const AgentsList = () => {
                     <Pencil1Icon />
                   </IconButton>
                   <IconButton variant="soft" color="red" onClick={() => handleDeleteClick(agent.id)}>
-                    <Cross2Icon />
+                    <TrashIcon />
                   </IconButton>
                 </Flex>
               </Table.Cell>

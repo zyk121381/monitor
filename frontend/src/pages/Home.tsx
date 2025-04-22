@@ -1,7 +1,7 @@
 import { Box, Flex, Heading, Text, Button, Card, Grid } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
 import { ActivityLogIcon, LightningBoltIcon, MixerHorizontalIcon, DesktopIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../providers/AuthProvider';
 import { useTranslation } from 'react-i18next';
 
 const Home = () => {

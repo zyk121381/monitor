@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import i18n from '../i18n/config';
-
-type LanguageContextType = {
-  currentLanguage: string;
-  changeLanguage: (lang: string) => void;
-  availableLanguages: { code: string; name: string }[];
-};
+import i18n from '../locales/config';
+import { LanguageContextType } from '../types/language';
 
 const availableLanguages = [
   { code: 'zh-CN', name: '中文' },

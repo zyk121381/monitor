@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Badge, Tabs, Grid, Avatar } from '@radix-ui/themes';
 import { ArrowLeftIcon, Pencil1Icon, Cross2Icon, ReloadIcon, ClockIcon, InfoCircledIcon, LapTimerIcon, DesktopIcon, GlobeIcon, Link2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
-import { getAgent, Agent, deleteAgent } from '../../api/agents';
+import { getAgent, deleteAgent } from '../../services/api/agents';
+import {  AgentWithResources } from '../../types/agents';
 import ClientResourceSection from '../../components/ClientResourceSection';
 import { useTranslation } from 'react-i18next';
 
@@ -14,16 +15,6 @@ const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
   connecting: "yellow",
   unknown: "gray"
 };
-
-// 客户端详情包含系统资源信息的扩展接口
-interface AgentWithResources extends Agent {
-  uptime: number;
-  cpuUsage?: number;
-  memoryUsage?: number;
-  diskUsage?: number;
-  networkRx?: number;
-  networkTx?: number;
-}
 
 const AgentDetail = () => {
   const navigate = useNavigate();

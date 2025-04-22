@@ -1,7 +1,7 @@
 import React from 'react';
 import { DropdownMenu, Button, Text, Flex } from '@radix-ui/themes';
 import { GlobeIcon, CheckIcon } from '@radix-ui/react-icons';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../providers/LanguageProvider';
 import { useTranslation } from 'react-i18next';
 
 const LanguageSelector: React.FC = () => {

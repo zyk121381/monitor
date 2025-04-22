@@ -6,13 +6,12 @@ import { Bindings } from '../models/db';
 import { 
   createTables, 
   createAdminUser, 
-  addSampleMonitors, 
-  addSampleAgents, 
   createDefaultStatusPage,
   createNotificationTemplates,
   createNotificationChannelsAndSettings
 } from './database';
 import { migrateFrom003To004 } from '../migrations/migrate-0.0.3-to-0.0.4';
+import { migrateFrom004To005 } from '../migrations/migrate-0.0.4-to-0.0.5';
 
 // 检查表是否存在
 async function tableExists(env: Bindings, tableName: string): Promise<boolean> {
@@ -97,34 +96,6 @@ export async function checkAndInitializeDatabase(env: Bindings): Promise<{ initi
       console.log('用户表不存在，跳过检查用户数据...');
     }
     
-    // 检查监控表是否存在并且为空，如果为空则添加示例监控
-    if (await tableExists(env, 'monitors')) {
-      const monitorCount = await env.DB.prepare('SELECT COUNT(*) as count FROM monitors').first<{ count: number }>();
-      if (!monitorCount || monitorCount.count === 0) {
-        console.log('监控表为空，添加示例监控...');
-        await addSampleMonitors(env);
-        initialized = true;
-      } else {
-        console.log('监控表已有数据，跳过添加示例监控...');
-      }
-    } else {
-      console.log('监控表不存在，跳过检查监控数据...');
-    }
-    
-    // 检查客户端表是否存在并且为空，如果为空则添加示例客户端
-    if (await tableExists(env, 'agents')) {
-      const agentCount = await env.DB.prepare('SELECT COUNT(*) as count FROM agents').first<{ count: number }>();
-      if (!agentCount || agentCount.count === 0) {
-        console.log('客户端表为空，添加示例客户端...');
-        await addSampleAgents(env);
-        initialized = true;
-      } else {
-        console.log('客户端表已有数据，跳过添加示例客户端...');
-      }
-    } else {
-      console.log('客户端表不存在，跳过检查客户端数据...');
-    }
-    
     // 检查状态页配置表是否存在并且为空，如果为空则创建默认状态页
     if (await tableExists(env, 'status_page_config')) {
       const statusPageCount = await env.DB.prepare('SELECT COUNT(*) as count FROM status_page_config').first<{ count: number }>();
@@ -187,11 +158,14 @@ async function runMigrations(env: Bindings): Promise<void> {
     console.log('开始执行数据库迁移...');
     
     // 从v0.0.3迁移到v0.0.4
-    const migrationResult = await migrateFrom003To004(env);
-    console.log(`迁移 0.0.3 -> 0.0.4: ${migrationResult.message}`);
+    const migration1Result = await migrateFrom003To004(env);
+    console.log(`迁移 0.0.3 -> 0.0.4: ${migration1Result.message}`);
+    
+    // 从v0.0.4迁移到v0.0.5
+    const migration2Result = await migrateFrom004To005(env);
+    console.log(`迁移 0.0.4 -> 0.0.5: ${migration2Result.message}`);
     
     // 将来可以在这里添加更多迁移脚本
-    // 例如: const migration2Result = await migrateFrom004To005(env);
     
     console.log('所有迁移已完成');
   } catch (error) {

@@ -2,14 +2,7 @@ import { Box, Flex, Text } from '@radix-ui/themes';
 import ResourceBar from './ResourceBar';
 import '../styles/components.css';
 import { useTranslation } from 'react-i18next';
-
-interface ClientResourceSectionProps {
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
-  networkRx: number;
-  networkTx: number;
-}
+import { ClientResourceSectionProps } from '../types/components';
 
 /**
  * 网络流量单位自适应函数
@@ -43,7 +36,8 @@ const ClientResourceSection = ({
   memoryUsage = 0,
   diskUsage = 0,
   networkRx = 0,
-  networkTx = 0
+  networkTx = 0,
+  showDetailedInfo = true
 }: ClientResourceSectionProps) => {
   const { t } = useTranslation();
   
@@ -90,37 +84,39 @@ const ClientResourceSection = ({
           <ResourceBar value={diskUsage} color="amber" height={6} />
         </Box>
         
-        {/* 网络流量 */}
-        <Box className="resource-item">
-          <Flex justify="between" align="center" mb="1">
-            <Text size="2" className="resource-label">{t('clientResource.network')}</Text>
-          </Flex>
-          <Flex gap="3" className="network-metrics">
-            {/* 下载速率 */}
-            <Box className="network-segment">
-              <Flex justify="between" align="center" mb="1">
-                <Flex align="center" gap="2">
-                  <Box className="resource-indicator resource-indicator-download" />
-                  <Text size="2" className="resource-label">{t('clientResource.download')}</Text>
+        {/* 网络流量 - 仅在显示详细信息时展示 */}
+        {showDetailedInfo && (
+          <Box className="resource-item">
+            <Flex justify="between" align="center" mb="1">
+              <Text size="2" className="resource-label">{t('clientResource.network')}</Text>
+            </Flex>
+            <Flex gap="3" className="network-metrics">
+              {/* 下载速率 */}
+              <Box className="network-segment">
+                <Flex justify="between" align="center" mb="1">
+                  <Flex align="center" gap="2">
+                    <Box className="resource-indicator resource-indicator-download" />
+                    <Text size="2" className="resource-label">{t('clientResource.download')}</Text>
+                  </Flex>
+                  <Text size="2" weight="medium">{rxFormatted.text}</Text>
                 </Flex>
-                <Text size="2" weight="medium">{rxFormatted.text}</Text>
-              </Flex>
-              <ResourceBar value={rxFormatted.percent} color="cyan" height={6} />
-            </Box>
-            
-            {/* 上传速率 */}
-            <Box className="network-segment">
-              <Flex justify="between" align="center" mb="1">
-                <Flex align="center" gap="2">
-                  <Box className="resource-indicator resource-indicator-upload" />
-                  <Text size="2" className="resource-label">{t('clientResource.upload')}</Text>
+                <ResourceBar value={rxFormatted.percent} color="cyan" height={6} />
+              </Box>
+              
+              {/* 上传速率 */}
+              <Box className="network-segment">
+                <Flex justify="between" align="center" mb="1">
+                  <Flex align="center" gap="2">
+                    <Box className="resource-indicator resource-indicator-upload" />
+                    <Text size="2" className="resource-label">{t('clientResource.upload')}</Text>
+                  </Flex>
+                  <Text size="2" weight="medium">{txFormatted.text}</Text>
                 </Flex>
-                <Text size="2" weight="medium">{txFormatted.text}</Text>
-              </Flex>
-              <ResourceBar value={txFormatted.percent} color="indigo" height={6} />
-            </Box>
-          </Flex>
-        </Box>
+                <ResourceBar value={txFormatted.percent} color="indigo" height={6} />
+              </Box>
+            </Flex>
+          </Box>
+        )}
       </Flex>
     </Box>
   );

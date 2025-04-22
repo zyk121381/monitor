@@ -1,55 +1,37 @@
-import { Hono } from 'hono';
+import { Hono,ExecutionContext } from 'hono';
 import { logger } from 'hono/logger';
-import { Bindings } from './models/db';
 import { prettyJSON } from 'hono/pretty-json';
-import { checkAndInitializeDatabase } from './initialization/initCheck';
-import { ExecutionContext } from 'hono';
-import { corsMiddleware } from './middlewares';
-import { jwtMiddleware } from './middlewares/auth';
+
+import * as initDb from './initialization';
+import { Bindings } from './models/db';
+import * as middlewares from './middlewares';
+import * as jobs from './jobs';
+import * as api from './api';
+
 // 添加全局变量声明
 declare global {
   var isInitialized: boolean;
 }
-
-// 导入路由
-import authRoutes from './api/auth';
-import monitorRoutes from './api/monitors';
-import agentRoutes from './api/agents';
-import userRoutes from './api/users';
-import statusRoutes from './api/status';
-import initDbRoutes from './initialization/database';
-import { monitorTask, runScheduledTasks } from './jobs';
-import notifications from './api/notifications';
 
 // 创建Hono应用
 const app = new Hono<{ Bindings: Bindings }>();
 
 // 中间件，需要作为服务端接收所有来源客户端的请求
 app.use('*', logger());
-app.use('*', corsMiddleware);
+app.use('*', middlewares.corsMiddleware);
 app.use('*', prettyJSON());
-app.use('*', jwtMiddleware);
+app.use('*', middlewares.jwtMiddleware);
 
 // 公共路由
 app.get('/', (c) => c.json({ message: 'XUGOU API 服务正在运行' }));
 
 // 路由注册
-app.route('/api/auth', authRoutes);
-app.route('/api/monitors', monitorRoutes);
-app.route('/api/agents', agentRoutes);
-app.route('/api/users', userRoutes);
-app.route('/api/status', statusRoutes);
-app.route('/api', initDbRoutes);
-app.route('/api/notifications', notifications);
-
-// 添加监控检查触发路由
-app.get('/api/trigger-check', async (c) => {
-  const { scheduled } = monitorTask;
-  if (scheduled) {
-    await scheduled(null, c.env, null);
-  }
-  return c.json({ success: true, message: '监控检查已触发' });
-});
+app.route('/api/auth', api.auth);
+app.route('/api/monitors', api.monitors);
+app.route('/api/agents', api.agents);
+app.route('/api/users', api.users);
+app.route('/api/status', api.status);
+app.route('/api/notifications', api.notifications);
 
 // 数据库状态标志，用于记录数据库初始化状态
 let dbInitialized = false;
@@ -68,7 +50,6 @@ export default {
 
     // 如果是 OPTIONS 请求，直接处理
     if (request.method === 'OPTIONS') {
-      console.log('Worker入口层面: 捕获到OPTIONS请求，直接返回');
       return new Response(null, {
         status: 204,
         headers: {
@@ -85,7 +66,7 @@ export default {
       if (!dbInitialized) {
         console.log('首次请求，检查数据库状态...');
         try {
-          const initResult = await checkAndInitializeDatabase(env);
+          const initResult = await initDb.checkAndInitializeDatabase(env);
           dbInitialized = true;
           console.log('数据库检查结果:', initResult.message);
         } catch (error) {
@@ -126,15 +107,7 @@ export default {
   // 添加定时任务，每分钟执行一次监控检查和客户端状态检查
   async scheduled(event: any, env: any, ctx: any) {
     try {
-      // 首先检查数据库状态
-      if (!dbInitialized) {
-        const initResult = await checkAndInitializeDatabase(env);
-        dbInitialized = true;
-        console.log('数据库检查结果:', initResult.message);
-      }
-      
-      // 执行所有定时任务
-      await runScheduledTasks(event, env, ctx);
+      await jobs.runScheduledTasks(event, env, ctx);
     } catch (error) {
       console.error('定时任务执行出错:', error);
     }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, Code, Separator } from '@radix-ui/themes';
 import { ArrowLeftIcon, CopyIcon, CheckIcon, InfoCircledIcon } from '@radix-ui/react-icons';
-import { generateToken } from '../../api/agents';
+import { generateToken } from '../../services/api/agents';
 import { useTranslation } from 'react-i18next';
 import { ENV_API_BASE_URL } from '../../config';
 

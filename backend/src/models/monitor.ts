@@ -7,7 +7,7 @@ export interface Monitor {
   interval: number;
   timeout: number;
   expected_status: number;
-  headers: string;
+  headers: Record<string, string>;
   body: string;
   created_by: number;
   active: boolean;

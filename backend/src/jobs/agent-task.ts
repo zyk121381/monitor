@@ -1,6 +1,6 @@
 // 定期检查客户端状态的任务
 import { getActiveAgents, setAgentInactive, getAgentById, getFormattedIPAddresses } from '../services';
-import { shouldSendNotification, sendNotification } from '../utils/notification';
+import { shouldSendNotification, sendNotification } from '../services';
 
 interface AgentResult {
   id: number;

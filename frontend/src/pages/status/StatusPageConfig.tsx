@@ -2,14 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Container } from '@radix-ui/themes';
 import { EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
-import { getAllMonitors, Monitor } from '../../api/monitors';
-import { getAllAgents, Agent } from '../../api/agents';
+import { getAllMonitors } from '../../services/api/monitors';
+import { Monitor } from '../../types/monitors';
+import { getAllAgents } from '../../services/api/agents';
+import { Agent } from '../../types/agents';
 import { 
   getStatusPageConfig, 
   saveStatusPageConfig, 
-  StatusPageConfig as StatusConfig,
-  StatusPageConfigResponse
-} from '../../api/status';
+} from '../../services/api/status';
+import { StatusPageConfig as StatusConfig, StatusPageConfigResponse } from '../../types/status';
 import '../../styles/components.css';
 import { useTranslation } from 'react-i18next';
 
@@ -99,7 +100,7 @@ const StatusPageConfig = () => {
             console.log(t('statusPageConfig.receivedConfig'), JSON.stringify(configData, null, 2));
             console.log(t('statusPageConfig.monitorListType'), Array.isArray(configData.monitors) ? 'Array' : typeof configData.monitors);
             console.log(t('statusPageConfig.monitorCount'), configData.monitors.length);
-            configData.monitors.forEach(monitor => {
+            configData.monitors.forEach((monitor: any) => {
               console.log(`${t('statusPageConfig.configMonitor')}: id=${monitor.id}, name=${monitor.name}, selected=${monitor.selected}`);
             });
           } else {
@@ -115,13 +116,13 @@ const StatusPageConfig = () => {
         console.log(t('statusPageConfig.monitorsResponse'), JSON.stringify(monitorsResponse, null, 2));
         
         if (monitorsResponse.success && monitorsResponse.monitors) {
-          const monitorsWithSelection = monitorsResponse.monitors.map(monitor => {
+          const monitorsWithSelection = monitorsResponse.monitors.map((monitor: Monitor) => {
             // 在配置中查找对应ID的监控项
             let isSelected = false;
             
             if (configData && configData.monitors && Array.isArray(configData.monitors)) {
               // 查找配置中的对应监控项
-              const configMonitor = configData.monitors.find(m => m.id === monitor.id);
+              const configMonitor = configData.monitors.find((m: {id: number}) => m.id === monitor.id);
               if (configMonitor) {
                 console.log(`${t('statusPageConfig.foundMonitor')}: ${monitor.name}(${monitor.id}), ${t('statusPageConfig.originalStatus')}:`, configMonitor.selected);
                 // 确保严格布尔值比较
@@ -140,7 +141,7 @@ const StatusPageConfig = () => {
             };
           });
           
-          console.log(t('statusPageConfig.processedMonitorList'), monitorsWithSelection.map(m => ({
+          console.log(t('statusPageConfig.processedMonitorList'), monitorsWithSelection.map((m: MonitorWithSelection) => ({
             id: m.id,
             name: m.name,
             selected: m.selected
@@ -156,7 +157,7 @@ const StatusPageConfig = () => {
               
               if (configData && configData.agents && Array.isArray(configData.agents)) {
                 // 查找配置中的对应客户端
-                const configAgent = configData.agents.find(a => a.id === agent.id);
+                const configAgent = configData.agents.find((a: {id: number}) => a.id === agent.id);
                 if (configAgent) {
                   console.log(`${t('statusPageConfig.foundAgent')}: ${agent.name}(${agent.id}), ${t('statusPageConfig.originalStatus')}:`, configAgent.selected);
                   // 确保严格布尔值比较
@@ -269,13 +270,13 @@ const StatusPageConfig = () => {
         description: config.description,
         logoUrl: config.logoUrl,
         customCss: config.customCss,
-        monitors: config.monitors.filter(m => m.selected).map(m => m.id),
-        agents: config.agents.filter(a => a.selected).map(a => a.id)
+        monitors: config.monitors.filter((m: MonitorWithSelection) => m.selected).map((m: MonitorWithSelection) => m.id),
+        agents: config.agents.filter((a: AgentWithSelection) => a.selected).map((a: AgentWithSelection) => a.id)
       };
       
       // 调试日志
       console.log(t('statusPageConfig.savingConfig'), configToSave);
-      console.log(t('statusPageConfig.selectedMonitors'), config.monitors.filter(m => m.selected));
+      console.log(t('statusPageConfig.selectedMonitors'), config.monitors.filter((m: MonitorWithSelection) => m.selected));
       console.log(t('statusPageConfig.selectedMonitorIds'), configToSave.monitors);
       
       // 调用API保存配置

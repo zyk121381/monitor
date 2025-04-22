@@ -432,8 +432,7 @@ notifications.post('/settings', async (c) => {
       memory_threshold: z.number().optional(),
       on_disk_threshold: z.boolean().optional(),
       disk_threshold: z.number().optional(),
-      channels: z.array(z.number()).or(z.string()),
-      override_global: z.boolean().optional()
+      channels: z.array(z.number()).or(z.string())
     });
     
     const validatedData = schema.parse(body);
@@ -458,8 +457,7 @@ notifications.post('/settings', async (c) => {
       memory_threshold: validatedData.memory_threshold || 90,
       on_disk_threshold: validatedData.on_disk_threshold || false,
       disk_threshold: validatedData.disk_threshold || 90,
-      channels: channelsStr,
-      override_global: validatedData.override_global || false
+      channels: channelsStr
     });
     
     if (!result.success) {
@@ -604,4 +602,4 @@ notifications.post('/validate-telegram', async (c) => {
   }
 });
 
-export default notifications; 
+export { notifications } ; 

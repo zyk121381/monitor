@@ -9,7 +9,6 @@ export interface Monitor {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
   interval: number;
   timeout: number;
-  retries: number;
   status: 'up' | 'down' | 'unknown' | 'maintenance';
   lastChecked?: string;
   uptime?: number;

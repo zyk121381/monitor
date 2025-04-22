@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Button, Table, Badge, Card, IconButton, Grid, Tabs } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Button, Table, Badge, Card, IconButton, Grid, Tabs, Dialog } from '@radix-ui/themes';
 import { PlusIcon, Pencil1Icon, TrashIcon, CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon, LayoutIcon, ViewGridIcon, ReloadIcon, InfoCircledIcon } from '@radix-ui/react-icons';
-import { getAllMonitors, deleteMonitor, Monitor } from '../../api/monitors';
+import { getAllMonitors, deleteMonitor } from '../../services/api/monitors';
+import { Monitor } from '../../types/monitors';
 import MonitorCard from '../../components/MonitorCard';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +13,8 @@ const MonitorsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'list' | 'grid'>('grid');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedMonitorId, setSelectedMonitorId] = useState<number | null>(null);
   const { t } = useTranslation();
 
   // 获取监控数据
@@ -51,22 +54,33 @@ const MonitorsList = () => {
     fetchData();
   };
 
-  // 处理删除
-  const handleDelete = async (id: number) => {
-    if (!window.confirm(t('monitors.delete.confirm'))) return;
-    
-    try {
-      const response = await deleteMonitor(id);
-      
-      if (response.success) {
-        // 更新列表，移除已删除的监控
-        setMonitors(monitors.filter(monitor => monitor.id !== id));
-      } else {
-        alert(response.message || t('monitors.delete.failed'));
+  // 打开删除确认对话框
+  const handleDeleteClick = (id: number) => {
+    setSelectedMonitorId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // 确认删除监控
+  const handleDeleteConfirm = async () => {
+    if (selectedMonitorId) {
+      try {
+        setLoading(true);
+        const response = await deleteMonitor(selectedMonitorId);
+        
+        if (response.success) {
+          // 更新列表，移除已删除的监控
+          setMonitors(monitors.filter(monitor => monitor.id !== selectedMonitorId));
+        } else {
+          setError(response.message || t('monitors.delete.failed'));
+        }
+      } catch (err) {
+        console.error(t('monitors.delete.failed'), err);
+        setError(t('monitors.delete.failed'));
+      } finally {
+        setDeleteDialogOpen(false);
+        setSelectedMonitorId(null);
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(t('monitors.delete.failed'), err);
-      alert(t('monitors.delete.failed'));
     }
   };
 
@@ -186,10 +200,10 @@ const MonitorsList = () => {
                       </Flex>
                     </Table.Cell>
                     <Table.Cell>
-                      <Text>{monitor.response_time}ms</Text>
+                      <Text>{monitor.response_time ? `${monitor.response_time}ms` : '-'}</Text>
                     </Table.Cell>
                     <Table.Cell>
-                      <Text>{Math.min(monitor.uptime || 0, 100).toFixed(2)}%</Text>
+                      <Text>{Math.min(monitor.uptime || monitor.uptime_percentage || 0, 100).toFixed(2)}%</Text>
                     </Table.Cell>
                     <Table.Cell>
                       <Flex gap="2">
@@ -199,7 +213,7 @@ const MonitorsList = () => {
                         <IconButton variant="soft" onClick={() => navigate(`/monitors/edit/${monitor.id}`)} title={t('monitors.edit')}>
                           <Pencil1Icon />
                         </IconButton>
-                        <IconButton variant="soft" color="red" onClick={() => handleDelete(monitor.id)} title={t('monitors.delete')}>
+                        <IconButton variant="soft" color="red" onClick={() => handleDeleteClick(monitor.id)} title={t('monitors.delete')}>
                           <TrashIcon />
                         </IconButton>
                       </Flex>
@@ -229,7 +243,7 @@ const MonitorsList = () => {
                     <IconButton variant="ghost" size="1" onClick={() => navigate(`/monitors/edit/${monitor.id}`)} title={t('monitors.edit')}>
                       <Pencil1Icon />
                     </IconButton>
-                    <IconButton variant="ghost" size="1" color="red" onClick={() => handleDelete(monitor.id)} title={t('monitors.delete')}>
+                    <IconButton variant="ghost" size="1" color="red" onClick={() => handleDeleteClick(monitor.id)} title={t('monitors.delete')}>
                       <TrashIcon />
                     </IconButton>
                   </Flex>
@@ -239,6 +253,26 @@ const MonitorsList = () => {
           )}
         </div>
       </div>
+
+      {/* 删除确认对话框 */}
+      <Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <Dialog.Content>
+          <Dialog.Title>{t('common.deleteConfirmation')}</Dialog.Title>
+          <Dialog.Description>
+            {t('common.deleteConfirmMessage')}
+          </Dialog.Description>
+          <Flex gap="3" mt="4" justify="end">
+            <Dialog.Close>
+              <Button variant="soft" color="gray">
+                {t('common.cancel')}
+              </Button>
+            </Dialog.Close>
+            <Button color="red" onClick={handleDeleteConfirm}>
+              {t('common.delete')}
+            </Button>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </Box>
   );
 };

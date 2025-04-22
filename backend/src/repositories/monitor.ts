@@ -54,18 +54,44 @@ export async function cleanupOldRecords(db: Bindings['DB']) {
 
 // 获取需要检查的监控列表
 export async function getMonitorsToCheck(db: Bindings['DB']) {
-  return await db.prepare(`
+  const result = await db.prepare(`
     SELECT * FROM monitors 
     WHERE active = true 
     AND (last_checked IS NULL OR datetime('now') > datetime(last_checked, '+' || interval || ' seconds'))
-  `).all();
+  `).all<Monitor>();
+  
+  // 解析所有监控的 headers 字段
+  if (result.results) {
+    result.results.forEach(monitor => {
+      if (typeof monitor.headers === 'string') {
+        try {
+          monitor.headers = JSON.parse(monitor.headers);
+        } catch (e) {
+          monitor.headers = {};
+        }
+      }
+    });
+  }
+  
+  return result;
 }
 
 // 获取单个监控详情
 export async function getMonitorById(db: Bindings['DB'], id: number) {
-  return await db.prepare(
+  const monitor = await db.prepare(
     'SELECT * FROM monitors WHERE id = ?'
   ).bind(id).first<Monitor>();
+  
+  // 解析 headers 字段
+  if (monitor && typeof monitor.headers === 'string') {
+    try {
+      monitor.headers = JSON.parse(monitor.headers);
+    } catch (e) {
+      monitor.headers = {};
+    }
+  }
+  
+  return monitor;
 }
 
 // 获取监控状态历史
@@ -184,7 +210,7 @@ export async function createMonitor(
   interval: number = 60,
   timeout: number = 30,
   expectedStatus: number = 200,
-  headers: string = '{}',
+  headers: Record<string, string> = {},
   body: string = '',
   userId: number
 ) {
@@ -201,7 +227,7 @@ export async function createMonitor(
     interval,
     timeout,
     expectedStatus,
-    headers,
+    JSON.stringify(headers),
     body,
     userId,
     1, // active
@@ -217,10 +243,20 @@ export async function createMonitor(
     throw new Error('创建监控失败');
   }
   
-  // 获取新创建的监控
-  return await db.prepare(
+  // 获取新创建的监控，解析 headers 字段
+  const newMonitor = await db.prepare(
     'SELECT * FROM monitors WHERE rowid = last_insert_rowid()'
   ).first<Monitor>();
+  
+  if (newMonitor && typeof newMonitor.headers === 'string') {
+    try {
+      newMonitor.headers = JSON.parse(newMonitor.headers);
+    } catch (e) {
+      newMonitor.headers = {};
+    }
+  }
+  
+  return newMonitor;
 }
 
 // 更新监控配置
@@ -265,7 +301,7 @@ export async function updateMonitorConfig(
   
   if (updates.headers !== undefined) {
     fields.push('headers = ?');
-    values.push(updates.headers);
+    values.push(JSON.stringify(updates.headers));
   }
   
   if (updates.body !== undefined) {
@@ -300,9 +336,20 @@ export async function updateMonitorConfig(
   }
   
   // 获取更新后的监控
-  return await db.prepare(
+  const updatedMonitor = await db.prepare(
     'SELECT * FROM monitors WHERE id = ?'
   ).bind(id).first<Monitor>();
+  
+  // 解析 headers 字段
+  if (updatedMonitor && typeof updatedMonitor.headers === 'string') {
+    try {
+      updatedMonitor.headers = JSON.parse(updatedMonitor.headers);
+    } catch (e) {
+      updatedMonitor.headers = {};
+    }
+  }
+  
+  return updatedMonitor;
 }
 
 // 删除监控
@@ -320,4 +367,74 @@ export async function deleteMonitor(db: Bindings['DB'], id: number) {
   return await db.prepare(
     'DELETE FROM monitors WHERE id = ?'
   ).bind(id).run();
+}
+
+/**
+ * 获取所有监控（根据用户角色过滤）
+ * @param db 数据库连接
+ * @param userId 用户ID
+ * @param userRole 用户角色
+ * @returns 监控列表和操作结果
+ */
+export async function getAllMonitors(db: Bindings['DB'], userId: number, userRole: string) {
+  try {
+    // 根据用户角色过滤监控
+    let result;
+    if (userRole === 'admin') {
+      result = await db.prepare(
+        'SELECT * FROM monitors ORDER BY created_at DESC'
+      ).all<Monitor>();
+    } else {
+      result = await db.prepare(
+        'SELECT * FROM monitors WHERE created_by = ? ORDER BY created_at DESC'
+      ).bind(userId).all<Monitor>();
+    }
+    
+    // 解析所有监控的 headers 字段
+    if (result.results && result.results.length > 0) {
+      result.results.forEach(monitor => {
+        if (typeof monitor.headers === 'string') {
+          try {
+            monitor.headers = JSON.parse(monitor.headers);
+          } catch (e) {
+            monitor.headers = {};
+          }
+        }
+      });
+      
+      // 获取所有监控的历史状态数据
+      const monitorsWithHistory = await Promise.all(result.results.map(async (monitor) => {
+        const historyResult = await db.prepare(
+          `SELECT * FROM monitor_status_history 
+           WHERE monitor_id = ? 
+           ORDER BY timestamp ASC`
+        ).bind(monitor.id).all<MonitorStatusHistory>();
+        
+        return {
+          ...monitor,
+          history: historyResult.results || []
+        };
+      }));
+      
+      return { 
+        success: true, 
+        monitors: monitorsWithHistory,
+        status: 200 
+      };
+    }
+    
+    return { 
+      success: true, 
+      monitors: result.results || [],
+      status: 200 
+    };
+  } catch (error) {
+    console.error('获取监控列表错误:', error);
+    return { 
+      success: false, 
+      message: '获取监控列表失败',
+      error: error instanceof Error ? error.message : String(error),
+      status: 500
+    };
+  }
 } 

@@ -1,16 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { login as apiLogin, register as apiRegister, getCurrentUser, User, LoginRequest, RegisterRequest } from '../api/auth';
+import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api/auth';
+import { User, LoginRequest, RegisterRequest, AuthContextType } from '../types/auth';
 import { useTranslation } from 'react-i18next';
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (data: LoginRequest) => Promise<{ success: boolean; message: string }>;
-  register: (data: RegisterRequest) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

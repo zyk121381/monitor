@@ -395,7 +395,6 @@ export default {
     },
     specificMonitorNotifications: 'Monitor Notification Settings',
     specificAgentNotifications: 'Agent Notification Settings',
-    overrideGlobalSettings: 'Override Global Settings',
     specificNotificationEnabled: 'Enable Specific Notifications',
     enableResponseTimeAlert: 'Enable Response Time Alert',
     responseTimeThreshold: 'Response Time Threshold',

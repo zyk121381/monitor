@@ -125,4 +125,4 @@ auth.get('/me', async (c) => {
   }
 });
 
-export default auth; 
+export { auth }; 

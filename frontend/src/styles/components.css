@@ -539,7 +539,7 @@
 }
 
 .config-tabs-list {
-  border-bottom: 1px solid var(--gray-4) !important;
+  border-bottom: none !important;
   padding: 0 8px 0 4px;
   margin-bottom: 0;
   gap: 4px;
@@ -696,7 +696,7 @@ button[data-state][role="tab"]:active,
 
 /* 标签列表样式 */
 [data-orientation="horizontal"] {
-  border-bottom: 1px solid var(--gray-4) !important;
+  border-bottom: none !important;
   padding-bottom: 0 !important;
   outline: none !important;
   box-shadow: none !important;

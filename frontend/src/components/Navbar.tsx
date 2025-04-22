@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Flex, Text, Button, Avatar, DropdownMenu, Separator, Container } from '@radix-ui/themes';
 import { ExitIcon, PersonIcon, PersonIcon as UserIcon, DashboardIcon, ChevronDownIcon, ActivityLogIcon, CubeIcon, PieChartIcon, BellIcon } from '@radix-ui/react-icons';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../providers/AuthProvider';
 import { useState, useEffect } from 'react';
 import '../styles/components.css';
 import { useTranslation } from 'react-i18next';

@@ -5,7 +5,7 @@
 
 import * as bcrypt from 'bcryptjs';
 import * as jsonwebtoken from 'jsonwebtoken';
-import { getUserByUsername, createUser, getUserById } from '../repositories/auth';
+import * as repositories from '../repositories';
 import { getJwtSecret } from '../utils/jwt';
 import { Bindings } from '../models/db';
 
@@ -42,7 +42,7 @@ export async function loginUser(
     
     // 查找用户
     console.log('开始查找用户:', username);
-    const user = await getUserByUsername(env.DB, username);
+    const user = await repositories.getUserByUsername(env.DB, username);
     
     if (!user) {
       console.log('用户不存在:', username);
@@ -116,7 +116,7 @@ export async function registerUser(
 ): Promise<{ success: boolean; message: string; user?: any }> {
   try {
     // 检查用户名是否已存在
-    const existingUser = await getUserByUsername(env.DB, username);
+    const existingUser = await repositories.getUserByUsername(env.DB, username);
     if (existingUser) {
       return { success: false, message: '用户名已存在' };
     }
@@ -126,7 +126,7 @@ export async function registerUser(
     const hashedPassword = await bcrypt.hash(password, salt);
     
     // 创建用户
-    const newUser = await createUser(env.DB, username, hashedPassword, email, role);
+    const newUser = await repositories.createUser(env.DB, username, hashedPassword, email, role);
     
     return {
       success: true,
@@ -158,7 +158,7 @@ export async function verifyUserToken(
     }
     
     // 获取用户信息
-    const user = await getUserById(env.DB, decoded.id);
+    const user = await repositories.getUserById(env.DB, decoded.id);
     if (!user) {
       return { success: false, message: '用户不存在' };
     }
@@ -185,7 +185,7 @@ export async function getCurrentUser(
   userId: number
 ): Promise<{ success: boolean; message: string; user?: any }> {
   try {
-    const user = await getUserById(env.DB, userId);
+    const user = await repositories.getUserById(env.DB, userId);
     
     if (!user) {
       return { success: false, message: '用户不存在' };

@@ -45,7 +45,6 @@ export interface NotificationSettings {
       onDown: boolean;
       onRecovery: boolean;
       channels: string[];
-      overrideGlobal: boolean;
     }
   };
   specificAgents: {
@@ -60,7 +59,6 @@ export interface NotificationSettings {
       onDiskThreshold: boolean;
       diskThreshold: number;
       channels: string[];
-      overrideGlobal: boolean;
     }
   };
 }
@@ -152,8 +150,7 @@ export const getNotificationConfig = async (): Promise<NotificationConfigRespons
               ...monitorSetting,
               enabled: !!monitorSetting.enabled,
               onDown: !!monitorSetting.onDown,
-              onRecovery: !!monitorSetting.onRecovery,
-              overrideGlobal: !!monitorSetting.overrideGlobal
+              onRecovery: !!monitorSetting.onRecovery
             };
           });
         }
@@ -169,8 +166,7 @@ export const getNotificationConfig = async (): Promise<NotificationConfigRespons
               onRecovery: !!agentSetting.onRecovery,
               onCpuThreshold: !!agentSetting.onCpuThreshold,
               onMemoryThreshold: !!agentSetting.onMemoryThreshold,
-              onDiskThreshold: !!agentSetting.onDiskThreshold,
-              overrideGlobal: !!agentSetting.overrideGlobal
+              onDiskThreshold: !!agentSetting.onDiskThreshold
             };
           });
         }
@@ -256,8 +252,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
       enabled: settings.monitors.enabled,
       on_down: settings.monitors.onDown,
       on_recovery: settings.monitors.onRecovery,
-      channels: JSON.stringify(settings.monitors.channels),
-      override_global: false
+      channels: JSON.stringify(settings.monitors.channels)
     };
     
     saveRequests.push(
@@ -276,8 +271,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
       memory_threshold: settings.agents.memoryThreshold,
       on_disk_threshold: settings.agents.onDiskThreshold,
       disk_threshold: settings.agents.diskThreshold,
-      channels: JSON.stringify(settings.agents.channels),
-      override_global: false
+      channels: JSON.stringify(settings.agents.channels)
     };
     
     saveRequests.push(
@@ -294,8 +288,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
         enabled: monitorSetting.enabled,
         on_down: monitorSetting.onDown,
         on_recovery: monitorSetting.onRecovery,
-        channels: JSON.stringify(monitorSetting.channels),
-        override_global: monitorSetting.overrideGlobal
+        channels: JSON.stringify(monitorSetting.channels)
       };
       
       saveRequests.push(
@@ -319,8 +312,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
         memory_threshold: agentSetting.memoryThreshold,
         on_disk_threshold: agentSetting.onDiskThreshold,
         disk_threshold: agentSetting.diskThreshold,
-        channels: JSON.stringify(agentSetting.channels),
-        override_global: agentSetting.overrideGlobal
+        channels: JSON.stringify(agentSetting.channels)
       };
       
       saveRequests.push(

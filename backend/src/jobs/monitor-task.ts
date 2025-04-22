@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { Bindings } from '../models/db';
 import { Monitor } from '../models/monitor';
 import { cleanupOldRecords, getMonitorsToCheck, checkSingleMonitor as monitorServiceCheck } from '../services';
-import { shouldSendNotification, sendNotification } from '../utils/notification';
+import { shouldSendNotification, sendNotification } from '../services';
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
 
@@ -100,7 +100,7 @@ async function handleMonitorNotification(c: any, monitor: Monitor, checkResult: 
       url: monitor.url,
       response_time: `${checkResult.responseTime}ms`,
       status_code: checkResult.statusCode ? checkResult.statusCode.toString() : '无',
-      expected_status_code: monitor.expected_status.toString(),
+      expected_status: monitor.expected_status.toString(),
       error: checkResult.error || '无',
       details: `URL: ${monitor.url}\n响应时间: ${checkResult.responseTime}ms\n状态码: ${checkResult.statusCode || '无'}\n错误信息: ${checkResult.error || '无'}`
     };
@@ -129,12 +129,6 @@ async function handleMonitorNotification(c: any, monitor: Monitor, checkResult: 
     console.error(`处理监控通知时出错 (${monitor.name}, ID: ${monitor.id}):`, error);
   }
 }
-
-// 定义触发器路由 - 通过HTTP请求触发监控检查
-monitorTask.get('/api/trigger-check', async (c) => {
-  const result = await checkMonitors(c);
-  return c.json(result);
-});
 
 // 在 Cloudflare Workers 中设置定时触发器
 export default {

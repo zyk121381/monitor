@@ -32,7 +32,6 @@ interface AgentNotificationSettings {
   onDiskThreshold: boolean;
   diskThreshold: number;
   channels: string[];
-  overrideGlobal?: boolean;
 }
 
 // 特定监控通知设置
@@ -44,8 +43,7 @@ interface MonitorNotificationSettings {
   responseTimeThreshold: number;
   onConsecutiveFailure: boolean;
   consecutiveFailureThreshold: number;
-  channels: string[];
-  overrideGlobal?: boolean;
+  channels: string[]
 }
 
 // 通知设置类型
@@ -176,8 +174,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings) =
       response_time_threshold: Number(settings.monitors.responseTimeThreshold || 1000),
       on_consecutive_failure: Boolean(settings.monitors.onConsecutiveFailure),
       consecutive_failure_threshold: Number(settings.monitors.consecutiveFailureThreshold || 3),
-      channels: JSON.stringify(settings.monitors.channels || []),
-      override_global: false
+      channels: JSON.stringify(settings.monitors.channels || [])
     };
     
     console.log('发送全局监控设置:', JSON.stringify(monitorSettings));
@@ -197,8 +194,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings) =
       memory_threshold: Number(settings.agents.memoryThreshold || 85),
       on_disk_threshold: Boolean(settings.agents.onDiskThreshold),
       disk_threshold: Number(settings.agents.diskThreshold || 90),
-      channels: JSON.stringify(settings.agents.channels || []),
-      override_global: false
+      channels: JSON.stringify(settings.agents.channels || [])
     };
     
     console.log('发送全局客户端设置:', JSON.stringify(agentSettings));
@@ -209,11 +205,6 @@ export const saveNotificationSettings = async (settings: NotificationSettings) =
     // 处理特定监控设置
     for (const monitorId in settings.specificMonitors) {
       const monitorSetting = settings.specificMonitors[monitorId];
-      
-      if (!monitorSetting.overrideGlobal) {
-        console.log(`跳过未启用覆盖的监控设置: ${monitorId}`);
-        continue;
-      }
       
       try {
         const target_id = safeParseInt(monitorId);
@@ -232,8 +223,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings) =
           response_time_threshold: Number(monitorSetting.responseTimeThreshold || 1000),
           on_consecutive_failure: Boolean(monitorSetting.onConsecutiveFailure),
           consecutive_failure_threshold: Number(monitorSetting.consecutiveFailureThreshold || 3),
-          channels: JSON.stringify(monitorSetting.channels || []),
-          override_global: Boolean(monitorSetting.overrideGlobal)
+          channels: JSON.stringify(monitorSetting.channels || [])
         };
         
         console.log(`发送特定监控设置 ${monitorId}:`, JSON.stringify(specificMonitorSettings));
@@ -248,11 +238,6 @@ export const saveNotificationSettings = async (settings: NotificationSettings) =
     // 处理特定客户端设置
     for (const agentId in settings.specificAgents) {
       const agentSetting = settings.specificAgents[agentId];
-      
-      if (!agentSetting.overrideGlobal) {
-        console.log(`跳过未启用覆盖的客户端设置: ${agentId}`);
-        continue;
-      }
       
       try {
         const target_id = safeParseInt(agentId);
@@ -273,8 +258,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings) =
           memory_threshold: Number(agentSetting.memoryThreshold || 85),
           on_disk_threshold: Boolean(agentSetting.onDiskThreshold),
           disk_threshold: Number(agentSetting.diskThreshold || 90),
-          channels: JSON.stringify(agentSetting.channels || []),
-          override_global: Boolean(agentSetting.overrideGlobal)
+          channels: JSON.stringify(agentSetting.channels || [])
         };
         
         console.log(`发送特定客户端设置 ${agentId}:`, JSON.stringify(specificAgentSettings));

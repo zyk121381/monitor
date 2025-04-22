@@ -223,18 +223,18 @@ export const deleteNotificationTemplate = async (db: D1Database, id: number): Pr
   return (((result.meta as D1Meta)?.changes) || 0) > 0;
 };
 
-// 获取用户的全局通知设置
-export const getGlobalSettings = async (db: D1Database, userId: number): Promise<{
+// 获取全局通知设置
+export const getGlobalSettings = async (db: D1Database): Promise<{
   monitorSettings: NotificationSettings | null;
   agentSettings: NotificationSettings | null;
 }> => {
   const monitorSettings = await db.prepare(
-    'SELECT * FROM notification_settings WHERE user_id = ? AND target_type = ?'
-  ).bind(userId, 'global-monitor').first<NotificationSettings>();
+    'SELECT * FROM notification_settings WHERE target_type = ?'
+  ).bind('global-monitor').first<NotificationSettings>();
   
   const agentSettings = await db.prepare(
-    'SELECT * FROM notification_settings WHERE user_id = ? AND target_type = ?'
-  ).bind(userId, 'global-agent').first<NotificationSettings>();
+    'SELECT * FROM notification_settings WHERE target_type = ?'
+  ).bind('global-agent').first<NotificationSettings>();
   
   return {
     monitorSettings,
@@ -245,12 +245,11 @@ export const getGlobalSettings = async (db: D1Database, userId: number): Promise
 // 获取特定对象的通知设置
 export const getSpecificSettings = async (
   db: D1Database, 
-  userId: number, 
   targetType: 'monitor' | 'agent', 
   targetId?: number
 ): Promise<NotificationSettings[]> => {
-  let query = 'SELECT * FROM notification_settings WHERE user_id = ? AND target_type = ?';
-  const params: any[] = [userId, targetType];
+  let query = 'SELECT * FROM notification_settings WHERE  target_type = ?';
+  const params: any[] = [targetType];
   
   if (targetId !== undefined) {
     query += ' AND target_id = ?';
@@ -268,9 +267,8 @@ export const createOrUpdateSettings = async (
 ): Promise<number> => {
   // 先检查是否已存在相同的设置
   const existingSettings = await db.prepare(
-    'SELECT id FROM notification_settings WHERE user_id = ? AND target_type = ? AND (target_id = ? OR (target_id IS NULL AND ? IS NULL))'
+    'SELECT id FROM notification_settings WHERE target_type = ? AND (target_id = ? OR (target_id IS NULL AND ? IS NULL))'
   ).bind(
-    settings.user_id, 
     settings.target_type, 
     settings.target_id, 
     settings.target_id
@@ -283,7 +281,7 @@ export const createOrUpdateSettings = async (
     
     // 动态构建UPDATE语句
     Object.entries(settings).forEach(([key, value]) => {
-      if (key !== 'user_id' && key !== 'target_type' && key !== 'target_id') {
+      if (key !== 'target_type' && key !== 'target_id') {
         sets.push(`${key} = ?`);
         
         if (typeof value === 'boolean') {
@@ -431,13 +429,13 @@ export const getNotificationConfig = async (
   const templates = await getNotificationTemplates(db);
   
   // 获取全局设置
-  const globalSettings = await getGlobalSettings(db, userId);
+  const globalSettings = await getGlobalSettings(db);
   
   // 获取特定监控项设置
-  const monitorSettings = await getSpecificSettings(db, userId, 'monitor');
+  const monitorSettings = await getSpecificSettings(db, 'monitor');
   
   // 获取特定客户端设置
-  const agentSettings = await getSpecificSettings(db, userId, 'agent');
+  const agentSettings = await getSpecificSettings(db, 'agent');
   
   // 构建通知配置
   const config: NotificationConfig = {
@@ -500,8 +498,7 @@ export const getNotificationConfig = async (
       enabled: setting.enabled,
       onDown: setting.on_down,
       onRecovery: setting.on_recovery,
-      channels: JSON.parse(setting.channels),
-      overrideGlobal: setting.override_global
+      channels: JSON.parse(setting.channels)
     };
   }
   
@@ -519,8 +516,7 @@ export const getNotificationConfig = async (
       memoryThreshold: setting.memory_threshold,
       onDiskThreshold: setting.on_disk_threshold,
       diskThreshold: setting.disk_threshold,
-      channels: JSON.parse(setting.channels),
-      overrideGlobal: setting.override_global
+      channels: JSON.parse(setting.channels)
     };
   }
   

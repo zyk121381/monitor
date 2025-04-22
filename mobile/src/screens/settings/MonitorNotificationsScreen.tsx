@@ -36,8 +36,7 @@ interface MonitorNotificationSettings {
   responseTimeThreshold: number;
   onConsecutiveFailure: boolean;
   consecutiveFailureThreshold: number;
-  channels: string[];
-  overrideGlobal?: boolean;
+  channels: string[]
 }
 
 // 通知设置类型
@@ -76,7 +75,6 @@ interface Monitor {
   method: string;
   interval: number;
   timeout: number;
-  retries: number;
   status: string;
   uptime: number;
   response_time: number;
@@ -115,9 +113,7 @@ const mockSettings: NotificationSettings = {
 };
 
 const mockChannels: NotificationChannel[] = [
-  { id: '1', name: '系统通知', type: 'app', enabled: true, config: {} },
-  { id: '2', name: '邮件通知', type: 'email', enabled: true, config: { email: 'admin@example.com' } },
-  { id: '3', name: '微信通知', type: 'wechat', enabled: true, config: {} }
+  { id: '1', name: 'Resend邮件通知', type: 'resend', enabled: true, config: { email: 'admin@example.com' } },
 ];
 
 const mockMonitors: Monitor[] = [
@@ -129,7 +125,6 @@ const mockMonitors: Monitor[] = [
     method: 'GET',
     interval: 1,
     timeout: 5,
-    retries: 2,
     status: 'up',
     uptime: 99.8,
     response_time: 320,
@@ -146,7 +141,6 @@ const mockMonitors: Monitor[] = [
     method: 'GET',
     interval: 5,
     timeout: 10,
-    retries: 3,
     status: 'down',
     uptime: 95.4,
     response_time: 500,
@@ -375,21 +369,14 @@ const MonitorNotificationsScreen: React.FC = () => {
       responseTimeThreshold: 1000,
       onConsecutiveFailure: false,
       consecutiveFailureThreshold: 3,
-      channels: [],
-      overrideGlobal: true
+      channels: []
     };
     
     // 更新设置
     let updatedSettings = {
       ...currentSettings,
-      [key]: value,
-      overrideGlobal: true
+      [key]: value
     };
-    
-    // 如果是启用通知，同时也设置overrideGlobal为true
-    if (key === 'enabled' && value === true) {
-      updatedSettings.overrideGlobal = true;
-    }
     
     setSettings({
       ...settings,

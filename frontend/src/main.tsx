@@ -1,18 +1,19 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
+import { RouterProvider } from 'react-router-dom'
+import { AuthProvider } from './providers/AuthProvider'
+import { LanguageProvider } from './providers/LanguageProvider'
 import '@radix-ui/themes/styles.css'
 import './styles/index.css'
-import './i18n/config'
-import App from './App.tsx'
+import './locales/config'
+import router from './router'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <LanguageProvider>
+        <RouterProvider router={router} />
+      </LanguageProvider>
+    </AuthProvider>
   </StrictMode>,
 )

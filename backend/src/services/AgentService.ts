@@ -1,5 +1,4 @@
 import { Bindings } from '../models/db';
-import { Agent } from '../models/agent';
 import * as AgentRepository from '../repositories/agent';
 import { generateToken, verifyToken } from '../utils/jwt';
 

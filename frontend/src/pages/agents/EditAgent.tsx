@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, TextField } from '@radix-ui/themes';
 import { ArrowLeftIcon, Cross2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
-import { getAgent, updateAgent } from '../../api/agents';
+import { getAgent, updateAgent } from '../../services/api/agents';
 import { useTranslation } from 'react-i18next';
 
 const EditAgent = () => {
@@ -14,11 +14,13 @@ const EditAgent = () => {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const initialFormData = {
+  const [formData, setFormData] = useState<{
+    name: string;
+    status: 'active' | 'inactive' | 'connecting' | 'unknown';
+  }>({
     name: '',
-    status: 'active' as 'active' | 'inactive'
-  };
-  const [formData, setFormData] = useState(initialFormData);
+    status: 'inactive'
+  });
   const { t } = useTranslation();
 
   useEffect(() => {

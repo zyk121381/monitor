@@ -1,15 +1,6 @@
 import { Bindings } from '../models/db';
+import { User } from '../models';
 
-// 用户类型定义
-interface User {
-  id: number;
-  username: string;
-  password: string;
-  email: string | null;
-  role: string;
-  created_at: string;
-  updated_at: string;
-}
 
 // 不含密码的用户信息
 type UserWithoutPassword = Omit<User, 'password'>;
@@ -178,3 +169,10 @@ export async function deleteUser(db: Bindings['DB'], id: number) {
   
   return { success: true, message: '用户已删除' };
 } 
+
+// 根据用户名获取用户
+export async function getUserByUsername(db: Bindings['DB'], username: string): Promise<User | null> {
+  return await db.prepare(
+    'SELECT * FROM users WHERE username = ?'
+  ).bind(username).first<User | null>();
+}

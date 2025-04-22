@@ -54,13 +54,6 @@ export interface Agent {
   version?: string;
 }
 
-// 数据库结果接口
-interface DbQueryResult<T> {
-  results?: T[];
-  success: boolean;
-  error?: string;
-}
-
 /**
  * 状态页相关的数据库操作
  */
@@ -228,13 +221,6 @@ export async function getAgentsByIds(db: Bindings['DB'], agentIds: number[]) {
   return await db.prepare(
     `SELECT * FROM agents WHERE id IN (${placeholders})`
   ).bind(...agentIds).all<Agent>();
-}
-
-// 获取管理员用户ID
-export async function getAdminUserId(db: Bindings['DB']) {
-  return await db.prepare(
-    'SELECT id FROM users WHERE role = ?'
-  ).bind('admin').first<{id: number}>();
 }
 
 // 创建默认配置并关联所有监控项和客户端

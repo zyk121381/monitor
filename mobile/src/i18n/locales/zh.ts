@@ -399,7 +399,6 @@ export default {
     },
     specificMonitorNotifications: '监控通知设置',
     specificAgentNotifications: '客户端通知设置',
-    overrideGlobalSettings: '覆盖全局设置',
     specificNotificationEnabled: '启用特定通知',
     enableResponseTimeAlert: '启用响应时间告警',
     responseTimeThreshold: '响应时间阈值',

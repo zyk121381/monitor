@@ -164,4 +164,4 @@ monitors.post('/:id/check', async (c) => {
   }
 });
 
-export default monitors; 
+export { monitors }; 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Heading, Text, Button, Card, TextField, Select, Table, IconButton, TextArea } from '@radix-ui/themes';
 import { ArrowLeftIcon, UpdateIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import { getMonitor, updateMonitor } from '../../api/monitors';
+import { getMonitor, updateMonitor } from '../../services/api/monitors';
 import StatusCodeSelect from '../../components/StatusCodeSelect';
 import { useTranslation } from 'react-i18next';
 
@@ -29,7 +29,7 @@ const EditMonitor = () => {
   ]);
 
   useEffect(() => {
-    // 实际 API 调用获取监控数据
+    // 获取监控数据
     const fetchMonitor = async () => {
       if (!id) return;
       
@@ -38,7 +38,6 @@ const EditMonitor = () => {
         const response = await getMonitor(parseInt(id));
         
         if (response.success && response.monitor) {
-          // 设置表单数据
           const monitor = response.monitor;
           setFormData({
             name: monitor.name,
@@ -46,7 +45,7 @@ const EditMonitor = () => {
             method: monitor.method,
             interval: Math.floor(monitor.interval / 60), // 从秒转换为分钟
             timeout: monitor.timeout,
-            expectedStatus: monitor.expected_status,
+            expectedStatus: monitor.expected_status || 200,
             body: monitor.body || ''
           });
           
@@ -63,11 +62,10 @@ const EditMonitor = () => {
                 value: value as string
               }));
               
-              // 如果没有请求头，添加一个空行
+              // 如果没有请求头，添加一个空行，否则添加一个空行用于新增
               if (headerPairs.length === 0) {
                 headerPairs.push({ key: '', value: '' });
               } else {
-                // 添加一个空行用于添加新的请求头
                 headerPairs.push({ key: '', value: '' });
               }
               
@@ -128,11 +126,12 @@ const EditMonitor = () => {
     }
   };
   
-  // 将键值对转换为JSON对象
-  const headersToJson = () => {
+  // 将键值对转换为对象
+  const headersToObject = () => {
     const result: Record<string, string> = {};
     
     headers.forEach(({ key, value }) => {
+      // 只处理有效的键值对
       if (key.trim()) {
         result[key.trim()] = value;
       }
@@ -148,6 +147,9 @@ const EditMonitor = () => {
     setLoading(true);
 
     try {
+      // 获取处理后的请求头数据
+      const headersData = headersToObject();
+      
       // 调用实际 API
       const response = await updateMonitor(parseInt(id), {
         name: formData.name,
@@ -155,8 +157,8 @@ const EditMonitor = () => {
         method: formData.method,
         interval: formData.interval * 60, // 转换为秒
         timeout: formData.timeout,
-        expectedStatus: formData.expectedStatus,
-        headers: headersToJson(),
+        expected_status: formData.expectedStatus, // 使用统一字段名
+        headers: headersData,
         body: formData.body
       });
       
