@@ -55,9 +55,33 @@ const StatusPage = () => {
           setPageTitle(statusData.title || t('statusPage.title'));
           setPageDescription(statusData.description || t('statusPage.allOperational'));
           
+          // 处理agents数据，将cpu、memory、disk等字段转换为cpuUsage、memoryUsage、diskUsage格式
+          const processedAgents = statusData.agents.map((agent: any) => {
+            // 创建处理后的agent对象
+            const processedAgent: any = { ...agent };
+            
+            // 将cpu、memory、disk属性值转换为cpuUsage、memoryUsage、diskUsage
+            if (agent.cpu !== undefined) {
+              processedAgent.cpuUsage = agent.cpu;
+              delete processedAgent.cpu;
+            }
+            
+            if (agent.memory !== undefined) {
+              processedAgent.memoryUsage = agent.memory;
+              delete processedAgent.memory;
+            }
+            
+            if (agent.disk !== undefined) {
+              processedAgent.diskUsage = agent.disk;
+              delete processedAgent.disk;
+            }
+            
+            return processedAgent;
+          });
+          
           setData({
             monitors: statusData.monitors || [],
-            agents: statusData.agents || []
+            agents: processedAgents
           });
         } else {
           console.error(t('statusPage.fetchError'), response.message);

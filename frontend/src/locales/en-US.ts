@@ -540,7 +540,7 @@ const enUS = {
     'clientResource.cpu': 'CPU',
     'clientResource.memory': 'Memory',
     'clientResource.disk': 'Disk',
-    'clientResource.network': 'Network Traffic',
+    'clientResource.network': 'Network',
     'clientResource.download': 'Download',
     'clientResource.upload': 'Upload',
     

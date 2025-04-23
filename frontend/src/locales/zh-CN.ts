@@ -546,7 +546,7 @@ const zhCN = {
     'clientResource.cpu': 'CPU',
     'clientResource.memory': '内存',
     'clientResource.disk': '磁盘',
-    'clientResource.network': '网络流量',
+    'clientResource.network': '网络',
     'clientResource.download': '下载',
     'clientResource.upload': '上传',
     
