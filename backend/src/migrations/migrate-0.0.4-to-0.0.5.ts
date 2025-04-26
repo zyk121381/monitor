@@ -41,7 +41,6 @@ export async function migrateFrom004To005(env: Bindings): Promise<{ success: boo
     // 再执行两个直接更新语句，确保覆盖所有情况
     await env.DB.exec("UPDATE notification_templates SET type = 'agent' WHERE name LIKE '%Agent%' OR name LIKE '%agent%'");
     await env.DB.exec("UPDATE notification_templates SET type = 'monitor' WHERE name LIKE '%Monitor%' OR name LIKE '%monitor%'");
-    
 
     // 新增 monitor_status_history 表中的 response_time,status_code ,error;
     await env.DB.exec("ALTER TABLE monitor_status_history ADD COLUMN response_time INTEGER");

@@ -88,3 +88,7 @@ IOS：没交苹果保护费，所以没有 IOS 版本
 ## 📄 开源协议
 
 本项目采用 MIT 协议开源，详见 [LICENSE](./LICENSE) 文件。
+
+## 🔥 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zaunist/xugou&type=Date)](https://www.star-history.com/#zaunist/xugou&Date)

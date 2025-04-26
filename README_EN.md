@@ -90,3 +90,7 @@ All forms of contributions are welcome, whether it's new features, bug fixes, or
 ## 📄 License
 
 This project is open-sourced under the MIT License. See the [LICENSE](./LICENSE) file for details. 
+
+## 🔥 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zaunist/xugou&type=Date)](https://www.star-history.com/#zaunist/xugou&Date)

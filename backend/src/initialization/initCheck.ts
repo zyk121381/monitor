@@ -10,7 +10,7 @@ import {
   createNotificationTemplates,
   createNotificationChannelsAndSettings
 } from './database';
-
+import { runMigrations } from '../migrations/migration';
 // 检查表是否存在
 async function tableExists(env: Bindings, tableName: string): Promise<boolean> {
   try {
@@ -134,7 +134,9 @@ export async function checkAndInitializeDatabase(env: Bindings): Promise<{ initi
     } else {
       console.log('通知渠道表不存在，跳过检查通知渠道数据...');
     }
-    
+
+    // 执行迁移
+    await runMigrations(env);
     return {
       initialized,
       message: initialized ? '数据库初始化成功' : '数据库已经初始化，不需要重新初始化',
