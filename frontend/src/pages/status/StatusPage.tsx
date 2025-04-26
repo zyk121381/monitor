@@ -169,7 +169,7 @@ const StatusPage = () => {
           {data.monitors.length > 0 && (
             <Box py="6">
               <Heading size="5" mb="4">{t('statusPage.apiServices')}</Heading>
-              <Grid columns={{ initial: '1', md: '2' }} gap="4">
+              <Grid columns={{ initial: '1' }} gap="4">
                 {data.monitors.map(monitor => (
                   <MonitorCard key={monitor.id} monitor={monitor} />
                 ))}
@@ -181,7 +181,7 @@ const StatusPage = () => {
           {data.agents.length > 0 && (
             <Box py="6">
               <Heading size="5" mb="4">{t('statusPage.agentStatus')}</Heading>
-              <Grid columns={{ initial: '1', md: '2', lg: '3' }} gap="4">
+              <Grid columns={{ initial: '1'}} gap="4">
                 {data.agents.map(agent => (
                   <Box key={agent.id} style={{ position: 'relative' }}>
                     <AgentCard agent={agent} showIpAddress={false} />

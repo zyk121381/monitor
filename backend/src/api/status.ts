@@ -62,13 +62,9 @@ adminRoutes.post('/config', async (c) => {
 // 公共路由
 // 获取状态页数据（公开访问）
 status.get('/data', async (c) => {
-  try {
     const result = await getStatusPagePublicData(c.env);
     return c.json(result);
-  } catch (error) {
-    console.error('获取状态页数据失败:', error);
-    return c.json({ success: false, message: '获取状态页数据失败', error: String(error) }, 500);
-  }
+
 });
 
 // 使用路由组

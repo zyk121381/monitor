@@ -38,9 +38,10 @@ const Register = lazy(() => import('../pages/auth/Register'));
 interface LayoutWrapperProps {
   children: ReactNode;
 }
-
 const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
-  return <Layout>{children}</Layout>;
+  // 检查当前路径是否为状态页面，如果是则不使用Layout包裹
+  const isStatusPage = window.location.pathname === '/status';
+  return isStatusPage ? <>{children}</> : <Layout>{children}</Layout>;
 };
 
 // 需要授权的路由

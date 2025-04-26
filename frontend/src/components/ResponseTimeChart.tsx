@@ -165,7 +165,7 @@ const ResponseTimeChart: React.FC<ResponseTimeChartProps> = ({
       },
       y: {
         beginAtZero: true,
-        max: 10000, // 设置y轴最大值为10000ms
+        max: undefined, // 不预先设置最大值，让数据处理逻辑动态设置
         grid: {
           color: '#e0e0e0',
           lineWidth: 0.5
@@ -499,6 +499,14 @@ const ResponseTimeChart: React.FC<ResponseTimeChartProps> = ({
     // 最终使用的数据点
     responseTimeData = filteredData;
 
+    // 计算最大响应时间，用于设置y轴
+    const maxResponseTime = Math.max(...responseTimeData.map(point => point.y || 0));
+    console.log('数据中最大响应时间:', maxResponseTime, 'ms');
+    
+    // 设置y轴最大值，低于10000ms时使用数据中最大值，否则设为10000ms
+    const yAxisMax = maxResponseTime < 10000 ? Math.ceil(maxResponseTime * 1.1) : 10000;
+    console.log('设置y轴最大值:', yAxisMax, 'ms');
+
     // 如果有数据，设置图表的时间范围
     if (responseTimeData.length > 0) {
       const oldestTime = responseTimeData[0].x;
@@ -516,7 +524,7 @@ const ResponseTimeChart: React.FC<ResponseTimeChartProps> = ({
           },
           y: {
             ...prevOptions.scales?.y,
-            max: 10000 // 确保保留y轴最大值为10000ms
+            max: yAxisMax // 使用动态计算的最大值
           }
         }
       }));

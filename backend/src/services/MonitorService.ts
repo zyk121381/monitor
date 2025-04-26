@@ -213,7 +213,6 @@ export async function getAllMonitors(db: Bindings['DB'], userId: number, userRol
  * @returns 监控详情和操作结果
  */
 export async function getMonitorById(db: Bindings['DB'], id: number, userId: number, userRole: string) {
-  try {
     const monitor = await repositories.getMonitorById(db, id);
     
     if (!monitor) {
@@ -236,15 +235,6 @@ export async function getMonitorById(db: Bindings['DB'], id: number, userId: num
       },
       status: 200
     };
-  } catch (error) {
-    console.error('获取监控详情错误:', error);
-    return { 
-      success: false, 
-      message: '获取监控详情失败',
-      error: error instanceof Error ? error.message : String(error),
-      status: 500
-    };
-  }
 }
 
 /**

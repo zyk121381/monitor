@@ -39,6 +39,12 @@ export interface MonitorStatusHistory {
   error?: string;
 }
 
+export interface MonitorStatusHistoryResponse {
+  success: boolean;
+  message: string;
+  history?: MonitorStatusHistory[];
+}
+
 export interface MonitorResponse {
   success: boolean;
   message: string;

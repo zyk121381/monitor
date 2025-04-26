@@ -5,7 +5,7 @@ import {
   CreateMonitorRequest, 
   UpdateMonitorRequest, 
   HistoryResponse, 
-  MonitorStatusHistory
+  MonitorStatusHistoryResponse,
 } from '../../types/monitors';
 
 // 获取所有监控
@@ -46,7 +46,7 @@ export const getMonitorHistory = async (id: number): Promise<HistoryResponse> =>
 
 
 // 手动检查监控
-export const checkMonitor = async (id: number): Promise<MonitorStatusHistory> => {
-  const response = await api.post<MonitorStatusHistory>(`/api/monitors/${id}/check`);
+export const checkMonitor = async (id: number): Promise<MonitorStatusHistoryResponse> => {
+  const response = await api.post<MonitorStatusHistoryResponse>(`/api/monitors/${id}/check`);
   return response.data;
 }; 

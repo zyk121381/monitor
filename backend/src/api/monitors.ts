@@ -6,7 +6,6 @@ const monitors = new Hono<{ Bindings: Bindings }>();
 
 // 获取所有监控
 monitors.get('/', async (c) => {
-  try {
     const payload = c.get('jwtPayload');
     
     // 调用服务层获取监控列表
@@ -17,15 +16,10 @@ monitors.get('/', async (c) => {
       monitors: result.monitors,
       message: result.message 
     }, result.status as any);
-  } catch (error) {
-    console.error('获取监控列表错误:', error);
-    return c.json({ success: false, message: '获取监控列表失败' }, 500);
-  }
 });
 
 // 获取单个监控
 monitors.get('/:id', async (c) => {
-  try {
     const id = parseInt(c.req.param('id'));
     const payload = c.get('jwtPayload');
     
@@ -37,15 +31,10 @@ monitors.get('/:id', async (c) => {
       monitor: result.monitor,
       message: result.message
     }, result.status as any);
-  } catch (error) {
-    console.error('获取监控详情错误:', error);
-    return c.json({ success: false, message: '获取监控详情失败' }, 500);
-  }
 });
 
 // 创建监控
 monitors.post('/', async (c) => {
-  try {
     const payload = c.get('jwtPayload');
     const data = await c.req.json();
     
@@ -57,15 +46,10 @@ monitors.post('/', async (c) => {
       monitor: result.monitor,
       message: result.message
     }, result.status as any);
-  } catch (error) {
-    console.error('创建监控错误:', error);
-    return c.json({ success: false, message: '创建监控失败' }, 500);
-  }
 });
 
 // 更新监控
 monitors.put('/:id', async (c) => {
-  try {
     const id = parseInt(c.req.param('id'));
     const payload = c.get('jwtPayload');
     const data = await c.req.json();
@@ -78,15 +62,10 @@ monitors.put('/:id', async (c) => {
       monitor: result.monitor,
       message: result.message
     }, result.status as any);
-  } catch (error) {
-    console.error('更新监控错误:', error);
-    return c.json({ success: false, message: '更新监控失败' }, 500);
-  }
 });
 
 // 删除监控
 monitors.delete('/:id', async (c) => {
-  try {
     const id = parseInt(c.req.param('id'));
     const payload = c.get('jwtPayload');
     
@@ -97,15 +76,10 @@ monitors.delete('/:id', async (c) => {
       success: result.success, 
       message: result.message
     }, result.status as any);
-  } catch (error) {
-    console.error('删除监控错误:', error);
-    return c.json({ success: false, message: '删除监控失败' }, 500);
-  }
 });
 
 // 获取监控状态历史
 monitors.get('/:id/history', async (c) => {
-  try {
     const id = parseInt(c.req.param('id'));
     const payload = c.get('jwtPayload');
     
@@ -117,14 +91,9 @@ monitors.get('/:id/history', async (c) => {
       history: result.history,
       message: result.message
     }, result.status as any);
-  } catch (error) {
-    console.error('获取监控历史错误:', error);
-    return c.json({ success: false, message: '获取监控历史失败' }, 500);
-  }
 });
 // 手动检查单个监控
 monitors.post('/:id/check', async (c) => {
-  try {
     const id = parseInt(c.req.param('id'));
     const payload = c.get('jwtPayload');
     
@@ -136,10 +105,7 @@ monitors.post('/:id/check', async (c) => {
       message: result.message,
       result: result.result
     }, result.status as any);
-  } catch (error) {
-    console.error('手动检查监控错误:', error);
-    return c.json({ success: false, message: '手动检查监控失败' }, 500);
-  }
+
 });
 
 export { monitors }; 

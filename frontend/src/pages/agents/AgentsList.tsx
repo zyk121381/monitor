@@ -115,7 +115,7 @@ const AgentsList = () => {
   // 展示卡片视图
   const renderCardView = () => {
     return (
-      <Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">
+      <Grid columns={{ initial: '1'}} gap="4">
         {agents.map(agent => (
           <Box key={agent.id} style={{ position: 'relative' }}>
             <AgentCard agent={agent} />

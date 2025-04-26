@@ -224,7 +224,7 @@ const MonitorsList = () => {
             </Table.Root>
           ) : (
             // 网格视图 - 使用 MonitorCard 组件
-            <Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">
+            <Grid columns={{ initial: '1' }} gap="4">
               {monitors.map(monitor => (
                 <Box key={monitor.id} style={{ position: 'relative' }}>
                   <MonitorCard monitor={monitor} />

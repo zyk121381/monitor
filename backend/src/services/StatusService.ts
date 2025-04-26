@@ -169,31 +169,13 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
     const configsResult = await repositories.getAllStatusPageConfigs(env.DB);
     
     if (!configsResult.results || configsResult.results.length === 0) {
-      // 尝试创建一个默认配置
-      try {
-        const adminUserId = await repositories.getAdminUserId(env.DB);
-        if (adminUserId ) {
-          const configId = await repositories.createDefaultConfig(env.DB, adminUserId);
-          if (configId) {
-            // 重新获取新创建的配置
-            const defaultConfig = await createDefaultStatusPageData(env);
-            if (defaultConfig) {
-              return { 
-                success: true,
-                data: defaultConfig
-              };
-            }
-          }
-        }
-      } catch (error) {
-        console.error('创建默认配置失败:', error);
-      }
-      
+      console.log("没有找到任何配置")
+
       return { 
-        success: true,
+        success: false,
         data: {
-          title: '系统状态',
-          description: '实时监控系统状态',
+          title: '故障状态',
+          description: '没有找到任何数据，请检查',
           logoUrl: '',
           customCss: '',
           monitors: [],
@@ -212,28 +194,17 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
     const selectedAgents = await repositories.getSelectedAgents(env.DB, config.id as number);
     
     // 获取监控项详细信息
-    let monitors: repositories.Monitor[] = [];
+    let monitors: any[] = [];
     if (selectedMonitors.results && selectedMonitors.results.length > 0) {
       const monitorIds = selectedMonitors.results.map(m => m.monitor_id);
-      
       if (monitorIds.length > 0) {
-        const monitorsResult = await repositories.getMonitorsByIds(env.DB, monitorIds);
-        
-        if (monitorsResult.results) {
-          // 获取每个监控的历史记录
-          monitors = await Promise.all(monitorsResult.results.map(async (monitor) => {
-            const historyResult = await repositories.getMonitorHistory(env.DB, monitor.id);
-            
-            // 将历史记录转换为状态数组
-            const history = historyResult.results 
-              ? historyResult.results.map(h => h.status)
-              : Array(24).fill('unknown');
-              
-            return {
-              ...monitor,
-              history
-            };
-          }));
+        for (const monitorId of monitorIds) {
+          const monitor = await repositories.getMonitorById(env.DB, monitorId);
+          const historyResult = await repositories.getMonitorStatusHistory(env.DB, monitor.id);
+          monitors.push({
+            ...monitor,
+            history: historyResult.results
+          });
         }
       }
     }
@@ -251,15 +222,6 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
         }
       }
     }
-    
-    // 为监控项添加必要的字段
-    const enrichedMonitors = monitors.map((monitor: any) => ({
-      ...monitor,
-      status: monitor.status || 'unknown',
-      uptime: monitor.uptime || 0,
-      response_time: monitor.response_time || 0,
-      history: monitor.history || Array(24).fill('unknown')
-    }));
     
     // 为客户端添加资源使用情况字段
     const enrichedAgents = agents.map((agent: any) => {
@@ -295,7 +257,7 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
         description: config.description,
         logoUrl: config.logo_url,
         customCss: config.custom_css,
-        monitors: enrichedMonitors,
+        monitors: monitors,
         agents: enrichedAgents.map(agent => ({
           id: agent.id,
           name: agent.name,

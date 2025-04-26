@@ -1,4 +1,4 @@
-import { Bindings } from '../models/db';
+import { MonitorStatusHistory,Bindings } from '../models';
 
 // 状态页配置接口定义
 export interface StatusPageConfig {
@@ -29,7 +29,7 @@ export interface Monitor {
   last_checked?: string;
   created_at: string;
   updated_at: string;
-  history?: string[];
+  history?: MonitorStatusHistory[];
 }
 
 // 客户端接口
@@ -188,28 +188,7 @@ export async function getSelectedAgents(db: Bindings['DB'], configId: number) {
   ).bind(configId).all<{ agent_id: number }>();
 }
 
-// 获取监控项详情
-export async function getMonitorsByIds(db: Bindings['DB'], monitorIds: number[]) {
-  if (monitorIds.length === 0) {
-    return { results: [] };
-  }
-  
-  const placeholders = monitorIds.map(() => '?').join(',');
-  return await db.prepare(
-    `SELECT * FROM monitors WHERE id IN (${placeholders})`
-  ).bind(...monitorIds).all<Monitor>();
-}
 
-// 获取监控项历史状态记录
-export async function getMonitorHistory(db: Bindings['DB'], monitorId: number, limit: number = 24) {
-  return await db.prepare(
-    `SELECT status, timestamp 
-     FROM monitor_status_history 
-     WHERE monitor_id = ? 
-     ORDER BY timestamp DESC 
-     LIMIT ?`
-  ).bind(monitorId, limit).all<{status: string, timestamp: string}>();
-}
 
 // 获取客户端详情
 export async function getAgentsByIds(db: Bindings['DB'], agentIds: number[]) {

@@ -1,9 +1,10 @@
 import { Box, Card, Flex, Text, Badge } from '@radix-ui/themes';
 import { CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { Monitor } from '../types/monitors';
-import HeartbeatGrid from './HeartbeatGrid';
 import '../styles/components.css';
 import { useTranslation } from 'react-i18next';
+import StatusBar from './StatusBar';
+import ResponseTimeChart from './ResponseTimeChart';
 
 interface MonitorCardProps {
   monitor: Monitor & { 
@@ -63,16 +64,22 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
           </Badge>
         </Flex>
         
-        <Flex align="center" gap="2" style={{ width: '100%', minHeight: '8px' }}>
-          <Text size="1" color="gray">
-            {t('monitorCard.responseTime')}: {monitor.response_time || t('monitorCard.unknown')}ms
-          </Text>
-        </Flex>
+
           
+        {/* 状态条显示 */}
         <Box pt="2" style={{ width: '100%' }}>
-          <HeartbeatGrid 
-            uptime={monitor.uptime || monitor.uptime_percentage || 0} 
-            history={monitor.history} 
+          <StatusBar 
+            status={currentStatus} 
+            history={monitor.history}
+          />
+        </Box>
+
+        {/* 响应时间图表 */}
+        <Box pt="2" style={{ width: '100%' }}>
+          <ResponseTimeChart 
+            history={monitor.history}
+            height={150} 
+            showTimeLabels={true}
           />
         </Box>
       </Flex>

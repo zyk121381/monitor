@@ -60,6 +60,7 @@ const zhCN = {
     'common.seconds': '秒',
     'common.minute': '分钟',
     'common.minutes': '分钟',
+    'common.date': '日期',
     'common.close': '关闭',
     'common.unknown': '未知',
     'common.comingSoon': '即将推出的功能',
@@ -172,6 +173,10 @@ const zhCN = {
     // 检查历史记录
     'monitor.history.time': '时间',
     'monitor.history.responseTime': '响应时间',
+    'monitor.history.records': '记录数',
+    'monitor.history.availability': '可用率',
+    'monitor.history.latest': '最新记录',
+    'monitor.history.error': '错误',
     
     // 创建/编辑监控
     'monitor.form.title.create': '创建监控',

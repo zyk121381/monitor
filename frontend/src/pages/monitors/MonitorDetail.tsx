@@ -35,22 +35,15 @@ const MonitorDetail = () => {
   // 获取监控详情数据
   const fetchMonitorData = async () => {
     if (!id) return;
-    
-    try {
       setLoading(true);
       const response = await getMonitor(parseInt(id));
       
       if (response.success && response.monitor) {
         setMonitor(response.monitor);
       } else {
-        setError(response.message || t('common.error.fetch'));
+        setError(t('common.error.fetch'));
       }
-    } catch (err) {
-      console.error(t('common.error.fetch'), err);
-      setError(t('common.error.fetch'));
-    } finally {
       setLoading(false);
-    }
   };
 
   // 组件加载时获取数据
@@ -70,55 +63,35 @@ const MonitorDetail = () => {
   // 手动检查监控状态
   const handleCheck = async () => {
     if (!id) return;
-    
-    try {
       setLoading(true);
       const response = await checkMonitor(parseInt(id));
-      
-      if (response.status === 'up' || response.status === 'down') {
-        // 重新获取监控数据以显示最新状态
-        await fetchMonitorData();
+      if (response.success) {
         setToastMessage(t('monitor.checkCompleted'));
         setToastType('success');
         setToastOpen(true);
       } else {
-        setToastMessage(response.error || t('monitor.checkFailed'));
+        setToastMessage(t('monitor.checkFailed'));
         setToastType('error');
         setToastOpen(true);
       }
-    } catch (err) {
-      console.error(t('monitor.checkFailed'), err);
-      setToastMessage(t('monitor.checkFailed'));
-      setToastType('error');
-      setToastOpen(true);
-    } finally {
       setLoading(false);
-    }
   };
 
   // 删除监控
   const handleDelete = async () => {
     if (!id || !window.confirm(t('monitors.delete.confirm'))) return;
     
-    try {
-      const response = await deleteMonitor(parseInt(id));
+    const response = await deleteMonitor(parseInt(id));
+    if (response.success) {
+      setToastMessage(t('monitor.deleteSuccess'));
+      setToastType('success');
+      setToastOpen(true);
       
-      if (response.success) {
-        setToastMessage(t('monitor.deleteSuccess'));
-        setToastType('success');
-        setToastOpen(true);
-        
-        // 短暂延迟后导航，让用户有时间看到提示
-        setTimeout(() => {
-          navigate('/monitors');
-        }, 1500);
-      } else {
-        setToastMessage(response.message || t('monitor.deleteFailed'));
-        setToastType('error');
-        setToastOpen(true);
-      }
-    } catch (err) {
-      console.error(t('monitor.deleteFailed'), err);
+      // 短暂延迟后导航，让用户有时间看到提示
+      setTimeout(() => {
+        navigate('/monitors');
+      }, 1500);
+    } else {
       setToastMessage(t('monitor.deleteFailed'));
       setToastType('error');
       setToastOpen(true);
@@ -222,7 +195,7 @@ const MonitorDetail = () => {
               <Flex direction="column" gap="3">
               <Heading size="4">{t('monitor.threeMonthsHistory')}</Heading>
               <Box>
-              <StatusBar status={monitor.status} uptime={monitor.uptime_percentage || monitor.uptime || 0} history={monitor.history || []} />
+              <StatusBar status={monitor.status} history={monitor.history || []} />
               </Box>
                   
                 </Flex>

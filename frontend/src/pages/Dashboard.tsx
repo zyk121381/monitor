@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Text, Grid, Button, Container } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text, Button, Container } from '@radix-ui/themes';
 import { CheckCircledIcon, CrossCircledIcon, ClockIcon, GlobeIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { Link } from 'react-router-dom';
 import { getAllMonitors } from '../services/api/monitors';
 import { Monitor } from '../types/monitors';
 import { getAllAgents } from '../services/api/agents';
 import { Agent } from '../types/agents';
 import StatusSummaryCard from '../components/StatusSummaryCard';
-import MonitorCard from '../components/MonitorCard';
-import AgentCard from '../components/AgentCard';
 import '../styles/components.css';
 import { useTranslation } from 'react-i18next';
 
@@ -165,36 +162,6 @@ const Dashboard = () => {
                 <StatusSummaryCard title={t('navbar.agentMonitors')} items={agentStatusItems} />
               </Box>
             </Flex>
-          </Box>
-          
-          {/* API监控状态 */}
-          <Box py="5">
-            <Flex justify="between" align="center" mb="4">
-              <Heading size="5">{t('navbar.apiMonitors')}</Heading>
-              <Button variant="soft" asChild>
-                <Link to="/monitors">{t('monitors.title')}</Link>
-              </Button>
-            </Flex>
-            <Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">
-              {monitors.slice(0, 3).map(monitor => (
-                <MonitorCard key={monitor.id} monitor={monitor} />
-              ))}
-            </Grid>
-          </Box>
-          
-          {/* 客户端状态 */}
-          <Box py="5">
-            <Flex justify="between" align="center" mb="4">
-              <Heading size="5">{t('navbar.agentMonitors')}</Heading>
-              <Button variant="soft" asChild>
-                <Link to="/agents">{t('agents.title')}</Link>
-              </Button>
-            </Flex>
-            <Grid columns={{ initial: '1', sm: '2', lg: '3' }} gap="4">
-              {agents.slice(0, 3).map((agent) => (
-                <AgentCard key={agent.id} agent={agent} />
-              ))}
-            </Grid>
           </Box>
         </Box>
       </Container>

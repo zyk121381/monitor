@@ -86,6 +86,18 @@ export async function getMonitorById(db: Bindings['DB'], id: number) {
   return monitor;
 }
 
+// 批量获取监控项详情
+export async function getMonitorsByIds(db: Bindings['DB'], monitorIds: number[]) {
+  if (monitorIds.length === 0) {
+    return { results: [] };
+  }
+  
+  const placeholders = monitorIds.map(() => '?').join(',');
+  return await db.prepare(
+    `SELECT * FROM monitors WHERE id IN (${placeholders})`
+  ).bind(...monitorIds).all<Monitor>();
+}
+
 // 获取监控状态历史
 export async function getMonitorStatusHistory(db: Bindings['DB'], monitorId: number) {
   return await db.prepare(
