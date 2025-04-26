@@ -5,24 +5,6 @@
 
 import { Bindings } from '../models/db';
 
-/**
- * 检查表中是否存在特定字段
- */
-async function columnExists(env: Bindings, table: string, column: string): Promise<boolean> {
-  try {
-    const tableInfo = await env.DB.prepare(
-      `PRAGMA table_info(${table})`
-    ).all();
-    
-    return tableInfo.results?.some(
-      (col: any) => col.name === column
-    ) || false;
-  } catch (error) {
-    console.error(`检查字段 ${column} 是否存在时出错:`, error);
-    return false;
-  }
-}
-
 export async function migrateFrom003To004(env: Bindings): Promise<{ success: boolean, message: string }> {
   try {
     console.log('开始从v0.0.3迁移到v0.0.4...');
@@ -37,17 +19,6 @@ export async function migrateFrom003To004(env: Bindings): Promise<{ success: boo
       return {
         success: true, 
         message: 'agents 表不存在，跳过迁移',
-      };
-    }
-    
-    // 检查 ip_addresses 字段是否存在
-    const hasIpAddressesColumn = await columnExists(env, 'agents', 'ip_addresses');
-    
-    if (hasIpAddressesColumn) {
-      console.log('ip_addresses 字段已存在，无需迁移');
-      return {
-        success: true,
-        message: 'ip_addresses 字段已存在，无需迁移',
       };
     }
     

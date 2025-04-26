@@ -5,8 +5,7 @@ import {
   CreateMonitorRequest, 
   UpdateMonitorRequest, 
   HistoryResponse, 
-  ChecksResponse, 
-  CheckResponse,
+  MonitorStatusHistory
 } from '../../types/monitors';
 
 // 获取所有监控
@@ -45,14 +44,9 @@ export const getMonitorHistory = async (id: number): Promise<HistoryResponse> =>
   return response.data;
 };
 
-// 获取监控检查记录
-export const getMonitorChecks = async (id: number, limit: number = 10): Promise<ChecksResponse> => {
-  const response = await api.get<ChecksResponse>(`/api/monitors/${id}/checks?limit=${limit}`);
-  return response.data;
-};
 
 // 手动检查监控
-export const checkMonitor = async (id: number): Promise<CheckResponse> => {
-  const response = await api.post<CheckResponse>(`/api/monitors/${id}/check`);
+export const checkMonitor = async (id: number): Promise<MonitorStatusHistory> => {
+  const response = await api.post<MonitorStatusHistory>(`/api/monitors/${id}/check`);
   return response.data;
 }; 

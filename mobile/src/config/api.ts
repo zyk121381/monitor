@@ -87,7 +87,6 @@ export const API_ENDPOINTS = {
   MONITORS: '/api/monitors',
   MONITOR_DETAIL: (id: number) => `/api/monitors/${id}`,
   MONITOR_HISTORY: (id: number) => `/api/monitors/${id}/history`,
-  MONITOR_CHECKS: (id: number) => `/api/monitors/${id}/checks`,
   MONITOR_CHECK: (id: number) => `/api/monitors/${id}/check`,
   
   // 客户端相关

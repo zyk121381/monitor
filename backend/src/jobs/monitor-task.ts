@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { Bindings } from '../models/db';
 import { Monitor } from '../models/monitor';
-import { cleanupOldRecords, getMonitorsToCheck, checkSingleMonitor as monitorServiceCheck } from '../services';
+import { getMonitorsToCheck, checkSingleMonitor as monitorServiceCheck } from '../services';
 import { shouldSendNotification, sendNotification } from '../services';
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
@@ -10,10 +10,6 @@ const monitorTask = new Hono<{ Bindings: Bindings }>();
 async function checkMonitors(c: any) {
   try {
     console.log('开始执行监控检查...');
-    
-    // 清理30天以前的历史记录
-    await cleanupOldRecords(c.env.DB);
-    
     // 获取当前时间
     const now = new Date();
     

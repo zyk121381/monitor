@@ -1,5 +1,5 @@
 import { Bindings } from '../models/db';
-import { Monitor, MonitorStatusHistory, MonitorCheck } from '../models/monitor';
+import { Monitor, MonitorStatusHistory } from '../models/monitor';
 
 // 定义操作结果的元数据类型
 interface DbResultMeta {
@@ -14,36 +14,28 @@ interface DbResultMeta {
 // 清理30天以前的历史记录
 export async function cleanupOldRecords(db: Bindings['DB']) {
   try {
-    console.log('开始清理30天以前的历史记录...');
+    console.log('开始清理90天以前的历史记录...');
     
     // 清理监控状态历史记录
     const deleteStatusHistoryResult = await db.prepare(`
       DELETE FROM monitor_status_history 
-      WHERE timestamp < datetime('now', '-30 days')
-    `).run();
-    
-    // 清理监控检查记录
-    const deleteChecksResult = await db.prepare(`
-      DELETE FROM monitor_checks 
-      WHERE checked_at < datetime('now', '-30 days')
+      WHERE timestamp < datetime('now', '-90 days')
     `).run();
     
     // 清理通知历史记录
     const deleteNotificationHistoryResult = await db.prepare(`
       DELETE FROM notification_history 
-      WHERE sent_at < datetime('now', '-30 days')
+      WHERE sent_at < datetime('now', '-90 days')
     `).run();
     
     const statusHistoryDeleted = (deleteStatusHistoryResult.meta as DbResultMeta)?.changes || 0;
-    const checksDeleted = (deleteChecksResult.meta as DbResultMeta)?.changes || 0;
     const notificationHistoryDeleted = (deleteNotificationHistoryResult.meta as DbResultMeta)?.changes || 0;
     
-    console.log(`清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${checksDeleted} 条检查记录，${notificationHistoryDeleted} 条通知历史记录`);
+    console.log(`清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${notificationHistoryDeleted} 条通知历史记录`);
     
     return {
       success: true,
       statusHistoryDeleted,
-      checksDeleted,
       notificationHistoryDeleted
     };
   } catch (error) {
@@ -103,44 +95,15 @@ export async function getMonitorStatusHistory(db: Bindings['DB'], monitorId: num
   ).bind(monitorId).all<MonitorStatusHistory>();
 }
 
-// 获取监控检查记录
-export async function getMonitorChecks(db: Bindings['DB'], monitorId: number, limit: number = 5) {
-  return await db.prepare(
-    `SELECT * FROM monitor_checks 
-     WHERE monitor_id = ? 
-     ORDER BY checked_at DESC 
-     LIMIT ?`
-  ).bind(monitorId, limit).all();
-}
-
 // 记录监控状态历史
-export async function insertMonitorStatusHistory(db: Bindings['DB'], monitorId: number, status: string) {
+export async function insertMonitorStatusHistory(db: Bindings['DB'], monitorId: number, status: string, response_time: number, status_code: number, error: string | null) {
   // 使用ISO格式的时间戳
   const now = new Date().toISOString();
   
   return await db.prepare(
-    `INSERT INTO monitor_status_history (monitor_id, status, timestamp) 
-     VALUES (?, ?, ?)`
-  ).bind(monitorId, status, now).run();
-}
-
-// 记录监控检查详情
-export async function insertMonitorCheck(
-  db: Bindings['DB'], 
-  monitorId: number, 
-  status: string, 
-  responseTime: number, 
-  statusCode: number | null, 
-  error: string | null = null
-) {
-  // 使用ISO格式的时间戳
-  const now = new Date().toISOString();
-  
-  return await db.prepare(
-    `INSERT INTO monitor_checks
-     (monitor_id, status, response_time, status_code, error, checked_at)
+    `INSERT INTO monitor_status_history (monitor_id, status, timestamp, response_time, status_code, error) 
      VALUES (?, ?, ?, ?, ?, ?)`
-  ).bind(monitorId, status, responseTime, statusCode, error, now).run();
+  ).bind(monitorId, status, now, response_time, status_code, error).run<MonitorStatusHistory>();
 }
 
 // 更新监控状态
@@ -173,13 +136,11 @@ export async function updateMonitorStatus(
 export async function recordMonitorError(
   db: Bindings['DB'], 
   monitorId: number, 
+  response_time: number,
   errorMessage: string
 ) {
   // 记录错误状态
-  await insertMonitorStatusHistory(db, monitorId, 'down');
-  
-  // 记录检查详情
-  await insertMonitorCheck(db, monitorId, 'down', 0, null, errorMessage);
+  await insertMonitorStatusHistory(db, monitorId, 'down', response_time, 0, errorMessage);
   
   // 使用ISO格式的时间戳
   const now = new Date().toISOString();
@@ -357,10 +318,6 @@ export async function deleteMonitor(db: Bindings['DB'], id: number) {
   // 先删除关联的历史数据
   await db.prepare(
     'DELETE FROM monitor_status_history WHERE monitor_id = ?'
-  ).bind(id).run();
-  
-  await db.prepare(
-    'DELETE FROM monitor_checks WHERE monitor_id = ?'
   ).bind(id).run();
   
   // 执行删除监控

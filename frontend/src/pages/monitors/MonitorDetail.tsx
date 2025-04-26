@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Flex, Heading, Text, Button, Card, Grid, Badge, Tabs, Table } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, ArrowLeftIcon, Pencil1Icon, TrashIcon, ReloadIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { Box, Flex, Heading, Text, Button, Card, Grid, Badge, } from '@radix-ui/themes';
+import {  ArrowLeftIcon, Pencil1Icon, TrashIcon, ReloadIcon, Cross2Icon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
 import { getMonitor, deleteMonitor, checkMonitor } from '../../services/api/monitors';
-import { Monitor, MonitorStatusHistory } from '../../types/monitors';
+import { Monitor } from '../../types/monitors';
 import { useTranslation } from 'react-i18next';
+import ResponseTimeChart from '../../components/ResponseTimeChart';
+import StatusBar from '../../components/StatusBar';
 
 // 将范围状态码转换为可读形式（2 -> 2xx, 3 -> 3xx 等）
 const formatStatusCode = (code: number | undefined): string => {
@@ -17,80 +19,6 @@ const formatStatusCode = (code: number | undefined): string => {
   }
   // 其他正常显示数字
   return code.toString();
-};
-
-// 状态条组件 - 时间轴格子展示
-const StatusBar = ({ status, history = [] }: { status: string, uptime: number, history?: MonitorStatusHistory[] }) => {
-  const { t } = useTranslation();
-  
-  // 根据状态确定颜色
-  const getColor = (itemStatus: string) => {
-    switch (itemStatus) {
-      case 'up':
-        return 'var(--green-5)';
-      case 'down':
-        return 'var(--red-5)';
-      default:
-        return 'var(--gray-5)';
-    }
-  };
-
-  // 根据状态确定悬停颜色
-  const getHoverColor = (itemStatus: string) => {
-    switch (itemStatus) {
-      case 'up':
-        return 'var(--green-6)';
-      case 'down':
-        return 'var(--red-6)';
-      default:
-        return 'var(--gray-6)';
-    }
-  };
-
-  // 最多显示40个时间点
-  const maxPoints = 40;
-  
-  // 获取最近的历史记录
-  let displayHistory = history.slice(-maxPoints);
-  
-  // 如果历史记录为空，创建一个初始状态记录
-  if (displayHistory.length === 0) {
-    displayHistory = [{
-      id: 0,
-      monitor_id: 0,
-      status: status as 'up' | 'down',
-      response_time: 0,
-      created_at: new Date().toISOString()
-    }];
-  }
-  
-  // 计算每个格子的宽度
-  const boxWidth = `${100 / maxPoints}%`;
-  
-  return (
-    <Flex gap="1" style={{ width: '100%' }}>
-      {displayHistory.map((item, index) => (
-        <Box
-          key={item.id || `empty-${index}`}
-          style={{
-            width: boxWidth,
-            height: '20px',
-            backgroundColor: getColor(item.status),
-            borderRadius: '2px',
-            transition: 'background-color 0.2s',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = getHoverColor(item.status);
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = getColor(item.status);
-          }}
-          title={`${t('common.status')}: ${item.status === 'up' ? t('monitor.status.normal') : item.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}\n${t('monitor.history.time')}: ${new Date(item.created_at).toLocaleString()}`}
-        />
-      ))}
-    </Flex>
-  );
 };
 
 const MonitorDetail = () => {
@@ -147,14 +75,14 @@ const MonitorDetail = () => {
       setLoading(true);
       const response = await checkMonitor(parseInt(id));
       
-      if (response.success) {
+      if (response.status === 'up' || response.status === 'down') {
         // 重新获取监控数据以显示最新状态
         await fetchMonitorData();
         setToastMessage(t('monitor.checkCompleted'));
         setToastType('success');
         setToastOpen(true);
       } else {
-        setToastMessage(response.message || t('monitor.checkFailed'));
+        setToastMessage(response.error || t('monitor.checkFailed'));
         setToastType('error');
         setToastOpen(true);
       }
@@ -194,18 +122,6 @@ const MonitorDetail = () => {
       setToastMessage(t('monitor.deleteFailed'));
       setToastType('error');
       setToastOpen(true);
-    }
-  };
-
-  // 状态图标
-  const StatusIcon = ({ status }: { status: string }) => {
-    switch (status) {
-      case 'up':
-        return <CheckCircledIcon style={{ color: 'var(--green-9)' }} />;
-      case 'down':
-        return <CrossCircledIcon style={{ color: 'var(--red-9)' }} />;
-      default:
-        return <QuestionMarkCircledIcon style={{ color: 'var(--gray-9)' }} />;
     }
   };
 
@@ -265,41 +181,11 @@ const MonitorDetail = () => {
             </Button>
           </Flex>
         </Flex>
-
-        <Tabs.Root defaultValue="overview">
-          <Tabs.List>
-            <Tabs.Trigger value="overview">{t('monitor.tabs.overview')}</Tabs.Trigger>
-            <Tabs.Trigger value="history">{t('monitor.tabs.history')}</Tabs.Trigger>
-            <Tabs.Trigger value="settings">{t('monitor.tabs.settings')}</Tabs.Trigger>
-          </Tabs.List>
-
           <Box pt="4" className="detail-content">
-            <Tabs.Content value="overview">
-              <Grid columns={{ initial: '1', sm: '2' }} gap="4">
-                <Card>
-                  <Flex direction="column" gap="3">
-                    <Heading size="4">{t('monitor.status.info')}</Heading>
-                    <Grid columns="2" gap="3">
-                      <Text>{t('common.status')}:</Text>
-                      <Flex align="center" gap="1">
-                        <StatusIcon status={monitor.status} />
-                        <Text>{monitor.status === 'up' ? t('monitor.status.normal') : monitor.status === 'down' ? t('monitor.status.failure') : t('monitor.status.pending')}</Text>
-                      </Flex>
-                      <Text>{t('monitor.uptime')}:</Text>
-                      <Box style={{ gridColumn: "2" }}>
-                        <StatusBar status={monitor.status} uptime={monitor.uptime_percentage || monitor.uptime || 0} history={monitor.history || []} />
-                      </Box>
-                      <Text>{t('monitor.responseTime')}:</Text>
-                      <Text>{monitor.response_time ? `${monitor.response_time}ms` : '-'}</Text>
-                      <Text>{t('monitor.lastCheck')}:</Text>
-                      <Text>{monitor.last_checked || t('monitor.notChecked')}</Text>
-                    </Grid>
-                  </Flex>
-                </Card>
 
                 <Card>
                   <Flex direction="column" gap="3">
-                    <Heading size="4">{t('monitor.basicInfo')}</Heading>
+                    <Heading size="4">{t('monitor.detailInfo')}</Heading>
                     <Grid columns="2" gap="3">
                       <Text>URL:</Text>
                       <Text>{monitor.url}</Text>
@@ -313,80 +199,35 @@ const MonitorDetail = () => {
                       <Text>{formatStatusCode(monitor.expected_status)}</Text>
                       <Text>{t('monitor.createTime')}:</Text>
                       <Text>{new Date(monitor.created_at).toLocaleString()}</Text>
+                      <Text>{t('monitor.headers')}:</Text>
+                      <Text style={{ overflowWrap: 'break-word' }}>
+                        {typeof monitor.headers === 'string' ? monitor.headers : JSON.stringify(monitor.headers)}
+                      </Text>
+                      <Text>{t('monitor.body')}:</Text>
+                      <Text style={{ overflowWrap: 'break-word' }}>{monitor.body || '-'}</Text>
                     </Grid>
                   </Flex>
-                </Card>
-              </Grid>
-            </Tabs.Content>
-
-            <Tabs.Content value="history">
-              <Card>
-                <Heading size="4" mb="3">{t('monitor.checkHistory')}</Heading>
-                {monitor.checks && monitor.checks.length > 0 ? (
-                  <Table.Root>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.ColumnHeaderCell>{t('monitor.history.time')}</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>{t('monitor.history.status')}</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>{t('monitor.history.responseTime')}</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>{t('monitor.history.statusCode')}</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>{t('monitor.history.error')}</Table.ColumnHeaderCell>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {monitor.checks.map((check) => (
-                        <Table.Row key={check.id}>
-                          <Table.Cell>{new Date(check.checked_at || check.created_at).toLocaleString()}</Table.Cell>
-                          <Table.Cell>
-                            <Flex align="center" gap="1">
-                              <StatusIcon status={check.status} />
-                              <Badge color={statusColors[check.status]}>
-                                {check.status === 'up' ? t('monitor.status.normal') : t('monitor.status.failure')}
-                              </Badge>
-                            </Flex>
-                          </Table.Cell>
-                          <Table.Cell>{check.response_time ? `${check.response_time}ms` : '-'}</Table.Cell>
-                          <Table.Cell>{check.status_code || '-'}</Table.Cell>
-                          <Table.Cell>{check.error || '-'}</Table.Cell>
-                        </Table.Row>
-                      ))}
-                    </Table.Body>
-                  </Table.Root>
-                ) : (
-                  <Text>{t('monitor.noCheckHistory')}</Text>
-                )}
+                </Card>             
+              {/* 添加响应时间图表 */}
+              <Card mt="4">
+            
+                <Flex direction="column" gap="3" mt="4">
+                  <Heading size="4">{t('monitor.oneDayHistory')}</Heading>
+                  <Box>
+                    <ResponseTimeChart history={monitor.history || []} height={220} />
+                  </Box>
+                </Flex>
               </Card>
-            </Tabs.Content>
-
-            <Tabs.Content value="settings">
-              <Card>
-                <Heading size="4" mb="3">{t('monitor.configDetails')}</Heading>
-                <Grid columns="2" gap="3">
-                  <Text>{t('common.name')}:</Text>
-                  <Text>{monitor.name}</Text>
-                  <Text>URL:</Text>
-                  <Text>{monitor.url}</Text>
-                  <Text>{t('monitor.method')}:</Text>
-                  <Text>{monitor.method}</Text>
-                  <Text>{t('monitor.interval')}:</Text>
-                  <Text>{monitor.interval} {t('common.seconds')}</Text>
-                  <Text>{t('monitor.timeout')}:</Text>
-                  <Text>{monitor.timeout} {t('common.seconds')}</Text>
-                  <Text>{t('monitor.expectedStatus')}:</Text>
-                  <Text>{formatStatusCode(monitor.expected_status)}</Text>
-                  <Text>{t('monitor.headers')}:</Text>
-                  <Text style={{ overflowWrap: 'break-word' }}>
-                    {typeof monitor.headers === 'string' ? monitor.headers : JSON.stringify(monitor.headers)}
-                  </Text>
-                  <Text>{t('monitor.body')}:</Text>
-                  <Text style={{ overflowWrap: 'break-word' }}>{monitor.body || '-'}</Text>
-                  <Text>{t('common.status')}:</Text>
-                  <Text>{(monitor.active === 1 || monitor.status === 'up' || monitor.status === 'down') ? t('monitor.active') : t('monitor.inactive')}</Text>
-                </Grid>
+              <Card mt="4">
+              <Flex direction="column" gap="3">
+              <Heading size="4">{t('monitor.threeMonthsHistory')}</Heading>
+              <Box>
+              <StatusBar status={monitor.status} uptime={monitor.uptime_percentage || monitor.uptime || 0} history={monitor.history || []} />
+              </Box>
+                  
+                </Flex>
               </Card>
-            </Tabs.Content>
           </Box>
-        </Tabs.Root>
         <Toast.Provider swipeDirection="right">
           <Toast.Root 
             className="ToastRoot" 

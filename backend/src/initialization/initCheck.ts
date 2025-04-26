@@ -10,8 +10,6 @@ import {
   createNotificationTemplates,
   createNotificationChannelsAndSettings
 } from './database';
-import { migrateFrom003To004 } from '../migrations/migrate-0.0.3-to-0.0.4';
-import { migrateFrom004To005 } from '../migrations/migrate-0.0.4-to-0.0.5';
 
 // 检查表是否存在
 async function tableExists(env: Bindings, tableName: string): Promise<boolean> {
@@ -36,7 +34,6 @@ export async function checkAndInitializeDatabase(env: Bindings): Promise<{ initi
     const tablesToCheck = [
       'users',
       'monitors',
-      'monitor_checks',
       'monitor_status_history',
       'agents',
       'status_page_config',
@@ -138,10 +135,6 @@ export async function checkAndInitializeDatabase(env: Bindings): Promise<{ initi
       console.log('通知渠道表不存在，跳过检查通知渠道数据...');
     }
     
-    // 在所有初始化操作完成后执行迁移脚本，确保数据库表已存在
-    console.log('检查并执行数据库迁移...');
-    await runMigrations(env);
-    
     return {
       initialized,
       message: initialized ? '数据库初始化成功' : '数据库已经初始化，不需要重新初始化',
@@ -152,24 +145,3 @@ export async function checkAndInitializeDatabase(env: Bindings): Promise<{ initi
   }
 }
 
-// 执行所有迁移脚本
-async function runMigrations(env: Bindings): Promise<void> {
-  try {
-    console.log('开始执行数据库迁移...');
-    
-    // 从v0.0.3迁移到v0.0.4
-    const migration1Result = await migrateFrom003To004(env);
-    console.log(`迁移 0.0.3 -> 0.0.4: ${migration1Result.message}`);
-    
-    // 从v0.0.4迁移到v0.0.5
-    const migration2Result = await migrateFrom004To005(env);
-    console.log(`迁移 0.0.4 -> 0.0.5: ${migration2Result.message}`);
-    
-    // 将来可以在这里添加更多迁移脚本
-    
-    console.log('所有迁移已完成');
-  } catch (error) {
-    console.error('执行迁移脚本时出错:', error);
-    throw error;
-  }
-} 

@@ -25,15 +25,7 @@ export interface MonitorStatusHistory {
   monitor_id: number;
   status: string;
   timestamp: string;
-}
-
-// 监控检查记录类型
-export interface MonitorCheck {
-  id: number;
-  monitor_id: number;
-  status: string;
   response_time: number;
   status_code: number;
   error: string | null;
-  checked_at: string;
-} 
+}

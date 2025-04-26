@@ -158,6 +158,9 @@ const enUS = {
     'monitor.history': 'History',
     'monitor.uptime': 'Uptime',
     'monitor.responseTime': 'Response Time',
+    'monitor.responseTimeHistory': 'Response Time History',
+    'monitor.noResponseTimeData': 'No response time data available',
+    'monitor.interpolatedData': 'Interpolated data point',
     'monitor.events': 'Events',
     'monitor.noEvents': 'No events',
     'monitor.manualCheck': 'Manual Check',
@@ -182,7 +185,7 @@ const enUS = {
     'monitor.lastCheck': 'Last checked',
     
     // Basic information
-    'monitor.basicInfo': 'Basic Information',
+    'monitor.detailInfo': 'Basic Information',
     'monitor.method': 'Method',
     'monitor.interval': 'Check Interval',
     'monitor.timeout': 'Timeout',

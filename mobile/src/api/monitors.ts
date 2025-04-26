@@ -171,7 +171,7 @@ export const getMonitorHistory = async (id: number): Promise<MonitorStatusHistor
 // 获取监控检查记录
 export const getMonitorChecks = async (id: number, limit: number = 10): Promise<MonitorCheck[]> => {
   try {
-    const response = await axios.get(`${API_ENDPOINTS.MONITOR_CHECKS(id)}?limit=${limit}`);
+    const response = await axios.get(`${API_ENDPOINTS.MONITOR_HISTORY(id)}?limit=${limit}`);
     
     if (response.data.success) {
       return response.data.checks || [];

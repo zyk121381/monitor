@@ -89,8 +89,6 @@ const zhCN = {
     'login.username': '用户名',
     'login.password': '密码',
     'login.button': '登录',
-    'login.registerLink': '没有账号？注册',
-    'login.rememberMe': '记住我',
     'login.error': '用户名或密码错误',
     
     // 注册页面
@@ -111,32 +109,21 @@ const zhCN = {
     'dashboard.summary': '概览',
     'dashboard.totalMonitors': '监控总数',
     'dashboard.activeMonitors': '活动监控',
-    'dashboard.failingMonitors': '异常监控',
     'dashboard.uptime': '正常运行时间',
-    'dashboard.responseTime': '响应时间',
-    'dashboard.recent': '最近事件',
-    'dashboard.noEvents': '暂无事件',
     'dashboard.refresh': '刷新',
     
     // 监控列表
     'monitors.title': '监控列表',
     'monitors.create': '创建监控',
     'monitors.noMonitors': '暂无监控',
-    'monitors.filter.all': '全部',
-    'monitors.filter.active': '活动',
-    'monitors.filter.paused': '暂停',
     'monitors.status.up': '正常',
     'monitors.status.down': '异常',
-    'monitors.status.paused': '暂停',
-    'monitors.lastChecked': '最后检查',
     'monitors.pageTitle': 'API监控',
     'monitors.loadingError': '获取监控数据失败',
     'monitors.delete.confirm': '确定要删除此监控吗？',
     'monitors.delete.failed': '删除监控失败',
     'monitors.addOne': '添加监控',
     'monitors.notFound': '没有找到监控',
-    'monitors.cardView': '卡片视图',
-    'monitors.tableView': '列表视图',
     'monitors.refresh': '刷新',
     'monitors.retry': '重试',
     'monitors.table.name': '名称',
@@ -153,13 +140,12 @@ const zhCN = {
     'monitor.details': '监控详情',
     'monitor.edit': '编辑监控',
     'monitor.delete': '删除监控',
-    'monitor.pause': '暂停监控',
-    'monitor.resume': '恢复监控',
     'monitor.history': '历史记录',
     'monitor.uptime': '正常运行时间',
     'monitor.responseTime': '响应时间',
-    'monitor.events': '事件',
-    'monitor.noEvents': '暂无事件',
+    'monitor.oneDayHistory': '24小时记录',
+    'monitor.threeMonthsHistory': "90天记录",
+    'monitor.noResponseTimeData': '暂无响应时间数据',
     'monitor.manualCheck': '手动检查',
     'monitor.checkCompleted': '监控检查已完成',
     'monitor.checkFailed': '检查失败',
@@ -168,42 +154,24 @@ const zhCN = {
     'monitor.notExist': '监控不存在',
     'monitor.returnToList': '返回监控列表',
     
-    // 监控详情页标签
-    'monitor.tabs.overview': '概览',
-    'monitor.tabs.history': '检查历史',
-    'monitor.tabs.settings': '配置详情',
-    
     // 监控状态信息
-    'monitor.status.info': '状态信息',
     'monitor.status.normal': '正常',
     'monitor.status.failure': '故障',
     'monitor.status.pending': '等待检查',
-    'monitor.notChecked': '尚未检查',
-    'monitor.lastCheck': '最后检查',
     
-    // 基本信息
-    'monitor.basicInfo': '基本信息',
+    // 详细信息
+    'monitor.detailInfo': '详细信息',
     'monitor.method': '方法',
     'monitor.interval': '检查间隔',
     'monitor.timeout': '超时时间',
     'monitor.expectedStatus': '预期状态码',
     'monitor.createTime': '创建时间',
-    
-    // 检查历史记录
-    'monitor.checkHistory': '检查历史',
-    'monitor.noCheckHistory': '暂无检查历史记录',
-    'monitor.history.time': '时间',
-    'monitor.history.status': '状态',
-    'monitor.history.responseTime': '响应时间',
-    'monitor.history.statusCode': '状态码',
-    'monitor.history.error': '错误',
-    
-    // 配置详情
-    'monitor.configDetails': '配置详情',
-    'monitor.active': '激活',
-    'monitor.inactive': '未激活',
     'monitor.headers': '请求头',
     'monitor.body': '请求体',
+    
+    // 检查历史记录
+    'monitor.history.time': '时间',
+    'monitor.history.responseTime': '响应时间',
     
     // 创建/编辑监控
     'monitor.form.title.create': '创建监控',
@@ -328,9 +296,6 @@ const zhCN = {
     'profile.edit': '编辑资料',
     'profile.changePassword': '修改密码',
     'profile.changePasswordButton': '修改密码',
-    'profile.apiKeys': 'API密钥',
-    'profile.createApiKey': '创建API密钥',
-    'profile.notifications': '通知设置',
     'profile.basicInfo': '基本信息',
     'profile.update': '更新个人资料',
     'profile.currentPassword': '当前密码',
@@ -346,13 +311,10 @@ const zhCN = {
     // 状态页
     'statusPage.title': '系统状态',
     'statusPage.allOperational': '所有系统正常运行',
-    'statusPage.someIssues': '部分系统存在问题',
-    'statusPage.majorOutage': '系统存在重大故障',
     'statusPage.lastUpdated': '最后更新',
     'statusPage.justNow': '刚刚',
     'statusPage.apiServices': 'API服务状态',
     'statusPage.agentStatus': '客户端监控状态',
-    'statusPage.displayResourceData': '显示资源数据:',
     
     // 状态页配置
     'statusPageConfig.title': '状态页配置',
@@ -371,11 +333,6 @@ const zhCN = {
     'statusPageConfig.selectionNote': '注意：如果您没有选择任何API服务或客户端，对应的部分将不会在状态页上显示。',
     'statusPageConfig.selectServicesPrompt': '选择要在状态页上显示的API服务',
     'statusPageConfig.selectAgentsPrompt': '选择要在状态页上显示的客户端',
-    'statusPageConfig.logoUrl': 'Logo URL (可选)',
-    'statusPageConfig.logoUrlPlaceholder': '输入logo图片的URL',
-    'statusPageConfig.customCss': '自定义CSS (可选)',
-    'statusPageConfig.customCssPlaceholder': '输入自定义CSS样式',
-    'statusPageConfig.customCssHelp': '高级用户可以添加自定义CSS来修改状态页的外观',
     'statusPageConfig.configSaved': '状态页配置已保存',
     'statusPageConfig.saveError': '保存状态页配置失败',
     'statusPageConfig.fetchingConfig': '开始获取状态页配置...',

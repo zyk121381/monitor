@@ -122,28 +122,6 @@ monitors.get('/:id/history', async (c) => {
     return c.json({ success: false, message: '获取监控历史失败' }, 500);
   }
 });
-
-// 获取监控检查记录
-monitors.get('/:id/checks', async (c) => {
-  try {
-    const id = parseInt(c.req.param('id'));
-    const payload = c.get('jwtPayload');
-    const limit = parseInt(c.req.query('limit') || '10');
-    
-    // 调用服务层获取监控检查记录
-    const result = await MonitorService.getMonitorChecksById(c.env.DB, id, payload.id, payload.role, limit);
-    
-    return c.json({ 
-      success: result.success, 
-      checks: result.checks,
-      message: result.message
-    }, result.status as any);
-  } catch (error) {
-    console.error('获取监控检查记录错误:', error);
-    return c.json({ success: false, message: '获取监控检查记录失败' }, 500);
-  }
-});
-
 // 手动检查单个监控
 monitors.post('/:id/check', async (c) => {
   try {

@@ -27,8 +27,10 @@ export async function migrateFrom004To005(env: Bindings): Promise<{ success: boo
     
     // 检查 notification_templates 表是否存在
     const hasTemplatesTable = await tableExists(env, 'notification_templates');
+
+    const hasMonitorStatusHistoryTable = await tableExists(env, 'monitor_status_history');
     
-    if (!hasTemplatesTable) {
+    if (!hasTemplatesTable && !hasMonitorStatusHistoryTable) {
       console.log('notification_templates 表不存在，跳过迁移');
       return {
         success: true, 
@@ -36,56 +38,21 @@ export async function migrateFrom004To005(env: Bindings): Promise<{ success: boo
       };
     }
     
-    // 获取所有通知模板
-    const templates = await env.DB.prepare(
-      'SELECT id, name, type FROM notification_templates'
-    ).all<{id: number, name: string, type: string}>();
-    
-    if (!templates.results || templates.results.length === 0) {
-      console.log('没有找到通知模板，跳过迁移');
-      return {
-        success: true,
-        message: '没有找到通知模板，跳过迁移',
-      };
-    }
-    
-    console.log(`找到 ${templates.results.length} 个通知模板，开始更新 type 字段...`);
-    
-    let updatedCount = 0;
-    
-    // 更新模板类型
-    for (const template of templates.results) {
-      let newType = template.type;
-      
-      // 根据模板名称判断适用的通知类型
-      if (template.name.includes('Agent') || template.name.includes('agent') || template.name.includes('客户端')) {
-        newType = 'agent';
-      } else if (template.name.includes('Monitor') || template.name.includes('monitor') || template.name.includes('监控')) {
-        newType = 'monitor';
-      } else if (template.name.includes('System') || template.name.includes('system') || template.name.includes('系统')) {
-        newType = 'system';
-      }
-      
-      // 如果类型需要更新
-      if (newType !== template.type) {
-        await env.DB.prepare(
-          'UPDATE notification_templates SET type = ? WHERE id = ?'
-        ).bind(newType, template.id).run();
-        
-        console.log(`已将模板 "${template.name}" (ID: ${template.id}) 的类型从 "${template.type}" 更新为 "${newType}"`);
-        updatedCount++;
-      }
-    }
-    
     // 再执行两个直接更新语句，确保覆盖所有情况
     await env.DB.exec("UPDATE notification_templates SET type = 'agent' WHERE name LIKE '%Agent%' OR name LIKE '%agent%'");
     await env.DB.exec("UPDATE notification_templates SET type = 'monitor' WHERE name LIKE '%Monitor%' OR name LIKE '%monitor%'");
     
-    console.log(`迁移完成: 共更新了 ${updatedCount} 个模板的类型字段`);
+
+    // 新增 monitor_status_history 表中的 response_time,status_code ,error;
+    await env.DB.exec("ALTER TABLE monitor_status_history ADD COLUMN response_time INTEGER");
+    await env.DB.exec("ALTER TABLE monitor_status_history ADD COLUMN status_code INTEGER");
+    await env.DB.exec("ALTER TABLE monitor_status_history ADD COLUMN error TEXT");
+
+    console.log(`迁移完成`);
     
     return {
       success: true,
-      message: `从v0.0.4到v0.0.5的迁移成功完成，共更新了 ${updatedCount} 个模板的类型字段`,
+      message: `从v0.0.4到v0.0.5的迁移成功完成`,
     };
   } catch (error) {
     console.error('迁移错误:', error);

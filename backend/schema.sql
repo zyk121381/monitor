@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS status_page_agents;
 DROP TABLE IF EXISTS status_page_monitors;
 DROP TABLE IF EXISTS status_page_config;
 DROP TABLE IF EXISTS monitor_status_history;
-DROP TABLE IF EXISTS monitor_checks;
 DROP TABLE IF EXISTS agents;
 DROP TABLE IF EXISTS monitors;
 DROP TABLE IF EXISTS users;
@@ -44,24 +43,15 @@ CREATE TABLE IF NOT EXISTS monitors (
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
--- 监控历史记录表
-CREATE TABLE IF NOT EXISTS monitor_checks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  monitor_id INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  response_time INTEGER,
-  status_code INTEGER,
-  error TEXT,
-  checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (monitor_id) REFERENCES monitors(id)
-);
-
--- 监控状态历史表（用于UI状态条展示）
+-- 监控状态历史表
 CREATE TABLE IF NOT EXISTS monitor_status_history (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   monitor_id INTEGER NOT NULL,
   status TEXT NOT NULL,
   timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  response_time INTEGER,
+  status_code INTEGER,
+  error TEXT,
   FOREIGN KEY (monitor_id) REFERENCES monitors(id)
 );
 

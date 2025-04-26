@@ -59,7 +59,7 @@ export async function checkMonitor(db: Bindings['DB'], monitor: models.Monitor) 
       console.error(`监控 ${monitor.name} (${monitor.url}) 请求失败: ${error}`);
       
       // 记录错误状态
-      await repositories.recordMonitorError(db, monitor.id, error);
+      await repositories.recordMonitorError(db, monitor.id, 0 ,error);
       
       return {
         success: false,
@@ -91,17 +91,7 @@ export async function checkMonitor(db: Bindings['DB'], monitor: models.Monitor) 
     const status = isExpectedStatus ? 'up' : 'down';
     
     // 记录状态历史
-    await repositories.insertMonitorStatusHistory(db, monitor.id, status);
-    
-    // 记录检查详情
-    await repositories.insertMonitorCheck(
-      db, 
-      monitor.id, 
-      status, 
-      responseTime, 
-      response.status, 
-      isExpectedStatus ? null : `状态码不符合预期: ${response.status}, 预期: ${getExpectedStatusDisplay(expectedStatus)}`
-    );
+    await repositories.insertMonitorStatusHistory(db, monitor.id, status, responseTime, response.status, error);
     
     // 更新监控状态
     await repositories.updateMonitorStatus(db, monitor.id, status, responseTime);
@@ -138,14 +128,10 @@ export async function getMonitorDetails(db: Bindings['DB'], id: number) {
 
   // 获取历史状态数据
   const historyResult = await repositories.getMonitorStatusHistory(db, id);
-  
-  // 获取最近的检查历史记录
-  const checksResult = await repositories.getMonitorChecks(db, id, 5);
-  
+
   return {
     ...monitor,
-    history: historyResult.results || [],
-    checks: checksResult.results || []
+    history: historyResult.results || []
   };
 }
 
@@ -242,15 +228,11 @@ export async function getMonitorById(db: Bindings['DB'], id: number, userId: num
     // 获取历史状态数据
     const historyResult = await repositories.getMonitorStatusHistory(db, id);
     
-    // 获取最近的检查历史记录
-    const checksResult = await repositories.getMonitorChecks(db, id, 5);
-    
     return { 
       success: true, 
       monitor: {
         ...monitor,
-        history: historyResult.results || [],
-        checks: checksResult.results || []
+        history: historyResult.results || []
       },
       status: 200
     };
@@ -478,55 +460,6 @@ export async function getMonitorStatusHistoryById(
     };
   }
 }
-
-/**
- * 获取监控检查记录
- * @param db 数据库连接
- * @param id 监控ID
- * @param userId 用户ID
- * @param userRole 用户角色
- * @param limit 限制数量
- * @returns 检查记录
- */
-export async function getMonitorChecksById(
-  db: Bindings['DB'],
-  id: number,
-  userId: number,
-  userRole: string,
-  limit: number = 10
-) {
-  try {
-    // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(db, id);
-    
-    if (!monitor) {
-      return { success: false, message: '监控不存在', status: 404 };
-    }
-    
-    // 检查权限
-    if (userRole !== 'admin' && monitor.created_by !== userId) {
-      return { success: false, message: '无权访问此监控检查记录', status: 403 };
-    }
-    
-    // 获取检查记录
-    const checksResult = await repositories.getMonitorChecks(db, id, limit);
-    
-    return { 
-      success: true, 
-      checks: checksResult.results || [],
-      status: 200
-    };
-  } catch (error) {
-    console.error('获取监控检查记录错误:', error);
-    return { 
-      success: false, 
-      message: '获取监控检查记录失败',
-      error: error instanceof Error ? error.message : String(error),
-      status: 500
-    };
-  }
-}
-
 /**
  * 手动检查监控并处理通知
  * @param db 数据库连接
