@@ -7,10 +7,8 @@ import {
   GlobeIcon,
   ExclamationTriangleIcon,
 } from "@radix-ui/react-icons";
-import { getAllMonitors } from "../services/api/monitors";
-import { Monitor } from "../types/monitors";
-import { getAllAgents } from "../services/api/agents";
-import { Agent } from "../types/agents";
+import { Monitor, Agent } from "../types";
+import { getDashboardData } from "../services/api/dashboard";
 import StatusSummaryCard from "../components/StatusSummaryCard";
 import "../styles/components.css";
 import { useTranslation } from "react-i18next";
@@ -24,49 +22,26 @@ const Dashboard = () => {
 
   // 获取所有数据
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        // 同时获取监控和客户端数据
-        const [monitorsResponse, agentsResponse] = await Promise.all([
-          getAllMonitors(),
-          getAllAgents(),
-        ]);
-
-        // 处理监控数据
-        if (monitorsResponse.success && monitorsResponse.monitors) {
-          setMonitors(monitorsResponse.monitors);
-        } else {
-          console.error("获取监控数据失败:", monitorsResponse.message);
-        }
-
-        // 处理客户端数据
-        if (agentsResponse.success && agentsResponse.agents) {
-          console.log("获取到客户端列表:", agentsResponse.agents);
-          setAgents(agentsResponse.agents);
-        } else {
-          console.error("获取客户端数据失败:", agentsResponse.message);
-        }
-      } catch (err) {
-        console.error("获取数据错误:", err);
-        setError(t("common.error"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-
     // 设置定时器，每分钟刷新一次数据
     const intervalId = setInterval(() => {
       console.log("Dashboard: 自动刷新数据...");
       fetchData();
-    }, 60000); // 60000ms = 1分钟
+    }, 180000); // 180000ms = 3分钟
 
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);
   }, [t]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const [dashboardResponse] = await Promise.all([getDashboardData()]);
+    if (dashboardResponse) {
+      setMonitors(dashboardResponse.monitors);
+      setAgents(dashboardResponse.agents);
+    }
+    setLoading(false);
+  };
 
   // 加载中显示
   if (loading) {

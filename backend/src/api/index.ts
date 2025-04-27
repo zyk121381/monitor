@@ -4,4 +4,4 @@ export * from "./agents";
 export * from "./users";
 export * from "./status";
 export * from "./notifications";
-export * from "./migrate";
+export * from "./dashboard";

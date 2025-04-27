@@ -11,7 +11,7 @@ notifications.get("/", async (c) => {
     const db = c.env.DB;
     const userId = c.get("jwtPayload").id;
 
-    const config = await NotificationService.getNotificationConfig(db, userId);
+    const config = await NotificationService.getNotificationConfig(db);
 
     return c.json({
       success: true,

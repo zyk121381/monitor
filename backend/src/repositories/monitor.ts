@@ -1,11 +1,9 @@
-import { Bindings } from "../models/db";
-import { Monitor, MonitorStatusHistory } from "../models/monitor";
-
-// 定义操作结果的元数据类型
-interface DbResultMeta {
-  changes?: number;
-  [key: string]: any;
-}
+import {
+  Bindings,
+  Monitor,
+  MonitorStatusHistory,
+  DbResultMeta,
+} from "../models";
 
 /**
  * 监控相关的数据库操作
@@ -393,83 +391,69 @@ export async function deleteMonitor(db: Bindings["DB"], id: number) {
 }
 
 /**
- * 获取所有监控（根据用户角色过滤）
+ * 获取所有监控
  * @param db 数据库连接
- * @param userId 用户ID
- * @param userRole 用户角色
  * @returns 监控列表和操作结果
  */
-export async function getAllMonitors(
-  db: Bindings["DB"],
-  userId: number,
-  userRole: string
-) {
-  try {
-    // 根据用户角色过滤监控
-    let result;
-    if (userRole === "admin") {
-      result = await db
-        .prepare("SELECT * FROM monitors ORDER BY created_at DESC")
-        .all<Monitor>();
-    } else {
-      result = await db
-        .prepare(
-          "SELECT * FROM monitors WHERE created_by = ? ORDER BY created_at DESC"
-        )
-        .bind(userId)
-        .all<Monitor>();
-    }
+export async function getAllMonitors(db: Bindings["DB"]) {
+  // 根据用户角色过滤监控
+  let result;
+  result = await db
+    .prepare("SELECT * FROM monitors ORDER BY created_at DESC")
+    .all<Monitor>();
 
-    // 解析所有监控的 headers 字段
-    if (result.results && result.results.length > 0) {
-      result.results.forEach((monitor) => {
-        if (typeof monitor.headers === "string") {
-          try {
-            monitor.headers = JSON.parse(monitor.headers);
-          } catch (e) {
-            monitor.headers = {};
-          }
+  // 解析所有监控的 headers 字段
+  if (result.results && result.results.length > 0) {
+    result.results.forEach((monitor) => {
+      if (typeof monitor.headers === "string") {
+        try {
+          monitor.headers = JSON.parse(monitor.headers);
+        } catch (e) {
+          monitor.headers = {};
         }
-      });
+      }
+    });
 
-      // 获取所有监控的历史状态数据
-      const monitorsWithHistory = await Promise.all(
-        result.results.map(async (monitor) => {
-          const historyResult = await db
-            .prepare(
-              `SELECT * FROM monitor_status_history 
+    // 获取所有监控的历史状态数据
+    const monitorsWithHistory = await Promise.all(
+      result.results.map(async (monitor) => {
+        const historyResult = await db
+          .prepare(
+            `SELECT * FROM monitor_status_history 
            WHERE monitor_id = ? 
            ORDER BY timestamp ASC`
-            )
-            .bind(monitor.id)
-            .all<MonitorStatusHistory>();
+          )
+          .bind(monitor.id)
+          .all<MonitorStatusHistory>();
 
-          return {
-            ...monitor,
-            history: historyResult.results || [],
-          };
-        })
-      );
-
-      return {
-        success: true,
-        monitors: monitorsWithHistory,
-        status: 200,
-      };
-    }
+        return {
+          ...monitor,
+          history: historyResult.results || [],
+        };
+      })
+    );
 
     return {
       success: true,
-      monitors: result.results || [],
+      monitors: monitorsWithHistory,
       status: 200,
     };
-  } catch (error) {
-    console.error("获取监控列表错误:", error);
-    return {
-      success: false,
-      message: "获取监控列表失败",
-      error: error instanceof Error ? error.message : String(error),
-      status: 500,
-    };
   }
+
+  return {
+    success: true,
+    monitors: result.results || [],
+    status: 200,
+  };
+}
+
+/**
+ * 获取所有监控（不包含历史状态数据）
+ * @param db 数据库连接
+ * @returns 监控列表和操作结果
+ */
+export async function getAllMonitorsWithoutHistory(db: Bindings["DB"]) {
+  return await db
+    .prepare("SELECT * FROM monitors ORDER BY created_at DESC")
+    .all<Monitor>();
 }

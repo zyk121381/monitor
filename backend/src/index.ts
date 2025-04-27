@@ -32,8 +32,7 @@ app.route("/api/agents", api.agents);
 app.route("/api/users", api.users);
 app.route("/api/status", api.status);
 app.route("/api/notifications", api.notifications);
-app.route("/api/migrate", api.migrate);
-
+app.route("/api/dashboard", api.dashboard);
 // 数据库状态标志，用于记录数据库初始化状态
 let dbInitialized = false;
 

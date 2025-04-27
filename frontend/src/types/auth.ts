@@ -1,15 +1,8 @@
+import { User } from "./users";
+
 /**
  * 认证相关类型定义
  */
-
-export interface User {
-  id: number;
-  username: string;
-  email?: string;
-  role?: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 export interface LoginRequest {
   username: string;

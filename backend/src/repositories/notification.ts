@@ -1,17 +1,12 @@
-import { D1Database } from "../models/db";
 import {
   NotificationChannel,
   NotificationTemplate,
   NotificationSettings,
   NotificationHistory,
   NotificationConfig,
-} from "../models/notification";
-
-// 扩展D1Result meta属性的类型
-interface D1Meta {
-  last_row_id?: number;
-  changes?: number;
-}
+  D1Meta,
+  D1Database,
+} from "../models";
 
 // 获取所有通知渠道
 export const getNotificationChannels = async (
@@ -485,7 +480,6 @@ export const getNotificationHistory = async (
 // 获取完整的通知配置（用于前端）
 export const getNotificationConfig = async (
   db: D1Database,
-  userId: number
 ): Promise<NotificationConfig> => {
   // 获取所有渠道
   const channels = await getNotificationChannels(db);
