@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text, Button, Container } from "@radix-ui/themes";
+import { Box, Flex, Heading, Text, Container } from "@radix-ui/themes";
 import {
   CheckCircledIcon,
   CrossCircledIcon,
@@ -17,7 +17,6 @@ const Dashboard = () => {
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
   // 获取所有数据
@@ -50,26 +49,6 @@ const Dashboard = () => {
         <Container size="3">
           <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
             <Text size="3">{t("common.loading")}</Text>
-          </Flex>
-        </Container>
-      </Box>
-    );
-  }
-
-  // 错误显示
-  if (error) {
-    return (
-      <Box className="dashboard-container">
-        <Container size="3">
-          <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
-            <Flex direction="column" align="center" gap="3">
-              <Text size="3" style={{ color: "var(--red-9)" }}>
-                {error}
-              </Text>
-              <Button variant="soft" onClick={() => window.location.reload()}>
-                {t("dashboard.refresh")}
-              </Button>
-            </Flex>
           </Flex>
         </Container>
       </Box>

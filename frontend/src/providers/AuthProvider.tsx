@@ -15,7 +15,7 @@ import {
   LoginRequest,
   RegisterRequest,
   AuthContextType,
-} from "../types/auth";
+} from "../types";
 import { useTranslation } from "react-i18next";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
