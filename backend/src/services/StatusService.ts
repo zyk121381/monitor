@@ -3,7 +3,7 @@
  * 状态页服务，处理状态页配置、监控项和客户端相关的业务逻辑
  */
 import * as repositories from "../repositories";
-import { Bindings } from "../models/db";
+import { Bindings, Agent } from "../models";
 
 /**
  * 获取状态页配置(管理员)
@@ -236,7 +236,7 @@ export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
   }
 
   // 获取客户端详细信息
-  let agents: repositories.Agent[] = [];
+  let agents: Agent[] = [];
   if (selectedAgents.results && selectedAgents.results.length > 0) {
     const agentIds = selectedAgents.results.map((a) => a.agent_id);
 
