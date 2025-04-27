@@ -2,8 +2,8 @@
  * StatusService.ts
  * 状态页服务，处理状态页配置、监控项和客户端相关的业务逻辑
  */
-import * as repositories from '../repositories';
-import { Bindings } from '../models/db';
+import * as repositories from "../repositories";
+import { Bindings } from "../models/db";
 
 /**
  * 获取状态页配置(管理员)
@@ -11,13 +11,19 @@ import { Bindings } from '../models/db';
  * @param userId 用户ID
  * @returns 状态页配置信息
  */
-export async function getStatusPageConfig(env: { DB: Bindings['DB'] }, userId: number) {
+export async function getStatusPageConfig(
+  env: { DB: Bindings["DB"] },
+  userId: number
+) {
   try {
     // 检查是否已存在配置
-    const existingConfig = await repositories.getStatusPageConfigById(env.DB, userId);
-    
+    const existingConfig = await repositories.getStatusPageConfigById(
+      env.DB,
+      userId
+    );
+
     let configId: number;
-    
+
     if (existingConfig && existingConfig.id) {
       configId = existingConfig.id;
     } else {
@@ -25,54 +31,66 @@ export async function getStatusPageConfig(env: { DB: Bindings['DB'] }, userId: n
       const insertResult = await repositories.createStatusPageConfig(
         env.DB,
         userId,
-        '系统状态',
-        '实时监控系统状态',
-        '',
-        ''
+        "系统状态",
+        "实时监控系统状态",
+        "",
+        ""
       );
-      
-      if (!insertResult || typeof insertResult.id !== 'number') {
-        throw new Error('创建状态页配置失败');
+
+      if (!insertResult || typeof insertResult.id !== "number") {
+        throw new Error("创建状态页配置失败");
       }
-      
+
       configId = insertResult.id;
     }
-    
+
     // 获取该用户的所有监控项
-    const monitorsResult = await repositories.getConfigMonitors(env.DB, configId, userId);
-    
+    const monitorsResult = await repositories.getConfigMonitors(
+      env.DB,
+      configId,
+      userId
+    );
+
     // 获取该用户的所有客户端
-    const agentsResult = await repositories.getConfigAgents(env.DB, configId, userId);
-    
+    const agentsResult = await repositories.getConfigAgents(
+      env.DB,
+      configId,
+      userId
+    );
+
     // 构建配置对象返回
     const config = await env.DB.prepare(
-      'SELECT * FROM status_page_config WHERE id = ?'
-    ).bind(configId).first<{
-      title?: string; 
-      description?: string; 
-      logo_url?: string; 
-      custom_css?: string;
-    }>();
-    
+      "SELECT * FROM status_page_config WHERE id = ?"
+    )
+      .bind(configId)
+      .first<{
+        title?: string;
+        description?: string;
+        logo_url?: string;
+        custom_css?: string;
+      }>();
+
     return {
-      title: config?.title || '',
-      description: config?.description || '',
-      logoUrl: config?.logo_url || '',
-      customCss: config?.custom_css || '',
-      monitors: monitorsResult.results?.map(m => ({
-        id: m.id,
-        name: m.name,
-        selected: m.selected === 1
-      })) || [],
-      agents: agentsResult.results?.map(a => ({
-        id: a.id,
-        name: a.name,
-        selected: a.selected === 1
-      })) || []
+      title: config?.title || "",
+      description: config?.description || "",
+      logoUrl: config?.logo_url || "",
+      customCss: config?.custom_css || "",
+      monitors:
+        monitorsResult.results?.map((m) => ({
+          id: m.id,
+          name: m.name,
+          selected: m.selected === 1,
+        })) || [],
+      agents:
+        agentsResult.results?.map((a) => ({
+          id: a.id,
+          name: a.name,
+          selected: a.selected === 1,
+        })) || [],
     };
   } catch (error) {
-    console.error('获取状态页配置失败:', error);
-    throw new Error('获取状态页配置失败');
+    console.error("获取状态页配置失败:", error);
+    throw new Error("获取状态页配置失败");
   }
 }
 
@@ -84,7 +102,7 @@ export async function getStatusPageConfig(env: { DB: Bindings['DB'] }, userId: n
  * @returns 保存结果
  */
 export async function saveStatusPageConfig(
-  env: { DB: Bindings['DB'] },
+  env: { DB: Bindings["DB"] },
   userId: number,
   data: {
     title: string;
@@ -97,10 +115,13 @@ export async function saveStatusPageConfig(
 ) {
   try {
     // 检查是否已存在配置
-    const existingConfig = await repositories.getStatusPageConfigById(env.DB, userId);
-    
+    const existingConfig = await repositories.getStatusPageConfigById(
+      env.DB,
+      userId
+    );
+
     let configId: number;
-    
+
     if (existingConfig && existingConfig.id) {
       // 更新现有配置
       await repositories.updateStatusPageConfig(
@@ -111,7 +132,7 @@ export async function saveStatusPageConfig(
         data.logoUrl,
         data.customCss
       );
-      
+
       configId = existingConfig.id;
     } else {
       // 创建新配置
@@ -123,38 +144,38 @@ export async function saveStatusPageConfig(
         data.logoUrl,
         data.customCss
       );
-      
-      if (!insertResult || typeof insertResult.id !== 'number') {
-        throw new Error('创建状态页配置失败');
+
+      if (!insertResult || typeof insertResult.id !== "number") {
+        throw new Error("创建状态页配置失败");
       }
-      
+
       configId = insertResult.id;
     }
-    
+
     // 清除现有的监控项关联
     await repositories.clearConfigMonitorLinks(env.DB, configId);
-    
+
     // 清除现有的客户端关联
     await repositories.clearConfigAgentLinks(env.DB, configId);
-    
+
     // 添加选定的监控项
     if (data.monitors && data.monitors.length > 0) {
       for (const monitorId of data.monitors) {
         await repositories.addMonitorToConfig(env.DB, configId, monitorId);
       }
     }
-    
+
     // 添加选定的客户端
     if (data.agents && data.agents.length > 0) {
       for (const agentId of data.agents) {
         await repositories.addAgentToConfig(env.DB, configId, agentId);
       }
     }
-    
+
     return { success: true, configId };
   } catch (error) {
-    console.error('保存状态页配置失败:', error);
-    throw new Error('保存状态页配置失败');
+    console.error("保存状态页配置失败:", error);
+    throw new Error("保存状态页配置失败");
   }
 }
 
@@ -163,182 +184,207 @@ export async function saveStatusPageConfig(
  * @param env 环境变量，包含数据库连接
  * @returns 状态页公开数据
  */
-export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
-    // 获取所有配置
-    const configsResult = await repositories.getAllStatusPageConfigs(env.DB);
-    
-    if (!configsResult.results || configsResult.results.length === 0) {
-      console.log("没有找到任何配置")
+export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
+  // 获取所有配置
+  const configsResult = await repositories.getAllStatusPageConfigs(env.DB);
 
-      return { 
-          title: '故障状态',
-          description: '没有找到任何数据，请检查',
-          logoUrl: '',
-          customCss: '',
-          monitors: [],
-          agents: []
-      };
-    }
-    
-    // 简单处理：获取第一个配置
-    const config = configsResult.results[0];
-    
-    // 获取选中的监控项
-    const selectedMonitors = await repositories.getSelectedMonitors(env.DB, config.id as number);
-    
-    // 获取选中的客户端
-    const selectedAgents = await repositories.getSelectedAgents(env.DB, config.id as number);
-    
-    // 获取监控项详细信息
-    let monitors: any[] = [];
-    if (selectedMonitors.results && selectedMonitors.results.length > 0) {
-      const monitorIds = selectedMonitors.results.map(m => m.monitor_id);
-      if (monitorIds.length > 0) {
-        for (const monitorId of monitorIds) {
-          const monitor = await repositories.getMonitorById(env.DB, monitorId);
-          const historyResult = await repositories.getMonitorStatusHistory(env.DB, monitor.id);
-          monitors.push({
-            ...monitor,
-            history: historyResult.results
-          });
-        }
+  if (!configsResult.results || configsResult.results.length === 0) {
+    console.log("没有找到任何配置");
+
+    return {
+      title: "故障状态",
+      description: "没有找到任何数据，请检查",
+      logoUrl: "",
+      customCss: "",
+      monitors: [],
+      agents: [],
+    };
+  }
+
+  // 简单处理：获取第一个配置
+  const config = configsResult.results[0];
+
+  // 获取选中的监控项
+  const selectedMonitors = await repositories.getSelectedMonitors(
+    env.DB,
+    config.id as number
+  );
+
+  // 获取选中的客户端
+  const selectedAgents = await repositories.getSelectedAgents(
+    env.DB,
+    config.id as number
+  );
+
+  // 获取监控项详细信息
+  let monitors: any[] = [];
+  if (selectedMonitors.results && selectedMonitors.results.length > 0) {
+    const monitorIds = selectedMonitors.results.map((m) => m.monitor_id);
+    if (monitorIds.length > 0) {
+      for (const monitorId of monitorIds) {
+        const monitor = await repositories.getMonitorById(env.DB, monitorId);
+        const historyResult = await repositories.getMonitorStatusHistory(
+          env.DB,
+          monitor.id
+        );
+        monitors.push({
+          ...monitor,
+          history: historyResult.results,
+        });
       }
     }
-    
-    // 获取客户端详细信息
-    let agents: repositories.Agent[] = [];
-    if (selectedAgents.results && selectedAgents.results.length > 0) {
-      const agentIds = selectedAgents.results.map(a => a.agent_id);
-      
-      if (agentIds.length > 0) {
-        const agentsResult = await repositories.getAgentsByIds(env.DB, agentIds);
-        
-        if (agentsResult.results) {
-          agents = agentsResult.results;
-        }
+  }
+
+  // 获取客户端详细信息
+  let agents: repositories.Agent[] = [];
+  if (selectedAgents.results && selectedAgents.results.length > 0) {
+    const agentIds = selectedAgents.results.map((a) => a.agent_id);
+
+    if (agentIds.length > 0) {
+      const agentsResult = await repositories.getAgentsByIds(env.DB, agentIds);
+
+      if (agentsResult.results) {
+        agents = agentsResult.results;
       }
     }
-    
-    // 为客户端添加资源使用情况字段
-    const enrichedAgents = agents.map((agent: any) => {
-      // 计算内存使用百分比 (如果有总量和使用量)
-      const memoryPercent = agent.memory_total && agent.memory_used
+  }
+
+  // 为客户端添加资源使用情况字段
+  const enrichedAgents = agents.map((agent: any) => {
+    // 计算内存使用百分比 (如果有总量和使用量)
+    const memoryPercent =
+      agent.memory_total && agent.memory_used
         ? (agent.memory_used / agent.memory_total) * 100
         : null;
-        
-      // 计算磁盘使用百分比 (如果有总量和使用量)
-      const diskPercent = agent.disk_total && agent.disk_used
+
+    // 计算磁盘使用百分比 (如果有总量和使用量)
+    const diskPercent =
+      agent.disk_total && agent.disk_used
         ? (agent.disk_used / agent.disk_total) * 100
         : null;
-        
-      return {
-        ...agent,
-        // 使用数据库中的 status 字段，不重新计算
-        cpu: agent.cpu_usage || 0,               // 使用数据库中的CPU使用率
-        memory: memoryPercent || 0,              // 使用数据库中的内存使用百分比
-        disk: diskPercent || 0,                  // 使用数据库中的磁盘使用百分比
-        network_rx: agent.network_rx || 0,       // 使用数据库中的网络下载速率
-        network_tx: agent.network_tx || 0,       // 使用数据库中的网络上传速率
-        hostname: agent.hostname || "未知主机",
-        ip_addresses: agent.ip_addresses || "0.0.0.0",
-        os: agent.os || "未知系统",
-        version: agent.version || "未知版本"
-      };
-    });
-    
+
     return {
-        title: config.title,
-        description: config.description,
-        logoUrl: config.logo_url,
-        customCss: config.custom_css,
-        monitors: monitors,
-        agents: enrichedAgents.map(agent => ({
-          id: agent.id,
-          name: agent.name,
-          status: agent.status,
-          cpu: agent.cpu,
-          memory: agent.memory,
-          disk: agent.disk,
-          network_rx: agent.network_rx,
-          network_tx: agent.network_tx,
-          hostname: agent.hostname,
-          ip_addresses: agent.ip_addresses,
-          os: agent.os,
-          version: agent.version
-        }))
+      ...agent,
+      // 使用数据库中的 status 字段，不重新计算
+      cpu: agent.cpu_usage || 0, // 使用数据库中的CPU使用率
+      memory: memoryPercent || 0, // 使用数据库中的内存使用百分比
+      disk: diskPercent || 0, // 使用数据库中的磁盘使用百分比
+      network_rx: agent.network_rx || 0, // 使用数据库中的网络下载速率
+      network_tx: agent.network_tx || 0, // 使用数据库中的网络上传速率
+      hostname: agent.hostname || "未知主机",
+      ip_addresses: agent.ip_addresses || "0.0.0.0",
+      os: agent.os || "未知系统",
+      version: agent.version || "未知版本",
     };
-  } 
+  });
+
+  return {
+    title: config.title,
+    description: config.description,
+    logoUrl: config.logo_url,
+    customCss: config.custom_css,
+    monitors: monitors,
+    agents: enrichedAgents.map((agent) => ({
+      id: agent.id,
+      name: agent.name,
+      status: agent.status,
+      cpu: agent.cpu,
+      memory: agent.memory,
+      disk: agent.disk,
+      network_rx: agent.network_rx,
+      network_tx: agent.network_tx,
+      hostname: agent.hostname,
+      ip_addresses: agent.ip_addresses,
+      os: agent.os,
+      version: agent.version,
+    })),
+  };
+}
 
 /**
  * 创建默认状态页数据
  * @param env 环境变量，包含数据库连接
  * @returns 状态页数据
  */
-export async function createDefaultStatusPageData(env: { DB: Bindings['DB'] }) {
+export async function createDefaultStatusPageData(env: { DB: Bindings["DB"] }) {
   try {
     // 获取所有配置
     const configsResult = await repositories.getAllStatusPageConfigs(env.DB);
     if (!configsResult.results || configsResult.results.length === 0) {
       return null;
     }
-    
+
     const config = configsResult.results[0];
-    
+
     // 获取选中的监控项
-    const selectedMonitors = await repositories.getSelectedMonitors(env.DB, config.id as number);
-    
+    const selectedMonitors = await repositories.getSelectedMonitors(
+      env.DB,
+      config.id as number
+    );
+
     // 获取选中的客户端
-    const selectedAgents = await repositories.getSelectedAgents(env.DB, config.id as number);
-    
+    const selectedAgents = await repositories.getSelectedAgents(
+      env.DB,
+      config.id as number
+    );
+
     // 获取监控项详细信息
     let monitors: any[] = [];
     if (selectedMonitors.results && selectedMonitors.results.length > 0) {
-      const monitorIds = selectedMonitors.results.map(m => m.monitor_id);
-      
+      const monitorIds = selectedMonitors.results.map((m) => m.monitor_id);
+
       if (monitorIds.length > 0) {
-        const monitorsResult = await repositories.getMonitorsByIds(env.DB, monitorIds);
-        
+        const monitorsResult = await repositories.getMonitorsByIds(
+          env.DB,
+          monitorIds
+        );
+
         if (monitorsResult.results) {
           monitors = monitorsResult.results;
         }
       }
     }
-    
+
     // 获取客户端详细信息
     let agents: any[] = [];
     if (selectedAgents.results && selectedAgents.results.length > 0) {
-      const agentIds = selectedAgents.results.map(a => a.agent_id);
-      
+      const agentIds = selectedAgents.results.map((a) => a.agent_id);
+
       if (agentIds.length > 0) {
-        const agentsResult = await repositories.getAgentsByIds(env.DB, agentIds);
-        
+        const agentsResult = await repositories.getAgentsByIds(
+          env.DB,
+          agentIds
+        );
+
         if (agentsResult.results) {
           agents = agentsResult.results;
         }
       }
     }
-    
+
     // 为监控项添加必要的字段
-    const enrichedMonitors = monitors.map(monitor => ({
+    const enrichedMonitors = monitors.map((monitor) => ({
       ...monitor,
-      status: monitor.status || 'unknown',
+      status: monitor.status || "unknown",
       uptime: monitor.uptime || 0,
       response_time: monitor.response_time || 0,
-      history: Array(24).fill('unknown')
+      history: Array(24).fill("unknown"),
     }));
-    
+
     // 为客户端添加资源使用情况字段
-    const enrichedAgents = agents.map(agent => {
+    const enrichedAgents = agents.map((agent) => {
       // 计算内存使用百分比 (如果有总量和使用量)
-      const memoryPercent = agent.memory_total && agent.memory_used
-        ? (agent.memory_used / agent.memory_total) * 100
-        : null;
-        
+      const memoryPercent =
+        agent.memory_total && agent.memory_used
+          ? (agent.memory_used / agent.memory_total) * 100
+          : null;
+
       // 计算磁盘使用百分比 (如果有总量和使用量)
-      const diskPercent = agent.disk_total && agent.disk_used
-        ? (agent.disk_used / agent.disk_total) * 100
-        : null;
-        
+      const diskPercent =
+        agent.disk_total && agent.disk_used
+          ? (agent.disk_used / agent.disk_total) * 100
+          : null;
+
       return {
         ...agent,
         cpu: agent.cpu_usage || 0,
@@ -349,17 +395,17 @@ export async function createDefaultStatusPageData(env: { DB: Bindings['DB'] }) {
         hostname: agent.hostname || "未知主机",
         ip_addresses: agent.ip_addresses || "0.0.0.0",
         os: agent.os || "未知系统",
-        version: agent.version || "未知版本"
+        version: agent.version || "未知版本",
       };
     });
-    
+
     return {
       title: config.title,
       description: config.description,
       logoUrl: config.logo_url,
       customCss: config.custom_css,
       monitors: enrichedMonitors,
-      agents: enrichedAgents.map(agent => ({
+      agents: enrichedAgents.map((agent) => ({
         id: agent.id,
         name: agent.name,
         status: agent.status,
@@ -371,11 +417,11 @@ export async function createDefaultStatusPageData(env: { DB: Bindings['DB'] }) {
         hostname: agent.hostname,
         ip_addresses: agent.ip_addresses,
         os: agent.os,
-        version: agent.version
-      }))
+        version: agent.version,
+      })),
     };
   } catch (error) {
-    console.error('创建默认状态页数据失败:', error);
+    console.error("创建默认状态页数据失败:", error);
     return null;
   }
-} 
+}

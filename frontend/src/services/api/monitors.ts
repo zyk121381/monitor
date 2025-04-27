@@ -1,16 +1,16 @@
-import api from './index';
-import { 
-  MonitorResponse, 
+import api from "./index";
+import {
+  MonitorResponse,
   MonitorsResponse,
-  CreateMonitorRequest, 
-  UpdateMonitorRequest, 
-  HistoryResponse, 
+  CreateMonitorRequest,
+  UpdateMonitorRequest,
+  HistoryResponse,
   MonitorStatusHistoryResponse,
-} from '../../types/monitors';
+} from "../../types/monitors";
 
 // 获取所有监控
 export const getAllMonitors = async (): Promise<MonitorsResponse> => {
-  const response = await api.get<MonitorsResponse>('/api/monitors');
+  const response = await api.get<MonitorsResponse>("/api/monitors");
   return response.data;
 };
 
@@ -21,13 +21,18 @@ export const getMonitor = async (id: number): Promise<MonitorResponse> => {
 };
 
 // 创建监控
-export const createMonitor = async (data: CreateMonitorRequest): Promise<MonitorResponse> => {
-  const response = await api.post<MonitorResponse>('/api/monitors', data);
+export const createMonitor = async (
+  data: CreateMonitorRequest
+): Promise<MonitorResponse> => {
+  const response = await api.post<MonitorResponse>("/api/monitors", data);
   return response.data;
 };
 
 // 更新监控
-export const updateMonitor = async (id: number, data: UpdateMonitorRequest): Promise<MonitorResponse> => {
+export const updateMonitor = async (
+  id: number,
+  data: UpdateMonitorRequest
+): Promise<MonitorResponse> => {
   const response = await api.put<MonitorResponse>(`/api/monitors/${id}`, data);
   return response.data;
 };
@@ -39,14 +44,21 @@ export const deleteMonitor = async (id: number): Promise<MonitorResponse> => {
 };
 
 // 获取监控历史
-export const getMonitorHistory = async (id: number): Promise<HistoryResponse> => {
-  const response = await api.get<HistoryResponse>(`/api/monitors/${id}/history`);
+export const getMonitorHistory = async (
+  id: number
+): Promise<HistoryResponse> => {
+  const response = await api.get<HistoryResponse>(
+    `/api/monitors/${id}/history`
+  );
   return response.data;
 };
 
-
 // 手动检查监控
-export const checkMonitor = async (id: number): Promise<MonitorStatusHistoryResponse> => {
-  const response = await api.post<MonitorStatusHistoryResponse>(`/api/monitors/${id}/check`);
+export const checkMonitor = async (
+  id: number
+): Promise<MonitorStatusHistoryResponse> => {
+  const response = await api.post<MonitorStatusHistoryResponse>(
+    `/api/monitors/${id}/check`
+  );
   return response.data;
-}; 
+};

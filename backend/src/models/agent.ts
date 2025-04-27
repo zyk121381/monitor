@@ -11,7 +11,7 @@ export interface Agent {
   ip_addresses: string | null; // 存储多个IP地址的JSON字符串
   os: string | null;
   version: string | null;
-  
+
   // 资源指标字段
   cpu_usage: number | null;
   memory_total: number | null;
@@ -20,4 +20,4 @@ export interface Agent {
   disk_used: number | null;
   network_rx: number | null;
   network_tx: number | null;
-} 
+}

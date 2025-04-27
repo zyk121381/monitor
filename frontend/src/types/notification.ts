@@ -29,11 +29,11 @@ export interface NotificationSettings {
   user_id: number;
   target_type: string; // global-monitor, global-agent, monitor, agent
   target_id: number | null; // 当target_type为monitor或agent时有效，存储monitor_id或agent_id
-  
+
   enabled: boolean;
   on_down: boolean; // 适用于monitor类型
   on_recovery: boolean; // 适用于monitor和agent类型
-  
+
   on_offline: boolean; // 适用于agent类型
   on_cpu_threshold: boolean; // 适用于agent类型
   cpu_threshold: number; // 适用于agent类型
@@ -41,9 +41,9 @@ export interface NotificationSettings {
   memory_threshold: number; // 适用于agent类型
   on_disk_threshold: boolean; // 适用于agent类型
   disk_threshold: number; // 适用于agent类型
-  
+
   channels: string; // JSON字符串数组，存储channel IDs
-  
+
   created_at: string;
   updated_at: string;
 }
@@ -89,8 +89,8 @@ export interface NotificationConfig {
         enabled: boolean;
         onDown: boolean;
         onRecovery: boolean;
-        channels: string[]
-      }
+        channels: string[];
+      };
     };
     specificAgents: {
       [agentId: string]: {
@@ -103,8 +103,8 @@ export interface NotificationConfig {
         memoryThreshold: number;
         onDiskThreshold: boolean;
         diskThreshold: number;
-        channels: string[]
-      }
+        channels: string[];
+      };
     };
   };
-} 
+}

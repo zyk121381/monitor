@@ -12,4 +12,4 @@ export interface AdminRouteProps {
 
 export interface LayoutWrapperProps {
   children: React.ReactNode;
-} 
+}

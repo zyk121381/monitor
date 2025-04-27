@@ -2,8 +2,8 @@
  * 状态页面相关类型定义
  */
 
-import { Agent } from './agents';
-import { Monitor } from './monitors';
+import { Agent } from "./agents";
+import { Monitor } from "./monitors";
 
 export interface ConfigMonitor {
   id: number;
@@ -45,8 +45,12 @@ export interface StatusConfigWithDetails {
   agents: AgentWithSelection[];
 }
 
-export interface StatusAgent extends Omit<Agent, 'cpu_usage' | 'memory_total' | 'memory_used' | 'disk_total' | 'disk_used'> {
-  status: 'active' | 'inactive';
+export interface StatusAgent
+  extends Omit<
+    Agent,
+    "cpu_usage" | "memory_total" | "memory_used" | "disk_total" | "disk_used"
+  > {
+  status: "active" | "inactive";
   cpuUsage: number;
   memoryUsage: number;
   diskUsage: number;
@@ -67,4 +71,4 @@ export interface AgentWithSelection extends Agent {
 
 export interface MonitorWithSelection extends Monitor {
   selected: boolean;
-} 
+}

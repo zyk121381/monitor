@@ -214,7 +214,7 @@
 /* 选中状态的勾选图标 */
 .custom-checkbox input[type="checkbox"]:checked + label:after,
 .custom-checkbox label.checked:after {
-  content: '';
+  content: "";
   position: absolute;
   left: 7px;
   top: 3px;
@@ -352,7 +352,7 @@
 
 /* 添加底部滑入动画效果 */
 .nav-link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 50%;
@@ -372,7 +372,7 @@
 
 /* 添加点击波纹效果 */
 .nav-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -484,7 +484,8 @@
   transform: translateX(2px);
 }
 
-[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item][data-accent-color="red"]:hover {
+[data-radix-dropdown-menu-content]
+  [data-radix-dropdown-menu-item][data-accent-color="red"]:hover {
   background-color: var(--red-2);
 }
 
@@ -495,12 +496,16 @@
 }
 
 /* 菜单内容动画 */
-[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item] [data-size="2"] {
+[data-radix-dropdown-menu-content]
+  [data-radix-dropdown-menu-item]
+  [data-size="2"] {
   font-size: 13px;
   transition: transform 0.2s ease;
 }
 
-[data-radix-dropdown-menu-content] [data-radix-dropdown-menu-item]:hover [data-size="2"] {
+[data-radix-dropdown-menu-content]
+  [data-radix-dropdown-menu-item]:hover
+  [data-size="2"] {
   transform: translateX(2px);
 }
 
@@ -617,7 +622,7 @@ button[data-state="active"][role="tab"]::after,
 .rt-TabsTrigger[data-state="active"]::after,
 .tab-trigger[data-state="active"]::after,
 [role="tab"][data-state="active"]::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -1px;
   left: 0;
@@ -642,8 +647,12 @@ button[data-state][role="tab"]:hover,
   outline: none !important;
 }
 
-button[data-radix-collection-item][role="tab"]:not([data-state="active"]):hover::after,
-button[data-orientation="horizontal"][role="tab"]:not([data-state="active"]):hover::after,
+button[data-radix-collection-item][role="tab"]:not(
+    [data-state="active"]
+  ):hover::after,
+button[data-orientation="horizontal"][role="tab"]:not(
+    [data-state="active"]
+  ):hover::after,
 button[data-state][role="tab"]:not([data-state="active"]):hover::after,
 .rt-TabsTrigger:not([data-state="active"]):hover::after,
 .tab-trigger:not([data-state="active"]):hover::after,
@@ -707,9 +716,9 @@ button[data-state][role="tab"]:active,
 
 /* 解决Safari特定渲染问题 */
 @media not all and (min-resolution: 0.001dpcm) {
-  @supports (-webkit-appearance:none) {
-    button[role="tab"], 
-    .tab-trigger, 
+  @supports (-webkit-appearance: none) {
+    button[role="tab"],
+    .tab-trigger,
     .rt-TabsTrigger {
       border: none !important;
       outline: none !important;
@@ -807,13 +816,15 @@ textarea:focus {
   transition: transform 0.2s ease;
 }
 
-.monitor-card, .agent-card {
+.monitor-card,
+.agent-card {
   height: 100%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.monitor-card:hover, .agent-card:hover {
+.monitor-card:hover,
+.agent-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -827,11 +838,11 @@ textarea:focus {
 
 .footer-link-icon {
   margin-right: 8px;
-} 
+}
 
 /* 覆盖 Radix UI TabsTrigger 底部边框 */
-html body .rt-TabsTrigger:where([data-state='active'])::before,
-html body .rt-TabsTrigger[data-state='active']::before {
+html body .rt-TabsTrigger:where([data-state="active"])::before,
+html body .rt-TabsTrigger[data-state="active"]::before {
   background-color: none !important;
   display: none !important;
   height: 0 !important;

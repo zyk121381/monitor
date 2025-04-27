@@ -33,4 +33,4 @@ export interface VersionMetadata {
 export type Bindings = {
   DB: D1Database;
   CF_VERSION_METADATA?: VersionMetadata;
-}; 
+};

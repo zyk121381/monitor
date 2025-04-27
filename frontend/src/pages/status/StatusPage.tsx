@@ -1,41 +1,48 @@
-import { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Text, Grid, Badge, Theme } from '@radix-ui/themes';
-import { getStatusPageData } from '../../services/api/status';
-import { StatusAgent } from '../../types/status';
-import { Monitor } from '../../types/monitors';
-import AgentCard from '../../components/AgentCard';
-import MonitorCard from '../../components/MonitorCard';
-import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from "react";
+import { Box, Flex, Heading, Text, Grid, Badge, Theme } from "@radix-ui/themes";
+import { getStatusPageData } from "../../services/api/status";
+import { StatusAgent } from "../../types/status";
+import { Monitor } from "../../types/monitors";
+import AgentCard from "../../components/AgentCard";
+import MonitorCard from "../../components/MonitorCard";
+import { useTranslation } from "react-i18next";
 
 const StatusPage = () => {
   const { t } = useTranslation();
-  const [data, setData] = useState<{monitors: Monitor[], agents: StatusAgent[]}>({
+  const [data, setData] = useState<{
+    monitors: Monitor[];
+    agents: StatusAgent[];
+  }>({
     monitors: [],
-    agents: []
+    agents: [],
   });
   const [loading, setLoading] = useState(false);
-  const [pageTitle, setPageTitle] = useState<string>(t('statusPage.title'));
-  const [pageDescription, setPageDescription] = useState<string>(t('statusPage.allOperational'));
+  const [pageTitle, setPageTitle] = useState<string>(t("statusPage.title"));
+  const [pageDescription, setPageDescription] = useState<string>(
+    t("statusPage.allOperational")
+  );
   const [error, setError] = useState<string | null>(null);
 
   // 获取数据
   const fetchData = async () => {
-      setLoading(true);
-      const response = await getStatusPageData();
-      if (response) {
-        const statusData = response;
-        // 设置页面标题和描述
-        setPageTitle(statusData.title || t('statusPage.title'));
-        setPageDescription(statusData.description || t('statusPage.allOperational'));
-        console.log(statusData);
-        setData({
-          monitors: statusData.monitors || [],
-          agents: statusData.agents || []
-        });
-      } else {
-        setError(t('statusPage.fetchError'));
-      }
-      setLoading(false);
+    setLoading(true);
+    const response = await getStatusPageData();
+    if (response) {
+      const statusData = response;
+      // 设置页面标题和描述
+      setPageTitle(statusData.title || t("statusPage.title"));
+      setPageDescription(
+        statusData.description || t("statusPage.allOperational")
+      );
+      console.log(statusData);
+      setData({
+        monitors: statusData.monitors || [],
+        agents: statusData.agents || [],
+      });
+    } else {
+      setError(t("statusPage.fetchError"));
+    }
+    setLoading(false);
   };
 
   // 从API获取数据
@@ -45,7 +52,7 @@ const StatusPage = () => {
     const intervalId = setInterval(() => {
       fetchData();
     }, 180000); // 180000ms = 3分钟
-    
+
     // 组件卸载时清除定时器和取消请求
     return () => {
       clearInterval(intervalId);
@@ -58,8 +65,10 @@ const StatusPage = () => {
       <Theme appearance="light">
         <Box>
           <div className="page-container">
-            <Flex justify="center" align="center" style={{ minHeight: '50vh' }}>
-              <Text size="3" style={{ color: 'var(--red-9)' }}>{error}</Text>
+            <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
+              <Text size="3" style={{ color: "var(--red-9)" }}>
+                {error}
+              </Text>
             </Flex>
           </div>
         </Box>
@@ -72,8 +81,8 @@ const StatusPage = () => {
       <Theme appearance="light">
         <Box>
           <div className="page-container">
-            <Flex justify="center" align="center" style={{ minHeight: '50vh' }}>
-              <Text size="3">{t('common.loading')}</Text>
+            <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
+              <Text size="3">{t("common.loading")}</Text>
             </Flex>
           </div>
         </Box>
@@ -86,35 +95,49 @@ const StatusPage = () => {
       <Box>
         <div className="page-container">
           {/* 状态页标题区域 */}
-          <Flex direction="column" align="center" justify="center" py="9" gap="5">
-            <Heading size="9" align="center">{pageTitle}</Heading>
-            <Text size="5" align="center" style={{ maxWidth: '800px' }}>
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            py="9"
+            gap="5"
+          >
+            <Heading size="9" align="center">
+              {pageTitle}
+            </Heading>
+            <Text size="5" align="center" style={{ maxWidth: "800px" }}>
               {pageDescription}
             </Text>
             <Flex gap="2" mt="2">
-              <Badge size="2">{t('statusPage.lastUpdated')}: {t('statusPage.justNow')}</Badge>
+              <Badge size="2">
+                {t("statusPage.lastUpdated")}: {t("statusPage.justNow")}
+              </Badge>
             </Flex>
           </Flex>
-          
+
           {/* API服务状态 */}
           {data.monitors.length > 0 && (
             <Box py="6">
-              <Heading size="5" mb="4">{t('statusPage.apiServices')}</Heading>
-              <Grid columns={{ initial: '1' }} gap="4">
-                {data.monitors.map(monitor => (
+              <Heading size="5" mb="4">
+                {t("statusPage.apiServices")}
+              </Heading>
+              <Grid columns={{ initial: "1" }} gap="4">
+                {data.monitors.map((monitor) => (
                   <MonitorCard key={monitor.id} monitor={monitor} />
                 ))}
               </Grid>
             </Box>
           )}
-          
+
           {/* 客户端监控状态 */}
           {data.agents.length > 0 && (
             <Box py="6">
-              <Heading size="5" mb="4">{t('statusPage.agentStatus')}</Heading>
-              <Grid columns={{ initial: '1'}} gap="4">
-                {data.agents.map(agent => (
-                  <Box key={agent.id} style={{ position: 'relative' }}>
+              <Heading size="5" mb="4">
+                {t("statusPage.agentStatus")}
+              </Heading>
+              <Grid columns={{ initial: "1" }} gap="4">
+                {data.agents.map((agent) => (
+                  <Box key={agent.id} style={{ position: "relative" }}>
                     <AgentCard agent={agent} showIpAddress={false} />
                   </Box>
                 ))}
@@ -127,4 +150,4 @@ const StatusPage = () => {
   );
 };
 
-export default StatusPage; 
+export default StatusPage;

@@ -1,6 +1,6 @@
-import { Box, Card, Flex, Heading, Text } from '@radix-ui/themes';
-import { ReactNode } from 'react';
-import '../styles/components.css';
+import { Box, Card, Flex, Heading, Text } from "@radix-ui/themes";
+import { ReactNode } from "react";
+import "../styles/components.css";
 
 interface StatusItem {
   icon: ReactNode;
@@ -20,21 +20,22 @@ interface StatusSummaryCardProps {
  * 用于显示系统状态概览，如正常/异常服务数量等
  */
 const StatusSummaryCard = ({ title, items }: StatusSummaryCardProps) => {
-  
   return (
     <Card className="status-summary-card">
       <Box p="4">
-        <Heading size="4" mb="3">{title}</Heading>
+        <Heading size="4" mb="3">
+          {title}
+        </Heading>
         <Flex direction="column" gap="3">
           {items.map((item, index) => (
             <Flex key={index} justify="between" align="center">
               <Flex align="center" gap="2">
-                <Box 
+                <Box
                   className="status-icon-container"
-                  style={{ 
-                    background: item.bgColor || 'var(--gray-3)', 
-                    padding: '8px', 
-                    borderRadius: '6px' 
+                  style={{
+                    background: item.bgColor || "var(--gray-3)",
+                    padding: "8px",
+                    borderRadius: "6px",
                   }}
                 >
                   <Box style={{ color: item.iconColor }}>{item.icon}</Box>
@@ -50,4 +51,4 @@ const StatusSummaryCard = ({ title, items }: StatusSummaryCardProps) => {
   );
 };
 
-export default StatusSummaryCard; 
+export default StatusSummaryCard;

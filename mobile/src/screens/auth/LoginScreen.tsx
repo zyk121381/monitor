@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Alert,
   ActivityIndicator,
@@ -8,59 +8,59 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet
-} from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+  StyleSheet,
+} from "react-native";
+import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 
-import { useAuthStore } from '../../store/authStore';
-import ApiUrlSettings from '../../components/ApiUrlSettings';
+import { useAuthStore } from "../../store/authStore";
+import ApiUrlSettings from "../../components/ApiUrlSettings";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   { Login: undefined },
-  'Login'
+  "Login"
 >;
 
 const LoginScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [apiUrlModalVisible, setApiUrlModalVisible] = useState(false);
-  
+
   const { login, isLoading, error } = useAuthStore();
-  
+
   const handleLogin = async () => {
     // 重置错误
-    setUsernameError('');
-    setPasswordError('');
-    
+    setUsernameError("");
+    setPasswordError("");
+
     // 表单验证
     let isValid = true;
-    
+
     if (!username.trim()) {
-      setUsernameError(t('auth.usernameRequired'));
+      setUsernameError(t("auth.usernameRequired"));
       isValid = false;
     }
-    
+
     if (!password) {
-      setPasswordError(t('auth.passwordRequired'));
+      setPasswordError(t("auth.passwordRequired"));
       isValid = false;
     }
-    
+
     if (!isValid) {
       return;
     }
-    
+
     // 执行登录
     const success = await login({ username, password });
-    
+
     if (!success && error) {
-      Alert.alert(t('common.error'), error);
+      Alert.alert(t("common.error"), error);
     }
   };
 
@@ -71,10 +71,10 @@ const LoginScreen: React.FC = () => {
   const handleApiSettingsComplete = () => {
     setApiUrlModalVisible(false);
   };
-  
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <View style={styles.content}>
@@ -85,18 +85,18 @@ const LoginScreen: React.FC = () => {
           >
             <Ionicons name="settings-outline" size={24} color="#666" />
           </TouchableOpacity>
-          <Text style={styles.title}>{t('auth.login')}</Text>
+          <Text style={styles.title}>{t("auth.login")}</Text>
           <Text style={styles.subtitle}>XUGOU 监控</Text>
         </View>
-        
+
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('auth.username')}</Text>
+            <Text style={styles.label}>{t("auth.username")}</Text>
             <TextInput
               style={styles.input}
               value={username}
               onChangeText={setUsername}
-              placeholder={t('auth.username')}
+              placeholder={t("auth.username")}
               autoCapitalize="none"
               placeholderTextColor="#999"
             />
@@ -104,14 +104,14 @@ const LoginScreen: React.FC = () => {
               <Text style={styles.errorText}>{usernameError}</Text>
             ) : null}
           </View>
-          
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('auth.password')}</Text>
+            <Text style={styles.label}>{t("auth.password")}</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder={t('auth.password')}
+              placeholder={t("auth.password")}
               secureTextEntry
               placeholderTextColor="#999"
             />
@@ -120,7 +120,7 @@ const LoginScreen: React.FC = () => {
             ) : null}
           </View>
         </View>
-        
+
         <TouchableOpacity
           style={styles.loginButton}
           onPress={handleLogin}
@@ -129,7 +129,7 @@ const LoginScreen: React.FC = () => {
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.loginButtonText}>{t('auth.login')}</Text>
+            <Text style={styles.loginButtonText}>{t("auth.login")}</Text>
           )}
         </TouchableOpacity>
 
@@ -149,33 +149,33 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   headerContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
-    position: 'relative',
+    position: "relative",
   },
   settingsButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 10,
     zIndex: 1,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   formContainer: {
     marginBottom: 24,
@@ -185,35 +185,35 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
   },
   errorText: {
-    color: '#e74c3c',
+    color: "#e74c3c",
     fontSize: 12,
     marginTop: 4,
   },
   loginButton: {
-    backgroundColor: '#0066cc',
+    backgroundColor: "#0066cc",
     borderRadius: 8,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   loginButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
-export default LoginScreen; 
+export default LoginScreen;

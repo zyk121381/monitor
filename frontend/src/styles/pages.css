@@ -119,25 +119,25 @@
   margin-top: 24px;
   text-align: center;
   font-size: 1.875rem; /* 相当于text-3xl */
-  font-weight: 800;   /* 相当于font-extrabold */
-  color: #111827;     /* 相当于text-gray-900 */
+  font-weight: 800; /* 相当于font-extrabold */
+  color: #111827; /* 相当于text-gray-900 */
 }
 
 .login-subtitle {
   margin-top: 8px;
   text-align: center;
   font-size: 0.875rem; /* 相当于text-sm */
-  color: #4b5563;      /* 相当于text-gray-600 */
+  color: #4b5563; /* 相当于text-gray-600 */
 }
 
 .login-link {
   font-weight: 500;
-  color: #2563eb;      /* 相当于text-blue-600 */
+  color: #2563eb; /* 相当于text-blue-600 */
   text-decoration: none;
 }
 
 .login-link:hover {
-  color: #3b82f6;      /* 相当于text-blue-500 */
+  color: #3b82f6; /* 相当于text-blue-500 */
 }
 
 .login-form {
@@ -150,7 +150,7 @@
 .login-input-group {
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .login-input {
@@ -158,14 +158,14 @@
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #d1d5db; /* 相当于border-gray-300 */
-  color: #111827;            /* 相当于text-gray-900 */
-  font-size: 0.875rem;       /* 相当于sm:text-sm */
+  color: #111827; /* 相当于text-gray-900 */
+  font-size: 0.875rem; /* 相当于sm:text-sm */
 }
 
 .login-input:focus {
   outline: none;
-  border-color: #3b82f6;    /* 相当于focus:border-blue-500 */
-  z-index: 10;              /* 相当于focus:z-10 */
+  border-color: #3b82f6; /* 相当于focus:border-blue-500 */
+  z-index: 10; /* 相当于focus:z-10 */
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25); /* 相当于focus:ring-blue-500 */
 }
 
@@ -181,8 +181,8 @@
 }
 
 .login-error {
-  color: #dc2626;          /* 相当于text-red-600 */
-  font-size: 0.875rem;     /* 相当于text-sm */
+  color: #dc2626; /* 相当于text-red-600 */
+  font-size: 0.875rem; /* 相当于text-sm */
   margin-top: 8px;
 }
 
@@ -201,18 +201,18 @@
 .login-checkbox {
   height: 16px;
   width: 16px;
-  color: #2563eb;         /* 相当于text-blue-600 */
-  border-color: #d1d5db;  /* 相当于border-gray-300 */
+  color: #2563eb; /* 相当于text-blue-600 */
+  border-color: #d1d5db; /* 相当于border-gray-300 */
   border-radius: 4px;
 }
 
 .login-checkbox-label {
   margin-left: 8px;
   display: block;
-  font-size: 0.875rem;   /* 相当于text-sm */
-  color: #111827;        /* 相当于text-gray-900 */
+  font-size: 0.875rem; /* 相当于text-sm */
+  color: #111827; /* 相当于text-gray-900 */
 }
 
 .login-forgot {
-  font-size: 0.875rem;   /* 相当于text-sm */
-} 
+  font-size: 0.875rem; /* 相当于text-sm */
+}

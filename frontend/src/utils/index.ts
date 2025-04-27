@@ -8,14 +8,17 @@
  * @param locale 地区设置
  * @returns 格式化后的日期字符串
  */
-export const formatDate = (dateString: string, locale: string = 'zh-CN'): string => {
+export const formatDate = (
+  dateString: string,
+  locale: string = "zh-CN"
+): string => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 };
 
@@ -41,10 +44,10 @@ export const debounce = <T extends (...args: any[]) => any>(
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: number | null = null;
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
-    
+
     timeout = window.setTimeout(() => {
       func(...args);
     }, wait);
@@ -62,7 +65,7 @@ export const throttle = <T extends (...args: any[]) => any>(
   limit: number
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean = false;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -82,11 +85,11 @@ export const throttle = <T extends (...args: any[]) => any>(
 export const getQueryParams = (search: string): Record<string, string> => {
   const params = new URLSearchParams(search);
   const result: Record<string, string> = {};
-  
+
   params.forEach((value, key) => {
     result[key] = value;
   });
-  
+
   return result;
 };
 
@@ -96,10 +99,10 @@ export const getQueryParams = (search: string): Record<string, string> => {
  * @returns 拷贝后的对象
  */
 export const deepClone = <T>(obj: T): T => {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== "object") {
     return obj;
   }
-  
+
   return JSON.parse(JSON.stringify(obj));
 };
 
@@ -109,12 +112,13 @@ export const deepClone = <T>(obj: T): T => {
  * @returns 随机ID
  */
 export const generateId = (length: number = 8): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  
+
   return result;
 };

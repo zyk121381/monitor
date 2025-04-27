@@ -2,13 +2,19 @@
  * 组件相关类型定义
  */
 
-import { ButtonHTMLAttributes } from 'react';
-import { NotificationChannel } from './notification';
-import { Monitor } from './monitors';
+import { ButtonHTMLAttributes } from "react";
+import { NotificationChannel } from "./notification";
+import { Monitor } from "./monitors";
 
 // Button 组件类型
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "success"
+  | "warning"
+  | "info";
+export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -27,14 +33,14 @@ export interface ChannelSelectorProps {
 export interface StatusItem {
   id: string;
   name: string;
-  status: 'up' | 'down' | 'pending' | 'unknown' | 'active' | 'inactive';
+  status: "up" | "down" | "pending" | "unknown" | "active" | "inactive";
   time?: string;
 }
 
 export interface StatusSummaryCardProps {
   title: string;
   items: StatusItem[];
-  type: 'monitors' | 'agents';
+  type: "monitors" | "agents";
 }
 
 // MonitorCard 组件类型
@@ -84,4 +90,4 @@ export interface AgentCardProps {
 // Layout 组件类型
 export interface LayoutProps {
   children: React.ReactNode;
-} 
+}

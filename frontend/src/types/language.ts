@@ -6,4 +6,4 @@ export type LanguageContextType = {
   currentLanguage: string;
   changeLanguage: (lang: string) => void;
   availableLanguages: { code: string; name: string }[];
-}; 
+};

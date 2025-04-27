@@ -1,15 +1,15 @@
-import axios from './client';
-import { API_ENDPOINTS } from '../config/api';
+import axios from "./client";
+import { API_ENDPOINTS } from "../config/api";
 
 // 监控类型
 export interface Monitor {
   id: string;
   name: string;
   url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "HEAD";
   interval: number;
   timeout: number;
-  status: 'up' | 'down' | 'unknown' | 'maintenance';
+  status: "up" | "down" | "unknown" | "maintenance";
   lastChecked?: string;
   uptime?: number;
   responseTime?: number;
@@ -70,14 +70,14 @@ export const getAllMonitors = async () => {
     const response = await axios.get(API_ENDPOINTS.MONITORS);
     return {
       success: true,
-      monitors: response.data.monitors || []
+      monitors: response.data.monitors || [],
     };
   } catch (error) {
-    console.error('获取监控列表失败', error);
+    console.error("获取监控列表失败", error);
     return {
       success: false,
-      message: '获取监控列表失败',
-      monitors: []
+      message: "获取监控列表失败",
+      monitors: [],
     };
   }
 };
@@ -88,14 +88,14 @@ export const getMonitorById = async (id: string) => {
     const response = await axios.get(API_ENDPOINTS.MONITOR_DETAIL(Number(id)));
     return {
       success: true,
-      monitor: response.data.monitor
+      monitor: response.data.monitor,
     };
   } catch (error) {
     console.error(`获取监控 ${id} 详情失败`, error);
     return {
       success: false,
-      message: '获取监控详情失败',
-      monitor: null
+      message: "获取监控详情失败",
+      monitor: null,
     };
   }
 };
@@ -106,32 +106,38 @@ export const createMonitor = async (monitorData: Partial<Monitor>) => {
     const response = await axios.post(API_ENDPOINTS.MONITORS, monitorData);
     return {
       success: true,
-      monitor: response.data.monitor
+      monitor: response.data.monitor,
     };
   } catch (error) {
-    console.error('创建监控失败', error);
+    console.error("创建监控失败", error);
     return {
       success: false,
-      message: '创建监控失败',
-      monitor: null
+      message: "创建监控失败",
+      monitor: null,
     };
   }
 };
 
 // 更新监控
-export const updateMonitor = async (id: string, monitorData: Partial<Monitor>) => {
+export const updateMonitor = async (
+  id: string,
+  monitorData: Partial<Monitor>
+) => {
   try {
-    const response = await axios.put(API_ENDPOINTS.MONITOR_DETAIL(Number(id)), monitorData);
+    const response = await axios.put(
+      API_ENDPOINTS.MONITOR_DETAIL(Number(id)),
+      monitorData
+    );
     return {
       success: true,
-      monitor: response.data.monitor
+      monitor: response.data.monitor,
     };
   } catch (error) {
     console.error(`更新监控 ${id} 失败`, error);
     return {
       success: false,
-      message: '更新监控失败',
-      monitor: null
+      message: "更新监控失败",
+      monitor: null,
     };
   }
 };
@@ -141,26 +147,28 @@ export const deleteMonitor = async (id: string) => {
   try {
     await axios.delete(API_ENDPOINTS.MONITOR_DETAIL(Number(id)));
     return {
-      success: true
+      success: true,
     };
   } catch (error) {
     console.error(`删除监控 ${id} 失败`, error);
     return {
       success: false,
-      message: '删除监控失败'
+      message: "删除监控失败",
     };
   }
 };
 
 // 获取监控历史
-export const getMonitorHistory = async (id: number): Promise<MonitorStatusHistory[]> => {
+export const getMonitorHistory = async (
+  id: number
+): Promise<MonitorStatusHistory[]> => {
   try {
     const response = await axios.get(API_ENDPOINTS.MONITOR_HISTORY(id));
-    
+
     if (response.data.success) {
       return response.data.history || [];
     }
-    
+
     return [];
   } catch (error) {
     console.error(`获取监控 ${id} 历史记录失败`, error);
@@ -169,14 +177,19 @@ export const getMonitorHistory = async (id: number): Promise<MonitorStatusHistor
 };
 
 // 获取监控检查记录
-export const getMonitorChecks = async (id: number, limit: number = 10): Promise<MonitorCheck[]> => {
+export const getMonitorChecks = async (
+  id: number,
+  limit: number = 10
+): Promise<MonitorCheck[]> => {
   try {
-    const response = await axios.get(`${API_ENDPOINTS.MONITOR_HISTORY(id)}?limit=${limit}`);
-    
+    const response = await axios.get(
+      `${API_ENDPOINTS.MONITOR_HISTORY(id)}?limit=${limit}`
+    );
+
     if (response.data.success) {
       return response.data.checks || [];
     }
-    
+
     return [];
   } catch (error) {
     console.error(`获取监控 ${id} 检查记录失败`, error);
@@ -188,11 +201,11 @@ export const getMonitorChecks = async (id: number, limit: number = 10): Promise<
 export const checkMonitor = async (id: number): Promise<any> => {
   try {
     const response = await axios.post(API_ENDPOINTS.MONITOR_CHECK(id));
-    
+
     if (response.data.success) {
       return response.data.result;
     }
-    
+
     return null;
   } catch (error) {
     console.error(`手动检查监控 ${id} 失败`, error);
@@ -203,16 +216,16 @@ export const checkMonitor = async (id: number): Promise<any> => {
 // Dashboard中使用的方法 - 为了兼容性添加
 export const getMonitors = async (): Promise<Monitor[]> => {
   try {
-    console.log('调用getMonitors方法获取监控列表');
+    console.log("调用getMonitors方法获取监控列表");
     const result = await getAllMonitors();
     if (result.success && result.monitors) {
       console.log(`成功获取${result.monitors.length}个监控`);
       return result.monitors;
     }
-    console.warn('监控列表为空或获取失败');
+    console.warn("监控列表为空或获取失败");
     return [];
   } catch (error) {
-    console.error('获取监控列表异常:', error);
+    console.error("获取监控列表异常:", error);
     return [];
   }
 };
@@ -230,4 +243,4 @@ const monitorService = {
   getMonitors, // 为了兼容Dashboard添加
 };
 
-export default monitorService; 
+export default monitorService;

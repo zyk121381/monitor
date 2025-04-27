@@ -7,7 +7,7 @@ export interface Agent {
   name: string;
   hostname?: string;
   ip_addresses?: string;
-  status: 'active' | 'inactive' | 'connecting' | 'unknown';
+  status: "active" | "inactive" | "connecting" | "unknown";
   version?: string;
   os?: string;
   cpu_usage?: number;
@@ -45,4 +45,4 @@ export interface AgentsResponse {
   success: boolean;
   message: string;
   agents?: Agent[];
-} 
+}

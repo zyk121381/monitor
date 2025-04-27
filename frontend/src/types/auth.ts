@@ -35,6 +35,8 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (data: LoginRequest) => Promise<{ success: boolean; message: string }>;
-  register: (data: RegisterRequest) => Promise<{ success: boolean; message: string }>;
+  register: (
+    data: RegisterRequest
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
-} 
+}
