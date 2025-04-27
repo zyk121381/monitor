@@ -11,47 +11,42 @@ import {
 
 // 清理30天以前的历史记录
 export async function cleanupOldRecords(db: Bindings["DB"]) {
-  try {
-    console.log("开始清理90天以前的历史记录...");
+  console.log("开始清理30天以前的历史记录...");
 
-    // 清理监控状态历史记录
-    const deleteStatusHistoryResult = await db
-      .prepare(
-        `
+  // 清理监控状态历史记录
+  const deleteStatusHistoryResult = await db
+    .prepare(
+      `
       DELETE FROM monitor_status_history 
-      WHERE timestamp < datetime('now', '-90 days')
+      WHERE timestamp < datetime('now', '-30 days')
     `
-      )
-      .run();
+    )
+    .run();
 
-    // 清理通知历史记录
-    const deleteNotificationHistoryResult = await db
-      .prepare(
-        `
+  // 清理通知历史记录
+  const deleteNotificationHistoryResult = await db
+    .prepare(
+      `
       DELETE FROM notification_history 
-      WHERE sent_at < datetime('now', '-90 days')
+      WHERE sent_at < datetime('now', '-30 days')
     `
-      )
-      .run();
+    )
+    .run();
 
-    const statusHistoryDeleted =
-      (deleteStatusHistoryResult.meta as DbResultMeta)?.changes || 0;
-    const notificationHistoryDeleted =
-      (deleteNotificationHistoryResult.meta as DbResultMeta)?.changes || 0;
+  const statusHistoryDeleted =
+    (deleteStatusHistoryResult.meta as DbResultMeta)?.changes || 0;
+  const notificationHistoryDeleted =
+    (deleteNotificationHistoryResult.meta as DbResultMeta)?.changes || 0;
 
-    console.log(
-      `清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${notificationHistoryDeleted} 条通知历史记录`
-    );
+  console.log(
+    `清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${notificationHistoryDeleted} 条通知历史记录`
+  );
 
-    return {
-      success: true,
-      statusHistoryDeleted,
-      notificationHistoryDeleted,
-    };
-  } catch (error) {
-    console.error("清理历史记录出错:", error);
-    return { success: false, error: String(error) };
-  }
+  return {
+    success: true,
+    statusHistoryDeleted,
+    notificationHistoryDeleted,
+  };
 }
 
 // 获取需要检查的监控列表
@@ -78,7 +73,6 @@ export async function getMonitorsToCheck(db: Bindings["DB"]) {
       }
     });
   }
-
   return result;
 }
 
@@ -97,7 +91,6 @@ export async function getMonitorById(db: Bindings["DB"], id: number) {
       monitor.headers = {};
     }
   }
-
   return monitor;
 }
 

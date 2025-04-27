@@ -11,6 +11,8 @@ import {
   createNotificationChannelsAndSettings,
 } from "./database";
 import { runMigrations } from "../migrations/migration";
+import { cleanupOldRecords } from "../repositories/monitor";
+
 // 检查表是否存在
 async function tableExists(env: Bindings, tableName: string): Promise<boolean> {
   try {
@@ -154,6 +156,10 @@ export async function checkAndInitializeDatabase(
 
     // 执行迁移
     await runMigrations(env);
+
+    // 执行清理任务
+    await cleanupOldRecords(env.DB);
+
     return {
       initialized,
       message: initialized

@@ -11,12 +11,11 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
     // 执行客户端状态检查任务
     await checkAgentsStatus(env);
 
-    // 执行清理任务 - 每季度第一天执行
+    // 执行清理任务 - 每30天执行一次
     const now = new Date();
-    const isFirstDayOfQuarter =
-      now.getDate() === 1 && [0, 3, 6, 9].includes(now.getMonth());
-    if (isFirstDayOfQuarter) {
-      console.log("执行季度清理任务...");
+    const dayOfMonth = now.getDate();
+    if (dayOfMonth === 1 || dayOfMonth === 30) {
+      console.log("执行清理任务...");
       await cleanupOldRecords(env);
     }
   } catch (error) {

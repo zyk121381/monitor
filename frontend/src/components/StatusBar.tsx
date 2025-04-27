@@ -18,7 +18,7 @@ interface StatusBarProps {
 
 /**
  * 状态条组件 - 展示监控状态历史的时间轴格子
- * 每个格子代表一天的数据，最多展示最近90天
+ * 每个格子代表一天的数据，最多展示最近30天
  */
 const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
   const { t } = useTranslation();
@@ -127,8 +127,8 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // 最多返回最近90天
-    const maxDays = 90;
+    // 最多返回最近30天
+    const maxDays = 30;
     return result.slice(-maxDays);
   }, [history, status]);
 
