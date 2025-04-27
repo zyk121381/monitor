@@ -132,9 +132,6 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
     return result.slice(-maxDays);
   }, [history, status]);
 
-  // 计算每个格子的宽度
-  const boxWidth = `${100 / Math.min(90, dailyHistory.length)}%`;
-
   // 显示详细信息对话框
   const showDialog = (dayData: {
     date: string;
@@ -221,8 +218,15 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
 
   return (
     <>
-      {/* 状态历史条 */}
-      <Flex gap="1" style={{ width: "100%", overflow: "hidden" }}>
+      {/* 状态历史条 - 使用Grid布局代替Flex */}
+      <Box 
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: `repeat(${dailyHistory.length}, 1fr)`,
+          gap: '4px', 
+          width: '100%' 
+        }}
+      >
         {dailyHistory.map((dayData, index) => {
           return (
             <Tooltip
@@ -256,19 +260,20 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
             >
               <Button
                 style={{
-                  width: boxWidth,
-                  height: "150px",
+                  width: '100%',
+                  height: "50px",
                   backgroundColor: getColor(dayData.status),
                   borderRadius: "2px",
                   transition: "background-color 0.2s",
                   cursor: "pointer",
+                  padding: '0'
                 }}
                 onClick={() => showDialog(dayData)}
               />
             </Tooltip>
           );
         })}
-      </Flex>
+      </Box>
 
       {/* 详细信息对话框 */}
       <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
