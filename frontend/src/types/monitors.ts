@@ -25,10 +25,6 @@ export interface Monitor {
   history?: MonitorStatusHistory[];
 }
 
-export interface MonitorWithSelection extends Monitor {
-  selected: boolean;
-}
-
 export interface MonitorStatusHistory {
   id: number;
   monitor_id: number;

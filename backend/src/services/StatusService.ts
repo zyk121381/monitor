@@ -164,7 +164,6 @@ export async function saveStatusPageConfig(
  * @returns 状态页公开数据
  */
 export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
-  try {
     // 获取所有配置
     const configsResult = await repositories.getAllStatusPageConfigs(env.DB);
     
@@ -172,15 +171,12 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
       console.log("没有找到任何配置")
 
       return { 
-        success: false,
-        data: {
           title: '故障状态',
           description: '没有找到任何数据，请检查',
           logoUrl: '',
           customCss: '',
           monitors: [],
           agents: []
-        }
       };
     }
     
@@ -251,8 +247,6 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
     });
     
     return {
-      success: true,
-      data: {
         title: config.title,
         description: config.description,
         logoUrl: config.logo_url,
@@ -272,13 +266,8 @@ export async function getStatusPagePublicData(env: { DB: Bindings['DB'] }) {
           os: agent.os,
           version: agent.version
         }))
-      }
     };
-  } catch (error) {
-    console.error('获取状态页数据失败:', error);
-    throw new Error('获取状态页数据失败: ' + String(error));
-  }
-}
+  } 
 
 /**
  * 创建默认状态页数据

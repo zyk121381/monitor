@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Flex, Heading, Text, Grid, Badge, Theme } from '@radix-ui/themes';
 import { getStatusPageData } from '../../services/api/status';
 import { StatusAgent } from '../../types/status';
@@ -17,92 +17,40 @@ const StatusPage = () => {
   const [pageTitle, setPageTitle] = useState<string>(t('statusPage.title'));
   const [pageDescription, setPageDescription] = useState<string>(t('statusPage.allOperational'));
   const [error, setError] = useState<string | null>(null);
-  const requestInProgressRef = useRef(false); // 新增：跟踪请求是否正在进行中
-  const fetchControllerRef = useRef<AbortController | null>(null); // 新增：用于取消重复请求
+
+  // 获取数据
+  const fetchData = async () => {
+      setLoading(true);
+      const response = await getStatusPageData();
+      if (response) {
+        const statusData = response;
+        // 设置页面标题和描述
+        setPageTitle(statusData.title || t('statusPage.title'));
+        setPageDescription(statusData.description || t('statusPage.allOperational'));
+        console.log(statusData);
+        setData({
+          monitors: statusData.monitors || [],
+          agents: statusData.agents || []
+        });
+      } else {
+        setError(t('statusPage.fetchError'));
+      }
+      setLoading(false);
+  };
 
   // 从API获取数据
   useEffect(() => {
-    // 创建数据获取函数
-    const fetchData = async () => {
-      
-      try {
-        setLoading(true);
-        console.log(t('statusPage.fetchingData'));
-        const response = await getStatusPageData();
-        console.log(t('statusPage.dataResponse'), response);
-        
-        if (response) {
-          const statusData = response;
-          console.log(t('statusPage.processingData'), statusData);
-          
-          // 设置页面标题和描述
-          setPageTitle(statusData.title || t('statusPage.title'));
-          setPageDescription(statusData.description || t('statusPage.allOperational'));
-          
-          // 处理agents数据，将cpu、memory、disk等字段转换为cpuUsage、memoryUsage、diskUsage格式
-          const processedAgents = statusData.agents.map((agent: any) => {
-            // 创建处理后的agent对象
-            const processedAgent: any = { ...agent };
-            
-            // 将cpu、memory、disk属性值转换为cpuUsage、memoryUsage、diskUsage
-            if (agent.cpu !== undefined) {
-              processedAgent.cpuUsage = agent.cpu;
-              delete processedAgent.cpu;
-            }
-            
-            if (agent.memory !== undefined) {
-              processedAgent.memoryUsage = agent.memory;
-              delete processedAgent.memory;
-            }
-            
-            if (agent.disk !== undefined) {
-              processedAgent.diskUsage = agent.disk;
-              delete processedAgent.disk;
-            }
-            
-            return processedAgent;
-          });
-          
-          setData({
-            monitors: statusData.monitors || [],
-            agents: processedAgents
-          });
-        } else {
-          setError(t('statusPage.fetchError'));
-        }
-      } catch (err: any) {
-        // 忽略被中止的请求错误
-        if (err.name !== 'AbortError') {
-          console.error(t('statusPage.fetchError'), err);
-          setError(t('statusPage.fetchError'));
-        }
-      } finally {
-        // 标记请求结束
-        requestInProgressRef.current = false;
-        fetchControllerRef.current = null;
-        setLoading(false);
-      }
-    };
-    
-    // 执行初始数据获取
     fetchData();
-    
     // 设置定时刷新，每分钟更新数据
     const intervalId = setInterval(() => {
-      console.log(t('statusPage.autoRefresh'));
       fetchData();
-    }, 60000); // 60000ms = 1分钟
+    }, 180000); // 180000ms = 3分钟
     
     // 组件卸载时清除定时器和取消请求
     return () => {
-      console.log(t('statusPage.componentUnmount'));
       clearInterval(intervalId);
-      
-      if (fetchControllerRef.current) {
-        fetchControllerRef.current.abort();
-      }
     };
-  }, [t]); // 依赖于 t 函数
+  }, []); // 依赖于 t 函数
 
   // 错误显示
   if (error) {
