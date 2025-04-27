@@ -24,16 +24,6 @@ const StatusPage = () => {
   useEffect(() => {
     // 创建数据获取函数
     const fetchData = async () => {
-      // 如果已经有请求在进行中，取消它
-      if (requestInProgressRef.current && fetchControllerRef.current) {
-        console.log(t('statusPage.cancelPreviousRequest'));
-        fetchControllerRef.current.abort();
-      }
-      
-      // 标记新请求开始
-      requestInProgressRef.current = true;
-      fetchControllerRef.current = new AbortController();
-      const signal = fetchControllerRef.current.signal;
       
       try {
         setLoading(true);
@@ -41,14 +31,8 @@ const StatusPage = () => {
         const response = await getStatusPageData();
         console.log(t('statusPage.dataResponse'), response);
         
-        // 如果请求被取消，则退出
-        if (signal.aborted) {
-          console.log(t('statusPage.requestCancelled'));
-          return;
-        }
-        
-        if (response.success && response.data) {
-          const statusData = response.data;
+        if (response) {
+          const statusData = response;
           console.log(t('statusPage.processingData'), statusData);
           
           // 设置页面标题和描述
@@ -84,8 +68,7 @@ const StatusPage = () => {
             agents: processedAgents
           });
         } else {
-          console.error(t('statusPage.fetchError'), response.message);
-          setError(response.message || t('statusPage.fetchError'));
+          setError(t('statusPage.fetchError'));
         }
       } catch (err: any) {
         // 忽略被中止的请求错误

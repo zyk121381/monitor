@@ -2,25 +2,25 @@ import { useState, useEffect, useRef } from 'react';
 import { Box, Flex, Heading, Text, Card, Button, TextField, TextArea, Tabs, Container } from '@radix-ui/themes';
 import { EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
 import * as Toast from '@radix-ui/react-toast';
-import { getAllMonitors } from '../../services/api/monitors';
-import { Monitor } from '../../types/monitors';
-import { getAllAgents } from '../../services/api/agents';
-import { Agent } from '../../types/agents';
 import { 
   getStatusPageConfig, 
   saveStatusPageConfig, 
 } from '../../services/api/status';
-import { StatusPageConfig as StatusConfig, StatusPageConfigResponse } from '../../types/status';
+import { StatusPageConfig as StatusConfig } from '../../types/status';
 import '../../styles/components.css';
 import { useTranslation } from 'react-i18next';
 
 // 监控项带选择状态
-interface MonitorWithSelection extends Monitor {
+interface MonitorWithSelection {
+  id: number;
+  name: string;
   selected: boolean;
 }
 
 // 客户端带选择状态
-interface AgentWithSelection extends Agent {
+interface AgentWithSelection {
+  id: number;
+  name: string;
   selected: boolean;
 }
 
@@ -72,129 +72,17 @@ const StatusPageConfig = () => {
         const configResponse = await getStatusPageConfig();
         console.log('==== 状态页配置API响应 ====', JSON.stringify(configResponse, null, 2));
         
-        let configData: StatusPageConfigResponse | null = null;
-        
-        // 判断响应是否包含所需数据
+        // 如果获取到有效的配置数据，直接使用
         if (configResponse) {
-          if (configResponse.success === false) {
-            console.log(t('common.error.fetch'), configResponse.message);
-          } else if (configResponse.config) {
-            // 从config属性获取配置
-            configData = configResponse.config;
-            console.log(t('statusPageConfig.configFromProperty'), JSON.stringify(configData, null, 2));
-          } else {
-            // 直接使用API响应作为配置数据 (可能是后端直接返回了配置对象)
-            try {
-              // 尝试将响应作为配置数据直接使用
-              if ('monitors' in configResponse && Array.isArray(configResponse.monitors)) {
-                console.log(t('statusPageConfig.tryingDirectResponse'));
-                configData = configResponse as unknown as StatusPageConfigResponse;
-              }
-            } catch (err) {
-              console.error(t('statusPageConfig.parseError'), err);
-            }
-          }
-          
-          // 输出配置信息
-          if (configData && configData.monitors && Array.isArray(configData.monitors)) {
-            console.log(t('statusPageConfig.receivedConfig'), JSON.stringify(configData, null, 2));
-            console.log(t('statusPageConfig.monitorListType'), Array.isArray(configData.monitors) ? 'Array' : typeof configData.monitors);
-            console.log(t('statusPageConfig.monitorCount'), configData.monitors.length);
-            configData.monitors.forEach((monitor: any) => {
-              console.log(`${t('statusPageConfig.configMonitor')}: id=${monitor.id}, name=${monitor.name}, selected=${monitor.selected}`);
-            });
-          } else {
-            console.log(t('statusPageConfig.noValidConfig'));
-          }
-        } else {
-          console.log(t('statusPageConfig.invalidResponse'));
-        }
-
-        // 获取监控数据
-        console.log(t('statusPageConfig.fetchingMonitors'));
-        const monitorsResponse = await getAllMonitors();
-        console.log(t('statusPageConfig.monitorsResponse'), JSON.stringify(monitorsResponse, null, 2));
-        
-        if (monitorsResponse.success && monitorsResponse.monitors) {
-          const monitorsWithSelection = monitorsResponse.monitors.map((monitor: Monitor) => {
-            // 在配置中查找对应ID的监控项
-            let isSelected = false;
-            
-            if (configData && configData.monitors && Array.isArray(configData.monitors)) {
-              // 查找配置中的对应监控项
-              const configMonitor = configData.monitors.find((m: {id: number}) => m.id === monitor.id);
-              if (configMonitor) {
-                console.log(`${t('statusPageConfig.foundMonitor')}: ${monitor.name}(${monitor.id}), ${t('statusPageConfig.originalStatus')}:`, configMonitor.selected);
-                // 确保严格布尔值比较
-                isSelected = configMonitor.selected === true;
-                console.log(`${t('statusPageConfig.processedStatus')}: ${isSelected}`);
-              } else {
-                console.log(`${t('statusPageConfig.notFoundMonitor')}: ${monitor.name}(${monitor.id})`);
-              }
-            }
-            
-            console.log(`${t('statusPageConfig.finalMonitorResult')}: ${monitor.name}(${monitor.id}) - ${t('statusPageConfig.selectedStatus')}: ${isSelected}`);
-            
-            return {
-              ...monitor,
-              selected: isSelected
-            };
-          });
-          
-          console.log(t('statusPageConfig.processedMonitorList'), monitorsWithSelection.map((m: MonitorWithSelection) => ({
-            id: m.id,
-            name: m.name,
-            selected: m.selected
-          })));
-          
-          // 获取客户端数据
-          console.log(t('statusPageConfig.fetchingAgents'));
-          const agentsResponse = await getAllAgents();
-          if (agentsResponse.success && agentsResponse.agents) {
-            const agentsWithSelection = agentsResponse.agents.map((agent: Agent) => {
-              // 在配置中查找对应ID的客户端
-              let isSelected = false;
-              
-              if (configData && configData.agents && Array.isArray(configData.agents)) {
-                // 查找配置中的对应客户端
-                const configAgent = configData.agents.find((a: {id: number}) => a.id === agent.id);
-                if (configAgent) {
-                  console.log(`${t('statusPageConfig.foundAgent')}: ${agent.name}(${agent.id}), ${t('statusPageConfig.originalStatus')}:`, configAgent.selected);
-                  // 确保严格布尔值比较
-                  isSelected = configAgent.selected === true;
-                  console.log(`${t('statusPageConfig.processedStatus')}: ${isSelected}`);
-                } else {
-                  console.log(`${t('statusPageConfig.notFoundAgent')}: ${agent.name}(${agent.id})`);
-                }
-              }
-              
-              console.log(`${t('statusPageConfig.finalAgentResult')}: ${agent.name}(${agent.id}) - ${t('statusPageConfig.selectedStatus')}: ${isSelected}`);
-              
-              return {
-                ...agent,
-                selected: isSelected
-              };
-            });
-            
-            console.log(t('statusPageConfig.processedAgentList'), agentsWithSelection.map((a: AgentWithSelection) => ({
-              id: a.id,
-              name: a.name,
-              selected: a.selected
-            })));
-            
-            setConfig(prev => ({
-              ...prev,
-              title: configData?.title || t('statusPage.title'),
-              description: configData?.description || t('statusPage.allOperational'),
-              logoUrl: configData?.logoUrl || '',
-              customCss: configData?.customCss || '',
-              monitors: monitorsWithSelection,
-              agents: agentsWithSelection
-            }));
-          }
-        } else {
-          console.error(t('statusPageConfig.fetchMonitorsError'));
-          setError(t('statusPageConfig.fetchMonitorsError'));
+          setConfig(prev => ({
+            ...prev,
+            title: configResponse?.title || t('statusPage.title'),
+            description: configResponse?.description || t('statusPage.allOperational'),
+            logoUrl: configResponse?.logoUrl || '',
+            customCss: configResponse?.customCss || '',
+            monitors: configResponse.monitors || [],
+            agents: configResponse.agents || []
+          }));
         }
       } catch (error) {
         console.error(t('statusPageConfig.fetchDataError'), error);
@@ -207,16 +95,7 @@ const StatusPageConfig = () => {
     fetchData();
   }, [t]);
 
-  useEffect(() => {
-    if (!loading && config.monitors.length > 0) {
-      console.log('=====================');
-      console.log(t('statusPageConfig.configLoaded'));
-      config.monitors.forEach(monitor => {
-        console.log(`- ${monitor.name}(ID: ${monitor.id}): ${monitor.selected ? t('common.yes') : t('common.no')}`);
-      });
-      console.log('=====================');
-    }
-  }, [loading, config.monitors, t]);
+
 
   // 处理表单字段变化
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -263,7 +142,6 @@ const StatusPageConfig = () => {
   // 保存配置
   const handleSave = async () => {
     setSaving(true);
-    try {
       // 构建要保存的配置对象
       const configToSave: StatusConfig = {
         title: config.title,
@@ -274,33 +152,19 @@ const StatusPageConfig = () => {
         agents: config.agents.filter((a: AgentWithSelection) => a.selected).map((a: AgentWithSelection) => a.id)
       };
       
-      // 调试日志
-      console.log(t('statusPageConfig.savingConfig'), configToSave);
-      console.log(t('statusPageConfig.selectedMonitors'), config.monitors.filter((m: MonitorWithSelection) => m.selected));
-      console.log(t('statusPageConfig.selectedMonitorIds'), configToSave.monitors);
-      
-      // 调用API保存配置
-      console.log(t('statusPageConfig.callingSaveApi'));
       const response = await saveStatusPageConfig(configToSave);
-      console.log(t('statusPageConfig.saveApiResponse'), response);
       
-      if (response.success) {
+      if (response) {
         setToastMessage(t('statusPageConfig.configSaved'));
         setShowSuccessToast(true);
         setTimeout(() => setShowSuccessToast(false), 3000);
       } else {
-        setToastMessage(response.message || t('statusPageConfig.saveError'));
+        setToastMessage(response || t('statusPageConfig.saveError'));
         setShowErrorToast(true);
         setTimeout(() => setShowErrorToast(false), 3000);
       }
-    } catch (err) {
-      console.error(t('statusPageConfig.saveError'), err);
-      setToastMessage(t('statusPageConfig.saveError'));
-      setShowErrorToast(true);
-      setTimeout(() => setShowErrorToast(false), 3000);
-    } finally {
       setSaving(false);
-    }
+
   };
 
   // 预览状态页
