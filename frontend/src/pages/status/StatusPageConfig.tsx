@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Flex,
@@ -48,13 +48,11 @@ interface StatusConfigWithDetails {
 
 const StatusPageConfig = () => {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [copied, setCopied] = useState(false);
-  const hasInitializedRef = useRef(false);
   const { t } = useTranslation();
 
   // 初始化配置对象
@@ -70,45 +68,34 @@ const StatusPageConfig = () => {
 
   // 从API获取数据
   useEffect(() => {
-    // 使用 ref 防止重复请求
-    if (hasInitializedRef.current) return;
-    hasInitializedRef.current = true;
-
-    setLoading(true);
-
-    const fetchData = async () => {
-      try {
-        // 获取状态页配置
-        console.log(t("statusPageConfig.fetchingConfig"));
-        const configResponse = await getStatusPageConfig();
-        console.log(
-          "==== 状态页配置API响应 ====",
-          JSON.stringify(configResponse, null, 2)
-        );
-
-        // 如果获取到有效的配置数据，直接使用
-        if (configResponse) {
-          setConfig((prev) => ({
-            ...prev,
-            title: configResponse?.title || t("statusPage.title"),
-            description:
-              configResponse?.description || t("statusPage.allOperational"),
-            logoUrl: configResponse?.logoUrl || "",
-            customCss: configResponse?.customCss || "",
-            monitors: configResponse.monitors || [],
-            agents: configResponse.agents || [],
-          }));
-        }
-      } catch (error) {
-        console.error(t("statusPageConfig.fetchDataError"), error);
-        setError(t("statusPageConfig.fetchDataError"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [t]);
+  }, []);
+
+  const fetchData = async () => {
+    // 获取状态页配置
+    setLoading(true);
+    console.log(t("statusPageConfig.fetchingConfig"));
+    const configResponse = await getStatusPageConfig();
+    console.log(
+      "==== 状态页配置API响应 ====",
+      JSON.stringify(configResponse, null, 2)
+    );
+
+    // 如果获取到有效的配置数据，直接使用
+    if (configResponse) {
+      setConfig((prev) => ({
+        ...prev,
+        title: configResponse?.title || t("statusPage.title"),
+        description:
+          configResponse?.description || t("statusPage.allOperational"),
+        logoUrl: configResponse?.logoUrl || "",
+        customCss: configResponse?.customCss || "",
+        monitors: configResponse.monitors || [],
+        agents: configResponse.agents || [],
+      }));
+    }
+    setLoading(false);
+  };
 
   // 处理表单字段变化
   const handleChange = (
@@ -190,30 +177,6 @@ const StatusPageConfig = () => {
     // 在新标签页中打开状态页
     window.open("/status", "_blank");
   };
-
-  // 错误显示
-  if (error) {
-    return (
-      <Box>
-        <div className="page-container detail-page">
-          <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
-            <Text size="3" style={{ color: "var(--red-9)" }}>
-              {error}
-            </Text>
-            <Button
-              variant="ghost"
-              size="2"
-              className="nav-button config-button"
-              onClick={() => window.location.reload()}
-              ml="2"
-            >
-              {t("common.retry")}
-            </Button>
-          </Flex>
-        </div>
-      </Box>
-    );
-  }
 
   if (loading) {
     return (

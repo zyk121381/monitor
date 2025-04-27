@@ -32,34 +32,28 @@ const EditAgent = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const fetchAgentData = async () => {
-      try {
-        setLoading(true);
-
-        const response = await getAgent(Number(id));
-
-        if (response.success && response.agent) {
-          const agent = response.agent;
-
-          setFormData({
-            name: agent.name,
-            status: agent.status || "inactive",
-          });
-        } else {
-          setNotFound(true);
-        }
-      } catch (error) {
-        console.error("获取客户端数据失败:", error);
-        setNotFound(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) {
       fetchAgentData();
     }
   }, [id]);
+
+  const fetchAgentData = async () => {
+    setLoading(true);
+
+    const response = await getAgent(Number(id));
+
+    if (response.success && response.agent) {
+      const agent = response.agent;
+
+      setFormData({
+        name: agent.name,
+        status: agent.status || "inactive",
+      });
+    } else {
+      setNotFound(true);
+    }
+    setLoading(false);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -73,40 +67,27 @@ const EditAgent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    try {
-      setLoading(true);
+    // 准备提交数据 - 只包含名称
+    const payload = {
+      name: formData.name,
+    };
 
-      // 准备提交数据 - 只包含名称
-      const payload = {
-        name: formData.name,
-      };
+    // 调用API更新客户端
+    const response = await updateAgent(Number(id), payload);
 
-      // 调用API更新客户端
-      const response = await updateAgent(Number(id), payload);
-
-      if (response.success) {
-        setToastMessage(t("agent.form.updateSuccess"));
-        setToastType("success");
-        setToastOpen(true);
-
-        // 短暂延迟后导航，让用户有时间看到提示
-        setTimeout(() => {
-          navigate("/agents");
-        }, 1500);
-      } else {
-        setToastMessage(response.message || t("agent.form.updateError"));
-        setToastType("error");
-        setToastOpen(true);
-      }
-    } catch (error) {
-      console.error("更新客户端失败:", error);
-      setToastMessage(t("agent.form.updateError"));
-      setToastType("error");
+    if (response.success) {
+      setToastMessage(t("agent.form.updateSuccess"));
+      setToastType("success");
       setToastOpen(true);
-    } finally {
-      setLoading(false);
+
+      // 短暂延迟后导航，让用户有时间看到提示
+      setTimeout(() => {
+        navigate("/agents");
+      }, 1500);
     }
+    setLoading(false);
   };
 
   if (notFound) {

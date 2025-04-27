@@ -249,34 +249,7 @@ export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
     }
   }
 
-  // 为客户端添加资源使用情况字段
-  const enrichedAgents = agents.map((agent: any) => {
-    // 计算内存使用百分比 (如果有总量和使用量)
-    const memoryPercent =
-      agent.memory_total && agent.memory_used
-        ? (agent.memory_used / agent.memory_total) * 100
-        : null;
 
-    // 计算磁盘使用百分比 (如果有总量和使用量)
-    const diskPercent =
-      agent.disk_total && agent.disk_used
-        ? (agent.disk_used / agent.disk_total) * 100
-        : null;
-
-    return {
-      ...agent,
-      // 使用数据库中的 status 字段，不重新计算
-      cpu: agent.cpu_usage || 0, // 使用数据库中的CPU使用率
-      memory: memoryPercent || 0, // 使用数据库中的内存使用百分比
-      disk: diskPercent || 0, // 使用数据库中的磁盘使用百分比
-      network_rx: agent.network_rx || 0, // 使用数据库中的网络下载速率
-      network_tx: agent.network_tx || 0, // 使用数据库中的网络上传速率
-      hostname: agent.hostname || "未知主机",
-      ip_addresses: agent.ip_addresses || "0.0.0.0",
-      os: agent.os || "未知系统",
-      version: agent.version || "未知版本",
-    };
-  });
 
   return {
     title: config.title,
@@ -284,20 +257,7 @@ export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
     logoUrl: config.logo_url,
     customCss: config.custom_css,
     monitors: monitors,
-    agents: enrichedAgents.map((agent) => ({
-      id: agent.id,
-      name: agent.name,
-      status: agent.status,
-      cpu: agent.cpu,
-      memory: agent.memory,
-      disk: agent.disk,
-      network_rx: agent.network_rx,
-      network_tx: agent.network_tx,
-      hostname: agent.hostname,
-      ip_addresses: agent.ip_addresses,
-      os: agent.os,
-      version: agent.version,
-    })),
+    agents: agents,
   };
 }
 

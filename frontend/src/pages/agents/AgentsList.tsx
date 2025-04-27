@@ -24,9 +24,9 @@ import {
   TrashIcon,
 } from "@radix-ui/react-icons";
 import { getAllAgents, deleteAgent } from "../../services/api/agents";
-import { ClientWithStatus, Agent } from "../../types/agents";
 import AgentCard from "../../components/AgentCard";
 import { useTranslation } from "react-i18next";
+import { Agent } from "../../types";
 
 // 定义客户端状态颜色映射
 const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
@@ -38,7 +38,7 @@ const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
 
 const AgentsList = () => {
   const navigate = useNavigate();
-  const [agents, setAgents] = useState<ClientWithStatus[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -46,50 +46,8 @@ const AgentsList = () => {
   const [viewMode, setViewMode] = useState<"table" | "card">("card"); // 默认使用卡片视图
   const { t } = useTranslation();
 
-  // 获取客户端数据
-  const fetchAgents = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // 获取所有客户端
-      const response = await getAllAgents();
-
-      if (!response.success || !response.agents) {
-        throw new Error(response.message || t("common.error.fetch"));
-      }
-
-      // 处理客户端数据
-      const clientsWithStatus: ClientWithStatus[] = response.agents.map(
-        (agent: Agent) => {
-          // 直接使用服务器端返回的状态
-          let status: "active" | "inactive" | "connecting" = "inactive";
-
-          if (agent.status === "active") {
-            status = "active";
-          } else if (agent.status === "connecting") {
-            status = "connecting";
-          }
-
-          return {
-            ...agent,
-            status,
-          };
-        }
-      );
-
-      setAgents(clientsWithStatus);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("common.error.fetch"));
-      console.error("获取客户端列表错误:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchAgents();
-
     // 设置定时器，每分钟刷新一次数据
     const intervalId = setInterval(() => {
       console.log("AgentsList: 自动刷新数据...");
@@ -99,6 +57,20 @@ const AgentsList = () => {
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);
   }, [t]);
+
+  // 获取客户端数据
+  const fetchAgents = async () => {
+    setLoading(true);
+    setError(null);
+      // 获取所有客户端
+      const response = await getAllAgents();
+
+      if (response.agents) {
+        setAgents(response.agents);
+      }
+      console.log("获取到的 agent 数据: ", response)
+      setLoading(false);
+  };
 
   // 刷新客户端列表
   const handleRefresh = () => {

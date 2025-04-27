@@ -53,11 +53,6 @@ export interface MonitorsResponse {
   monitors?: Monitor[];
 }
 
-export interface HistoryResponse {
-  success: boolean;
-  message: string;
-  history?: MonitorStatusHistory[];
-}
 
 export interface CreateMonitorRequest {
   name: string;

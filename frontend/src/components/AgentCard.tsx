@@ -18,49 +18,30 @@ const AgentCard = ({
 }: AgentCardProps) => {
   const { t } = useTranslation();
 
-  // 解析获取资源使用情况
-  let cpuUsage = 0;
-  let memoryUsage = 0;
-  let diskUsage = 0;
-  let networkRx = 0;
-  let networkTx = 0;
-
   console.log(t("agentCard.receivedData"), agent);
 
-  try {
-    // 优先从cpuUsage等属性获取，这些可能来自StatusAgent类型
-    if (agent.cpuUsage !== undefined) {
-      cpuUsage = agent.cpuUsage;
-    } else if (agent.cpu_usage !== undefined) {
-      cpuUsage = Math.round(agent.cpu_usage);
-    }
+  // 计算资源使用百分比
+  const cpuUsage = agent.cpu_usage || 0;
+  const memoryUsage =
+    agent.memory_total && agent.memory_used
+      ? Math.round((agent.memory_used / agent.memory_total) * 100)
+      : 0;
+  const diskUsage =
+    agent.disk_total && agent.disk_used
+      ? Math.round((agent.disk_used / agent.disk_total) * 100)
+      : 0;
 
-    if (agent.memoryUsage !== undefined) {
-      memoryUsage = agent.memoryUsage;
-    } else if (agent.memory_total && agent.memory_used) {
-      memoryUsage = Math.round((agent.memory_used / agent.memory_total) * 100);
-    }
+  // 传递原始网络流量数据 (KB/s)，ClientResourceSection 组件负责单位自适应显示
+  const networkRx = agent.network_rx || 0;
+  const networkTx = agent.network_tx || 0;
 
-    if (agent.diskUsage !== undefined) {
-      diskUsage = agent.diskUsage;
-    } else if (agent.disk_total && agent.disk_used) {
-      diskUsage = Math.round((agent.disk_used / agent.disk_total) * 100);
-    }
-
-    // 传递原始网络流量数据 (KB/s)，ClientResourceSection 组件负责单位自适应显示
-    networkRx = agent.network_rx || 0;
-    networkTx = agent.network_tx || 0;
-
-    console.log(t("agentCard.calculatedResource"), {
-      cpuUsage,
-      memoryUsage,
-      diskUsage,
-      networkRx,
-      networkTx,
-    });
-  } catch (e) {
-    console.error(t("agentCard.resourceError"), e);
-  }
+  console.log(t("agentCard.calculatedResource"), {
+    cpuUsage,
+    memoryUsage,
+    diskUsage,
+    networkRx,
+    networkTx,
+  });
 
   // 根据status属性判断状态
   const agentStatus = agent.status || "inactive";
@@ -82,15 +63,10 @@ const AgentCard = ({
   // 获取IP地址显示的文本
   const getIpAddressText = () => {
     if (!agent.ip_addresses) return t("common.notFound");
-
-    try {
-      const ipArray = JSON.parse(String(agent.ip_addresses));
-      return Array.isArray(ipArray) && ipArray.length > 0
-        ? ipArray[0] + (ipArray.length > 1 ? ` (+${ipArray.length - 1})` : "")
-        : String(agent.ip_addresses);
-    } catch (e) {
-      return String(agent.ip_addresses);
-    }
+    const ipArray = JSON.parse(String(agent.ip_addresses));
+    return Array.isArray(ipArray) && ipArray.length > 0
+      ? ipArray[0] + (ipArray.length > 1 ? ` (+${ipArray.length - 1})` : "")
+      : String(agent.ip_addresses);
   };
 
   // 格式化最后更新时间

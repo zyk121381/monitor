@@ -26,9 +26,9 @@ import {
 } from "@radix-ui/react-icons";
 import * as Toast from "@radix-ui/react-toast";
 import { getAgent, deleteAgent } from "../../services/api/agents";
-import { AgentWithResources } from "../../types/agents";
-import ClientResourceSection from "../../components/ClientResourceSection";
+import { Agent } from "../../types/agents";
 import { useTranslation } from "react-i18next";
+import AgentCard from "../../components/AgentCard";
 
 // 定义客户端状态颜色映射
 const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
@@ -41,7 +41,7 @@ const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
 const AgentDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [agent, setAgent] = useState<AgentWithResources | null>(null);
+  const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -54,45 +54,14 @@ const AgentDetail = () => {
     setLoading(true);
     setError(null);
 
-    try {
       console.log("AgentDetail: 正在获取客户端数据...");
       const agentResponse = await getAgent(Number(id));
 
-      if (!agentResponse.success || !agentResponse.agent) {
-        throw new Error(agentResponse.message || t("common.error.fetch"));
+      if (agentResponse.agent) {
+        setAgent(agentResponse.agent)
       }
-
-      const agentData = agentResponse.agent;
-
-      // 计算资源使用百分比
-      const cpuUsage = agentData.cpu_usage || 0;
-      const memoryUsage =
-        agentData.memory_total && agentData.memory_used
-          ? Math.round((agentData.memory_used / agentData.memory_total) * 100)
-          : 0;
-      const diskUsage =
-        agentData.disk_total && agentData.disk_used
-          ? Math.round((agentData.disk_used / agentData.disk_total) * 100)
-          : 0;
-
-      // 扩展客户端信息
-      const agentWithDetails: AgentWithResources = {
-        ...agentData,
-        uptime: 0, // 没有真正的 uptime 数据，这里简化处理
-        cpuUsage,
-        memoryUsage,
-        diskUsage,
-        networkRx: agentData.network_rx || 0, // 保持原始 KB/s 单位
-        networkTx: agentData.network_tx || 0, // 保持原始 KB/s 单位
-      };
-
-      setAgent(agentWithDetails);
       setLoading(false);
-    } catch (err) {
-      console.error("AgentDetail: 获取客户端数据失败:", err);
-      setError(err instanceof Error ? err.message : t("common.error.fetch"));
-      setLoading(false);
-    }
+
   };
 
   useEffect(() => {
@@ -120,7 +89,7 @@ const AgentDetail = () => {
     fetchAgentData();
   };
 
-  const formatUptime = (agent: AgentWithResources) => {
+  const formatUptime = (agent: Agent) => {
     // 如果有最后活动时间，计算从创建到最后活动的时间差
     if (agent.updated_at) {
       const lastSeenDate = new Date(agent.updated_at);
@@ -447,18 +416,11 @@ const AgentDetail = () => {
                     </Flex>
                   </Card>
 
-                  {/* 系统资源信息卡片 */}
+                  {/* Agent 资源信息卡片 */}
                   <Card>
                     <Flex direction="column" gap="4">
                       <Heading size="3">{t("agent.systemResources")}</Heading>
-
-                      <ClientResourceSection
-                        cpuUsage={agent.cpuUsage || 0}
-                        memoryUsage={agent.memoryUsage || 0}
-                        diskUsage={agent.diskUsage || 0}
-                        networkRx={agent.networkRx || 0}
-                        networkTx={agent.networkTx || 0}
-                      />
+                      <AgentCard agent={agent} showIpAddress={false} showHostname={false} showLastUpdated={false} showDetailedResources={false}></AgentCard>
                     </Flex>
                   </Card>
                 </Grid>

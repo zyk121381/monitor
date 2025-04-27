@@ -4,7 +4,6 @@ import {
   MonitorsResponse,
   CreateMonitorRequest,
   UpdateMonitorRequest,
-  HistoryResponse,
   MonitorStatusHistoryResponse,
 } from "../../types/monitors";
 
@@ -46,8 +45,8 @@ export const deleteMonitor = async (id: number): Promise<MonitorResponse> => {
 // 获取监控历史
 export const getMonitorHistory = async (
   id: number
-): Promise<HistoryResponse> => {
-  const response = await api.get<HistoryResponse>(
+): Promise<MonitorStatusHistoryResponse> => {
+  const response = await api.get<MonitorStatusHistoryResponse>(
     `/api/monitors/${id}/history`
   );
   return response.data;

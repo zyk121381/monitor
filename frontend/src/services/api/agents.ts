@@ -19,16 +19,12 @@ export const generateToken = async (): Promise<{
 };
 
 export const getAllAgents = async (): Promise<AgentsResponse> => {
-  try {
     const response = await api.get("/api/agents");
-    return response.data;
-  } catch (error) {
-    console.error("获取客户端列表失败:", error);
     return {
-      success: false,
-      message: "获取客户端列表失败",
-    };
-  }
+      success: true,
+      agents: response.data.agents,
+    }
+
 };
 
 export const updateAgentStatus = async (
@@ -56,16 +52,11 @@ export const updateAgentStatus = async (
 };
 
 export const getAgent = async (id: number): Promise<AgentResponse> => {
-  try {
-    const response = await api.get(`/api/agents/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`获取客户端 ${id} 失败:`, error);
+  const response = await api.get(`/api/agents/${id}`);
     return {
-      success: false,
-      message: "获取客户端失败",
-    };
-  }
+      success: true,
+      agent: response.data.agent
+    }
 };
 
 export const deleteAgent = async (
@@ -94,7 +85,6 @@ export const updateAgent = async (
     console.error(`更新客户端 ${id} 失败:`, error);
     return {
       success: false,
-      message: "更新客户端失败",
     };
   }
 };

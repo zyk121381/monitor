@@ -35,40 +35,12 @@ export interface StatusPageConfig {
   agents: number[];
 }
 
-export interface StatusConfigWithDetails {
-  title: string;
-  description: string;
-  logoUrl: string;
-  customCss: string;
-  publicUrl: string;
-  monitors: MonitorWithSelection[];
-  agents: AgentWithSelection[];
-}
-
-export interface StatusAgent
-  extends Omit<
-    Agent,
-    "cpu_usage" | "memory_total" | "memory_used" | "disk_total" | "disk_used"
-  > {
-  status: "active" | "inactive";
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
-}
-
 export interface StatusPageData {
   title: string;
   description: string;
   logoUrl: string;
   customCss: string;
   monitors: Monitor[];
-  agents: StatusAgent[];
+  agents: Agent[];
 }
 
-export interface AgentWithSelection extends Agent {
-  selected: boolean;
-}
-
-export interface MonitorWithSelection extends Monitor {
-  selected: boolean;
-}

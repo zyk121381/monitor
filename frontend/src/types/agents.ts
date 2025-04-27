@@ -21,28 +21,12 @@ export interface Agent {
   updated_at: string;
 }
 
-export interface AgentWithResources extends Agent {
-  uptime: number;
-  cpuUsage?: number;
-  memoryUsage?: number;
-  diskUsage?: number;
-  networkRx?: number;
-  networkTx?: number;
-}
-
-export interface ClientWithStatus extends Agent {
-  status_color?: string;
-  status_text?: string;
-}
-
 export interface AgentResponse {
   success: boolean;
-  message: string;
   agent?: Agent;
 }
 
 export interface AgentsResponse {
   success: boolean;
-  message: string;
   agents?: Agent[];
 }

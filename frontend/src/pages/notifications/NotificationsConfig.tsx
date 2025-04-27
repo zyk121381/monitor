@@ -88,72 +88,56 @@ const NotificationsConfig = () => {
 
   const { t } = useTranslation();
 
-  // 加载通知配置数据
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        // 使用实际API调用获取通知配置
-        const configResponse = await getNotificationConfig();
-
-        if (configResponse.success && configResponse.data) {
-          setChannels(configResponse.data.channels);
-          setTemplates(configResponse.data.templates);
-          setSettings(configResponse.data.settings);
-        } else {
-          console.error("获取通知配置失败:", configResponse.message);
-          setShowErrorToast(true);
-          setToastMessage(t("notifications.fetch.error"));
-        }
-      } catch (error) {
-        console.error("加载通知设置失败", error);
-        setShowErrorToast(true);
-        setToastMessage(t("notifications.fetch.error"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
+    loadMonitorsAndAgents();
   }, [t]);
 
-  // 加载监控和客户端列表
-  useEffect(() => {
-    const loadMonitorsAndAgents = async () => {
-      setMonitorsLoading(true);
-      setAgentsLoading(true);
 
-      try {
-        // 获取监控列表
-        const monitorsResponse = await getAllMonitors();
-        if (monitorsResponse.success && monitorsResponse.monitors) {
-          setMonitors(monitorsResponse.monitors);
-        } else {
-          console.error("获取监控数据失败:", monitorsResponse.message);
-        }
-      } catch (error) {
-        console.error("获取监控列表失败", error);
-      } finally {
-        setMonitorsLoading(false);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      // 使用实际API调用获取通知配置
+      const configResponse = await getNotificationConfig();
+
+      if (configResponse.success && configResponse.data) {
+        setChannels(configResponse.data.channels);
+        setTemplates(configResponse.data.templates);
+        setSettings(configResponse.data.settings);
+      } else {
+        console.error("获取通知配置失败:", configResponse.message);
+        setShowErrorToast(true);
+        setToastMessage(t("notifications.fetch.error"));
       }
+    } catch (error) {
+      console.error("加载通知设置失败", error);
+      setShowErrorToast(true);
+      setToastMessage(t("notifications.fetch.error"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      try {
-        // 获取客户端列表
-        const agentsResponse = await getAllAgents();
-        if (agentsResponse.success && agentsResponse.agents) {
-          setAgents(agentsResponse.agents);
-        } else {
-          console.error("获取客户端数据失败:", agentsResponse.message);
-        }
-      } catch (error) {
-        console.error("获取客户端列表失败", error);
-      } finally {
-        setAgentsLoading(false);
-      }
-    };
+  const loadMonitorsAndAgents = async () => {
+    setMonitorsLoading(true);
+    setAgentsLoading(true);
 
-    loadMonitorsAndAgents();
-  }, []);
+    // 获取监控列表
+    const monitorsResponse = await getAllMonitors();
+    if (monitorsResponse.success && monitorsResponse.monitors) {
+      setMonitors(monitorsResponse.monitors);
+    } else {
+      console.error("获取监控数据失败:", monitorsResponse.message);
+    }
+    setMonitorsLoading(false);
+
+    // 获取客户端列表
+    const agentsResponse = await getAllAgents();
+    if (agentsResponse.success && agentsResponse.agents) {
+      setAgents(agentsResponse.agents);
+    }
+    setAgentsLoading(false);
+  };
 
   // 设置处理函数
   const handleMonitorSettingChange = (key: string, value: any) => {
