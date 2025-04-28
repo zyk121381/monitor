@@ -121,21 +121,6 @@ export async function getAllMonitors(db: Bindings["DB"]) {
   };
 }
 
-// 批量获取监控项详情
-export async function getMonitorsByIds(
-  db: Bindings["DB"],
-  monitorIds: number[]
-) {
-  if (monitorIds.length === 0) {
-    return { results: [] };
-  }
-
-  const placeholders = monitorIds.map(() => "?").join(",");
-  return await db
-    .prepare(`SELECT * FROM monitors WHERE id IN (${placeholders})`)
-    .bind(...monitorIds)
-    .all<Monitor>();
-}
 
 // 获取单个监控状态历史 24小时内
 export async function getMonitorStatusHistoryIn24h(

@@ -139,37 +139,6 @@ export async function checkMonitor(
 }
 
 /**
- * 获取单个监控的详细信息
- */
-export async function getMonitorDetails(db: Bindings["DB"], id: number) {
-  const monitor = await repositories.getMonitorById(db, id);
-  if (!monitor) {
-    return null;
-  }
-
-  // 获取历史状态数据
-  const historyResult = await repositories.getMonitorStatusHistoryIn24h(db, id);
-
-  return {
-    ...monitor,
-    history: historyResult.results || [],
-  };
-}
-
-/**
- * 检查单个监控
- * @param db 数据库连接
- * @param monitor 监控对象
- * @returns 检查结果
- */
-export async function checkSingleMonitor(
-  db: Bindings["DB"],
-  monitor: models.Monitor
-) {
-  return checkMonitor(db, monitor);
-}
-
-/**
  * 获取所有监控（根据用户角色过滤）
  * @param db 数据库连接
  * @returns 监控列表和操作结果
@@ -449,7 +418,7 @@ export async function manualCheckMonitor(
     }
 
     // 使用抽象出来的通用检查监控函数进行检查
-    const result = await checkSingleMonitor(db, monitor);
+    const result = await checkMonitor(db, monitor);
 
     // 处理通知逻辑
     try {

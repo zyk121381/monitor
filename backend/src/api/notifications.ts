@@ -9,7 +9,6 @@ const notifications = new Hono<{ Bindings: Bindings }>();
 notifications.get("/", async (c) => {
   try {
     const db = c.env.DB;
-    const userId = c.get("jwtPayload").id;
 
     const config = await NotificationService.getNotificationConfig(db);
 
@@ -624,105 +623,6 @@ notifications.get("/history", async (c) => {
       {
         success: false,
         message: "获取通知历史记录失败",
-        error: error instanceof Error ? error.message : String(error),
-      },
-      500
-    );
-  }
-});
-
-// 测试通知渠道
-notifications.post("/test", async (c) => {
-  try {
-    const body = await c.req.json();
-
-    // 验证参数
-    const schema = z.object({
-      channel: z.object({
-        id: z.union([z.string(), z.number()]).optional(),
-        name: z.string(),
-        type: z.string(),
-        config: z.any(),
-        enabled: z.boolean().default(true),
-      }),
-      subject: z.string().default("测试通知"),
-      content: z
-        .string()
-        .default(
-          "这是一条测试通知，如果您收到这条消息，表明您的通知配置正确。"
-        ),
-    });
-
-    const { channel, subject, content } = schema.parse(body);
-
-    // 确保 id 有值，否则设置为 0
-    const channelWithId = {
-      ...channel,
-      id: channel.id !== undefined ? channel.id : 0,
-      config: channel.config || {}, // 确保 config 有值
-    };
-
-    // 发送测试通知
-    const result = await NotificationService.sendTestEmail(
-      channelWithId,
-      subject,
-      content
-    );
-
-    if (result.success) {
-      return c.json({
-        success: true,
-        message: "测试通知发送成功",
-      });
-    } else {
-      return c.json(
-        {
-          success: false,
-          message: `测试通知发送失败: ${result.error}`,
-        },
-        500
-      );
-    }
-  } catch (error) {
-    console.error("发送测试通知失败:", error);
-    return c.json(
-      {
-        success: false,
-        message: "发送测试通知失败",
-        error: error instanceof Error ? error.message : String(error),
-      },
-      500
-    );
-  }
-});
-
-// 验证Telegram令牌
-notifications.post("/validate-telegram", async (c) => {
-  try {
-    const body = await c.req.json();
-
-    // 验证参数
-    const schema = z.object({
-      botToken: z.string(),
-    });
-
-    const { botToken } = schema.parse(body);
-
-    // 验证令牌
-    const isValid = await NotificationService.validateTelegramToken(botToken);
-
-    return c.json({
-      success: true,
-      data: {
-        valid: isValid,
-      },
-    });
-  } catch (error) {
-    console.error("验证Telegram令牌失败:", error);
-    return c.json(
-      {
-        success: false,
-        message: "验证Telegram令牌失败",
         error: error instanceof Error ? error.message : String(error),
       },
       500

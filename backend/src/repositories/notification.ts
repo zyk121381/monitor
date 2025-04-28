@@ -376,19 +376,6 @@ export const createOrUpdateSettings = async (
   }
 };
 
-// 删除特定对象的通知设置
-export const deleteNotificationSettings = async (
-  db: D1Database,
-  id: number
-): Promise<boolean> => {
-  const result = await db
-    .prepare("DELETE FROM notification_settings WHERE id = ?")
-    .bind(id)
-    .run();
-
-  return ((result.meta as D1Meta)?.changes || 0) > 0;
-};
-
 // 记录通知历史
 export const createNotificationHistory = async (
   db: D1Database,
@@ -477,7 +464,7 @@ export const getNotificationHistory = async (
   };
 };
 
-// 获取完整的通知配置（用于前端）
+// 获取完整的通知配置
 export const getNotificationConfig = async (
   db: D1Database,
 ): Promise<NotificationConfig> => {

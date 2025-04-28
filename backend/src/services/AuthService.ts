@@ -162,41 +162,6 @@ export async function registerUser(
 }
 
 /**
- * 验证用户令牌
- * @param env 环境变量
- * @param token JWT令牌
- * @returns 验证结果
- */
-export async function verifyUserToken(
-  env: any,
-  token: string
-): Promise<{ success: boolean; message: string; user?: any }> {
-  try {
-    const secret = getJwtSecret(env);
-    const decoded = jsonwebtoken.verify(token, secret) as { id: number };
-
-    if (!decoded || !decoded.id) {
-      return { success: false, message: "无效的令牌" };
-    }
-
-    // 获取用户信息
-    const user = await repositories.getUserById(env.DB, decoded.id);
-    if (!user) {
-      return { success: false, message: "用户不存在" };
-    }
-
-    return {
-      success: true,
-      message: "令牌有效",
-      user,
-    };
-  } catch (error) {
-    console.error("令牌验证错误:", error);
-    return { success: false, message: "令牌验证失败" };
-  }
-}
-
-/**
  * 获取当前用户信息
  * @param env 环境变量，包含数据库连接
  * @param userId 用户ID

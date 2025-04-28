@@ -1,10 +1,7 @@
 import { Hono } from "hono";
 import { Bindings } from "../models/db";
 import { Monitor } from "../models/monitor";
-import {
-  getMonitorsToCheck,
-  checkSingleMonitor as monitorServiceCheck,
-} from "../services";
+import { getMonitorsToCheck, checkMonitor } from "../services";
 import { shouldSendNotification, sendNotification } from "../services";
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
@@ -30,7 +27,7 @@ async function checkMonitors(c: any) {
       monitors.results.map(async (monitorItem: any) => {
         // 确保正确的类型转换
         const monitor = monitorItem as Monitor;
-        const checkResult = await checkSingleMonitor(c, monitor);
+        const checkResult = await checkMonitor(c.env.DB, monitor);
 
         // 处理通知
         await handleMonitorNotification(c, monitor, checkResult);
@@ -49,12 +46,6 @@ async function checkMonitors(c: any) {
     console.error("监控检查出错:", error);
     return { success: false, message: "监控检查出错", error: String(error) };
   }
-}
-
-// 检查单个监控的函数
-async function checkSingleMonitor(c: any, monitor: Monitor) {
-  // 使用服务层的检查函数
-  return await monitorServiceCheck(c.env.DB, monitor);
 }
 
 // 处理监控通知

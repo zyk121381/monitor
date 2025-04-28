@@ -1,5 +1,5 @@
 import { Bindings } from "../models/db";
-import * as AgentRepository from "../repositories/agent";
+import * as AgentRepository from "../repositories";
 import { generateToken, verifyToken } from "../utils/jwt";
 
 /**
@@ -496,104 +496,8 @@ export async function updateAgentStatusService(
   }
 }
 
-// 保留原有函数供直接使用
-export async function getAllAgents(db: Bindings["DB"]) {
-  return await AgentRepository.getAllAgents(db);
-}
-
-export async function getAgentsByUser(db: Bindings["DB"], userId: number) {
-  return await AgentRepository.getAgentsByUser(db, userId);
-}
-
 export async function getAgentById(db: Bindings["DB"], id: number) {
   return await AgentRepository.getAgentById(db, id);
-}
-
-export async function createAgent(
-  db: Bindings["DB"],
-  name: string,
-  token: string,
-  createdBy: number,
-  status: string = "inactive",
-  hostname: string | null = null,
-  os: string | null = null,
-  version: string | null = null,
-  ipAddresses: string[] | null = null
-) {
-  return await AgentRepository.createAgent(
-    db,
-    name,
-    token,
-    createdBy,
-    status,
-    hostname,
-    os,
-    version,
-    ipAddresses
-  );
-}
-
-export async function updateAgent(
-  db: Bindings["DB"],
-  id: number,
-  fields: {
-    name?: string;
-    hostname?: string;
-    ip_addresses?: string[];
-    os?: string;
-    version?: string;
-    status?: string;
-    cpu_usage?: number;
-    memory_total?: number;
-    memory_used?: number;
-    disk_total?: number;
-    disk_used?: number;
-    network_rx?: number;
-    network_tx?: number;
-  }
-) {
-  return await AgentRepository.updateAgent(db, id, fields);
-}
-
-export async function updateAgentStatus(
-  db: Bindings["DB"],
-  id: number,
-  status: string = "active",
-  metrics: {
-    cpu_usage?: number;
-    memory_total?: number;
-    memory_used?: number;
-    disk_total?: number;
-    disk_used?: number;
-    network_rx?: number;
-    network_tx?: number;
-    hostname?: string;
-    ip_addresses?: string[];
-    os?: string;
-    version?: string;
-  }
-) {
-  return await AgentRepository.updateAgentStatus(db, id, status, metrics);
-}
-
-export async function deleteAgent(db: Bindings["DB"], id: number) {
-  return await AgentRepository.deleteAgent(db, id);
-}
-
-export async function updateAgentToken(
-  db: Bindings["DB"],
-  id: number,
-  token: string
-) {
-  return await AgentRepository.updateAgentToken(db, id, token);
-}
-
-export async function getAgentByToken(db: Bindings["DB"], token: string) {
-  return await AgentRepository.getAgentByToken(db, token);
-}
-
-export async function getAdminUserId(db: Bindings["DB"]) {
-  return await AgentRepository.getAdminUserId(db);
 }
 
 export async function getActiveAgents(db: Bindings["DB"]) {
@@ -602,26 +506,4 @@ export async function getActiveAgents(db: Bindings["DB"]) {
 
 export async function setAgentInactive(db: Bindings["DB"], id: number) {
   return await AgentRepository.setAgentInactive(db, id);
-}
-
-export async function registerAgent(
-  db: Bindings["DB"],
-  env: any,
-  token: string,
-  name: string,
-  hostname: string | null = null,
-  ipAddresses: string[] | null = null,
-  os: string | null = null,
-  version: string | null = null
-) {
-  return await registerAgentService(
-    db,
-    env,
-    token,
-    name,
-    hostname,
-    ipAddresses,
-    os,
-    version
-  );
 }

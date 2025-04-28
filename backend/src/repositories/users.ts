@@ -189,3 +189,18 @@ export async function getUserByUsername(
     .bind(username)
     .first<User | null>();
 }
+
+
+// 获取管理员用户ID
+export async function getAdminUserId(db: Bindings["DB"]) {
+  const adminUser = await db
+    .prepare("SELECT id FROM users WHERE role = ?")
+    .bind("admin")
+    .first<{ id: number }>();
+
+  if (!adminUser) {
+    throw new Error("无法找到管理员用户");
+  }
+
+  return adminUser.id;
+}

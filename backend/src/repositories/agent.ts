@@ -12,6 +12,19 @@ export async function getAllAgents(db: Bindings["DB"]) {
     .all<Agent>();
 }
 
+// 批量获取客户端详情
+export async function getAgentsByIds(db: Bindings["DB"], agentIds: number[]) {
+  if (agentIds.length === 0) {
+    return { results: [] };
+  }
+
+  const placeholders = agentIds.map(() => "?").join(",");
+  return await db
+    .prepare(`SELECT * FROM agents WHERE id IN (${placeholders})`)
+    .bind(...agentIds)
+    .all<Agent>();
+}
+
 // 获取用户创建的客户端
 export async function getAgentsByUser(db: Bindings["DB"], userId: number) {
   return await db
@@ -230,46 +243,12 @@ export async function deleteAgent(db: Bindings["DB"], id: number) {
   return { success: true, message: "客户端已删除" };
 }
 
-// 更新客户端令牌
-export async function updateAgentToken(
-  db: Bindings["DB"],
-  id: number,
-  token: string
-) {
-  const now = new Date().toISOString();
-
-  const result = await db
-    .prepare("UPDATE agents SET token = ?, updated_at = ? WHERE id = ?")
-    .bind(token, now, id)
-    .run();
-
-  if (!result.success) {
-    throw new Error("更新客户端令牌失败");
-  }
-
-  return { success: true, message: "客户端令牌已更新", token };
-}
-
 // 通过令牌获取客户端
 export async function getAgentByToken(db: Bindings["DB"], token: string) {
   return await db
     .prepare("SELECT * FROM agents WHERE token = ?")
     .bind(token)
     .first<Agent>();
-}
-
-// 获取管理员用户ID
-export async function getAdminUserId(db: Bindings["DB"]) {
-  const adminUser = await db
-    .prepare("SELECT id FROM users WHERE role = ?")
-    .bind("admin")
-    .first<{ id: number }>();
-
-  if (!adminUser) {
-    throw new Error("无法找到管理员用户");
-  }
-
-  return adminUser.id;
 }
 
 // 获取活跃状态的客户端
