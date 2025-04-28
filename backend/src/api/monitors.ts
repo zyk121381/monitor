@@ -9,43 +9,27 @@ monitors.get("/", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层获取监控列表
-  const result = await MonitorService.getAllMonitors(
-    c.env.DB,
-    payload.id,
-    payload.role
-  );
+  const result = await MonitorService.getAllMonitors(c.env.DB);
 
   return c.json(
     {
       success: result.success,
       monitors: result.monitors,
-      message: result.message,
     },
     result.status as any
   );
 });
 
-// 获取单个监控
-monitors.get("/:id", async (c) => {
-  const id = parseInt(c.req.param("id"));
-  const payload = c.get("jwtPayload");
+// 获取所有监控的每日统计数据
+monitors.get("/daily", async (c) => {
+  // 调用服务层获取所有监控的每日统计数据
+  const result = await MonitorService.getAllMonitorDailyStats(c.env.DB);
 
-  // 调用服务层获取监控详情
-  const result = await MonitorService.getMonitorById(
-    c.env.DB,
-    id,
-    payload.id,
-    payload.role
-  );
-
-  return c.json(
-    {
-      success: result.success,
-      monitor: result.monitor,
-      message: result.message,
-    },
-    result.status as any
-  );
+  return c.json({
+    success: result.success,
+    dailyStats: result.dailyStats,
+    message: result.message,
+  });
 });
 
 // 创建监控
@@ -66,6 +50,38 @@ monitors.post("/", async (c) => {
   );
 });
 
+// 获取所有监控状态历史
+monitors.get("/history", async (c) => {
+  // 调用服务层获取监控历史
+  const result = await MonitorService.getAllMonitorStatusHistory(c.env.DB);
+
+  return c.json(
+    {
+      success: result.success,
+      history: result.history,
+    },
+    result.status as any
+  );
+});
+
+// 获取单个监控
+monitors.get("/:id", async (c) => {
+  const id = parseInt(c.req.param("id"));
+  const payload = c.get("jwtPayload");
+
+  // 调用服务层获取监控详情
+  const result = await MonitorService.getMonitorById(c.env.DB, id);
+
+  return c.json(
+    {
+      success: result.success,
+      monitor: result.monitor,
+      message: result.message,
+    },
+    result.status as any
+  );
+});
+
 // 更新监控
 monitors.put("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
@@ -73,13 +89,7 @@ monitors.put("/:id", async (c) => {
   const data = await c.req.json();
 
   // 调用服务层更新监控
-  const result = await MonitorService.updateMonitor(
-    c.env.DB,
-    id,
-    data,
-    payload.id,
-    payload.role
-  );
+  const result = await MonitorService.updateMonitor(c.env.DB, id, data);
 
   return c.json(
     {
@@ -97,12 +107,7 @@ monitors.delete("/:id", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层删除监控
-  const result = await MonitorService.deleteMonitor(
-    c.env.DB,
-    id,
-    payload.id,
-    payload.role
-  );
+  const result = await MonitorService.deleteMonitor(c.env.DB, id);
 
   return c.json(
     {
@@ -113,7 +118,7 @@ monitors.delete("/:id", async (c) => {
   );
 });
 
-// 获取监控状态历史
+// 获取单个监控状态历史
 monitors.get("/:id/history", async (c) => {
   const id = parseInt(c.req.param("id"));
   const payload = c.get("jwtPayload");
@@ -135,19 +140,28 @@ monitors.get("/:id/history", async (c) => {
     result.status as any
   );
 });
+
+// 获取单个监控的每日统计数据
+monitors.get("/:id/daily", async (c) => {
+  const id = parseInt(c.req.param("id"));
+
+  // 调用服务层获取每日统计数据
+  const result = await MonitorService.getMonitorDailyStats(c.env.DB, id);
+
+  return c.json({
+    success: result.success,
+    dailyStats: result.dailyStats,
+    message: result.message,
+  });
+});
+
 // 手动检查单个监控
 monitors.post("/:id/check", async (c) => {
   const id = parseInt(c.req.param("id"));
   const payload = c.get("jwtPayload");
 
   // 调用服务层手动检查监控
-  const result = await MonitorService.manualCheckMonitor(
-    c.env.DB,
-    id,
-    payload.id,
-    payload.role,
-    c.env
-  );
+  const result = await MonitorService.manualCheckMonitor(c.env.DB, id, c.env);
 
   return c.json(
     {

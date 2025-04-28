@@ -52,6 +52,8 @@ const ResponseTimeChart: React.FC<ResponseTimeChartProps> = ({
   const { t } = useTranslation();
   const chartRef = useRef<ChartJS<"line">>(null);
 
+  console.log("ResponseTimeChart组件的history: ", history);
+
   // 格式化时间的函数使用 useCallback 缓存
   const formatTime = useCallback((date: Date) => {
     try {
@@ -274,6 +276,8 @@ const ResponseTimeChart: React.FC<ResponseTimeChartProps> = ({
       };
     });
 
+    console.log("processedHistory: ", processedHistory);
+
     // 计算24小时前的时间戳
     const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
 
@@ -326,6 +330,8 @@ const ResponseTimeChart: React.FC<ResponseTimeChartProps> = ({
       })
       .filter((point) => point.x >= twentyFourHoursAgo)
       .sort((a, b) => a.x - b.x);
+
+    console.log("responseTimeData: ", responseTimeData);
 
     // 确保相邻点至少间隔1分钟
     const oneMinute = 60 * 1000;

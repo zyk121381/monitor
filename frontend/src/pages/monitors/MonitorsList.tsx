@@ -26,14 +26,21 @@ import {
   ReloadIcon,
   InfoCircledIcon,
 } from "@radix-ui/react-icons";
-import { getAllMonitors, deleteMonitor } from "../../services/api/monitors";
-import { Monitor } from "../../types/monitors";
+import {
+  getAllMonitors,
+  deleteMonitor,
+  getAllDailyStats,
+  getAllMonitorHistory,
+} from "../../services/api/monitors";
+import { MonitorWithDailyStatsAndStatusHistory } from "../../types/monitors";
 import MonitorCard from "../../components/MonitorCard";
 import { useTranslation } from "react-i18next";
 
 const MonitorsList = () => {
   const navigate = useNavigate();
-  const [monitors, setMonitors] = useState<Monitor[]>([]);
+  const [monitors, setMonitors] = useState<
+    MonitorWithDailyStatsAndStatusHistory[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "grid">("grid");
@@ -42,25 +49,6 @@ const MonitorsList = () => {
     null
   );
   const { t } = useTranslation();
-
-  // 获取监控数据
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllMonitors();
-
-      if (response.success && response.monitors) {
-        setMonitors(response.monitors);
-      } else {
-        setError(response.message || t("monitors.loadingError"));
-      }
-    } catch (err) {
-      console.error(t("monitors.loadingError"), err);
-      setError(t("monitors.loadingError"));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchData();
@@ -74,6 +62,44 @@ const MonitorsList = () => {
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);
   }, []);
+
+  // 获取监控数据
+  const fetchData = async () => {
+    setLoading(true);
+    const response = await getAllMonitors();
+    const responseDailyStats = await getAllDailyStats();
+    const responseMonitorHistory = await getAllMonitorHistory();
+
+    console.log("responseDailyStats: ", responseDailyStats);
+
+    if (
+      response.success &&
+      responseDailyStats.success &&
+      responseMonitorHistory.success
+    ) {
+      const monitorsWithData = response.monitors?.map((monitor) => {
+        // 将与当前监控相关的 dailyStats 数据附加到 monitor 上
+        const dailyStats = (responseDailyStats.dailyStats || []).filter(
+          (stat) => stat.monitor_id === monitor.id
+        );
+        // 将与当前监控相关的 monitorHistory 数据附加到 monitor 上
+        const history = (responseMonitorHistory.history || []).filter(
+          (item) => item.monitor_id === monitor.id
+        );
+        // 返回附加了相关数据的 monitor
+        return {
+          ...monitor,
+          dailyStats: dailyStats,
+          history: history,
+        };
+      });
+      console.log("monitorsWithData: ", monitorsWithData);
+      setMonitors(monitorsWithData || []);
+    } else {
+      setError(response.message || t("monitors.loadingError"));
+    }
+    setLoading(false);
+  };
 
   // 处理刷新
   const handleRefresh = () => {
@@ -230,7 +256,7 @@ const MonitorsList = () => {
 
               <Table.Body>
                 {monitors.map((monitor) => (
-                  <Table.Row key={monitor.id}>
+                  <Table.Row key={`${monitor.id}-${Math.random()}`}>
                     <Table.Cell>
                       <Text weight="medium">{monitor.name}</Text>
                     </Table.Cell>
@@ -303,7 +329,10 @@ const MonitorsList = () => {
             // 网格视图 - 使用 MonitorCard 组件
             <Grid columns={{ initial: "1" }} gap="4">
               {monitors.map((monitor) => (
-                <Box key={monitor.id} style={{ position: "relative" }}>
+                <Box
+                  key={`${monitor.id}-${Math.random()}`}
+                  style={{ position: "relative" }}
+                >
                   <MonitorCard monitor={monitor} />
                   <Flex
                     style={{

@@ -4,12 +4,12 @@ import { getStatusPageData } from "../../services/api/status";
 import AgentCard from "../../components/AgentCard";
 import MonitorCard from "../../components/MonitorCard";
 import { useTranslation } from "react-i18next";
-import { Agent, Monitor } from "../../types";
+import { Agent, MonitorWithDailyStatsAndStatusHistory } from "../../types";
 
 const StatusPage = () => {
   const { t } = useTranslation();
   const [data, setData] = useState<{
-    monitors: Monitor[];
+    monitors: MonitorWithDailyStatsAndStatusHistory[];
     agents: Agent[];
   }>({
     monitors: [],
@@ -21,7 +21,6 @@ const StatusPage = () => {
     t("statusPage.allOperational")
   );
   const [error, setError] = useState<string | null>(null);
-
 
   // 从API获取数据
   useEffect(() => {
@@ -41,6 +40,7 @@ const StatusPage = () => {
   const fetchData = async () => {
     setLoading(true);
     const response = await getStatusPageData();
+
     if (response) {
       // 设置页面标题和描述
       setPageTitle(response.title || t("statusPage.title"));
@@ -57,7 +57,6 @@ const StatusPage = () => {
     }
     setLoading(false);
   };
-
 
   // 错误显示
   if (error) {
@@ -123,7 +122,7 @@ const StatusPage = () => {
               </Heading>
               <Grid columns={{ initial: "1" }} gap="4">
                 {data.monitors.map((monitor) => (
-                  <MonitorCard key={monitor.id} monitor={monitor} />
+                  <MonitorCard monitor={monitor} />
                 ))}
               </Grid>
             </Box>

@@ -55,6 +55,21 @@ CREATE TABLE IF NOT EXISTS monitor_status_history (
   FOREIGN KEY (monitor_id) REFERENCES monitors(id)
 );
 
+-- 监控每日统计表
+CREATE TABLE IF NOT EXISTS monitor_daily_stats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  monitor_id INTEGER NOT NULL,
+  date TEXT NOT NULL,
+  total_checks INTEGER NOT NULL DEFAULT 0,
+  up_checks INTEGER NOT NULL DEFAULT 0,
+  down_checks INTEGER NOT NULL DEFAULT 0,
+  avg_response_time INTEGER DEFAULT 0,
+  min_response_time INTEGER DEFAULT 0,
+  max_response_time INTEGER DEFAULT 0,
+  availability REAL DEFAULT 0,
+  FOREIGN KEY (monitor_id) REFERENCES monitors(id)
+);
+
 -- 客户端表
 CREATE TABLE IF NOT EXISTS agents (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

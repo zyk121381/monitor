@@ -49,6 +49,7 @@ export async function checkAndInitializeDatabase(
       "notification_templates",
       "notification_settings",
       "notification_history",
+      "monitor_daily_stats",
     ];
 
     // 检查每个表是否存在
@@ -88,70 +89,6 @@ export async function checkAndInitializeDatabase(
       console.log("创建缺失的表结构...");
       await createTables(env);
       initialized = true;
-    }
-
-    // 检查用户表是否存在并且为空，如果为空则创建管理员用户
-    if (await tableExists(env, "users")) {
-      const userCount = await env.DB.prepare(
-        "SELECT COUNT(*) as count FROM users"
-      ).first<{ count: number }>();
-      if (!userCount || userCount.count === 0) {
-        console.log("用户表为空，创建管理员用户...");
-        await createAdminUser(env);
-        initialized = true;
-      } else {
-        console.log("用户表已有数据，跳过创建管理员用户...");
-      }
-    } else {
-      console.log("用户表不存在，跳过检查用户数据...");
-    }
-
-    // 检查状态页配置表是否存在并且为空，如果为空则创建默认状态页
-    if (await tableExists(env, "status_page_config")) {
-      const statusPageCount = await env.DB.prepare(
-        "SELECT COUNT(*) as count FROM status_page_config"
-      ).first<{ count: number }>();
-      if (!statusPageCount || statusPageCount.count === 0) {
-        console.log("状态页配置表为空，创建默认状态页...");
-        await createDefaultStatusPage(env);
-        initialized = true;
-      } else {
-        console.log("状态页配置表已有数据，跳过创建默认状态页...");
-      }
-    } else {
-      console.log("状态页配置表不存在，跳过检查状态页数据...");
-    }
-
-    // 检查通知模板表是否存在并且为空，如果为空则创建默认通知模板
-    if (await tableExists(env, "notification_templates")) {
-      const templateCount = await env.DB.prepare(
-        "SELECT COUNT(*) as count FROM notification_templates"
-      ).first<{ count: number }>();
-      if (!templateCount || templateCount.count === 0) {
-        console.log("通知模板表为空，创建默认通知模板...");
-        await createNotificationTemplates(env);
-        initialized = true;
-      } else {
-        console.log("通知模板表已有数据，跳过创建默认通知模板...");
-      }
-    } else {
-      console.log("通知模板表不存在，跳过检查通知模板数据...");
-    }
-
-    // 检查通知渠道表是否存在并且为空，如果为空则创建默认通知渠道和设置
-    if (await tableExists(env, "notification_channels")) {
-      const channelCount = await env.DB.prepare(
-        "SELECT COUNT(*) as count FROM notification_channels"
-      ).first<{ count: number }>();
-      if (!channelCount || channelCount.count === 0) {
-        console.log("通知渠道表为空，创建默认通知渠道和设置...");
-        await createNotificationChannelsAndSettings(env);
-        initialized = true;
-      } else {
-        console.log("通知渠道表已有数据，跳过创建默认通知渠道和设置...");
-      }
-    } else {
-      console.log("通知渠道表不存在，跳过检查通知渠道数据...");
     }
 
     // 执行迁移

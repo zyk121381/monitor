@@ -5,11 +5,24 @@ import {
   CreateMonitorRequest,
   UpdateMonitorRequest,
   MonitorStatusHistoryResponse,
+  DailyStatsResponse,
 } from "../../types/monitors";
 
 // 获取所有监控
 export const getAllMonitors = async (): Promise<MonitorsResponse> => {
   const response = await api.get<MonitorsResponse>("/api/monitors");
+  return response.data;
+};
+
+// 获取所有每日统计
+export const getAllDailyStats = async (): Promise<DailyStatsResponse> => {
+  const response = await api.get<DailyStatsResponse>("/api/monitors/daily");
+  return response.data;
+};
+
+// 获取单个监控每日统计
+export const getMonitorDailyStats = async (id: number): Promise<DailyStatsResponse> => {
+  const response = await api.get<DailyStatsResponse>(`/api/monitors/${id}/daily`);
   return response.data;
 };
 
@@ -42,8 +55,8 @@ export const deleteMonitor = async (id: number): Promise<MonitorResponse> => {
   return response.data;
 };
 
-// 获取监控历史
-export const getMonitorHistory = async (
+// 获取单个监控历史 24小时内
+export const getMonitorStatusHistoryById = async (
   id: number
 ): Promise<MonitorStatusHistoryResponse> => {
   const response = await api.get<MonitorStatusHistoryResponse>(
@@ -51,6 +64,15 @@ export const getMonitorHistory = async (
   );
   return response.data;
 };
+
+// 获取所有监控历史 24小时内
+export const getAllMonitorHistory =
+  async (): Promise<MonitorStatusHistoryResponse> => {
+    const response = await api.get<MonitorStatusHistoryResponse>(
+      `/api/monitors/history`
+    );
+    return response.data;
+  };
 
 // 手动检查监控
 export const checkMonitor = async (

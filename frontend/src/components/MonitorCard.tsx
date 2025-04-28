@@ -4,18 +4,14 @@ import {
   CrossCircledIcon,
   QuestionMarkCircledIcon,
 } from "@radix-ui/react-icons";
-import { Monitor } from "../types/monitors";
+import { MonitorWithDailyStatsAndStatusHistory } from "../types/monitors";
 import "../styles/components.css";
 import { useTranslation } from "react-i18next";
 import StatusBar from "./StatusBar";
 import ResponseTimeChart from "./ResponseTimeChart";
 
 interface MonitorCardProps {
-  monitor: Monitor & {
-    response_time?: number;
-    uptime?: number;
-    history?: any[];
-  };
+  monitor: MonitorWithDailyStatsAndStatusHistory;
 }
 
 /**
@@ -78,7 +74,7 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
 
         {/* 状态条显示 */}
         <Box pt="2" style={{ width: "100%" }}>
-          <StatusBar status={currentStatus} history={monitor.history} />
+          <StatusBar dailyStats={monitor.dailyStats} />
         </Box>
 
         {/* 响应时间图表 */}

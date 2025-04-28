@@ -1,30 +1,20 @@
-import React, { useState, useMemo } from "react";
-import {
-  Box,
-  Flex,
-  Tooltip,
-  Dialog,
-  ScrollArea,
-  Text,
-  Button,
-} from "@radix-ui/themes";
+import React, { useMemo } from "react";
+import { Box, Tooltip, Text } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
-import { MonitorStatusHistory } from "../types/monitors";
+import { DailyStats } from "../types/monitors";
 
 interface StatusBarProps {
-  status: string;
-  history?: MonitorStatusHistory[];
+  dailyStats?: DailyStats[]; // 新增每日统计数据参数
 }
 
 /**
  * 状态条组件 - 展示监控状态历史的时间轴格子
  * 每个格子代表一天的数据，最多展示最近30天
  */
-const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
+const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
   const { t } = useTranslation();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogTitle, setDialogTitle] = useState("");
-  const [dialogContent, setDialogContent] = useState<React.ReactNode>(<div />);
+
+  console.log("StatusBar组件的dailyStats: ", dailyStats);
 
   // 根据状态或百分比确定颜色
   const getColor = (value: string | number, isHover = false) => {
@@ -60,177 +50,48 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
     }
   };
 
-  // 按天聚合数据
+  // 按天聚合数据 - 优先使用每日统计数据，如果没有则使用历史记录
   const dailyHistory = useMemo(() => {
-    // 确保历史记录有数据
-    if (history.length === 0) {
-      return [
-        {
-          date: new Date().toISOString().split("T")[0],
-          status: status as "up" | "down",
-          availability: 100,
-          records: [
-            {
-              id: 0,
-              monitor_id: 0,
-              status: status as "up" | "down",
-              response_time: 0,
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        },
-      ];
-    }
-
-    // 按日期分组
-    const grouped: Record<string, MonitorStatusHistory[]> = {};
-
-    // 确保每条记录都有时间戳
-    history.forEach((item) => {
-      if (!item.timestamp) return;
-
-      // 提取日期部分 (YYYY-MM-DD)
-      const dateStr = new Date(item.timestamp).toISOString().split("T")[0];
-
-      if (!grouped[dateStr]) {
-        grouped[dateStr] = [];
-      }
-
-      grouped[dateStr].push(item);
-    });
-
-    // 转换为按日期排序的数组
-    const result = Object.entries(grouped)
-      .map(([date, records]) => {
-        // 按时间戳排序，确保最新的在前面
-        const sortedRecords = [...records].sort((a, b) => {
-          const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-          const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-          return timeB - timeA; // 降序，最新的在前
-        });
-
-        // 计算当天的主要状态
-        const downCount = records.filter((r) => r.status === "down").length;
-        const upCount = records.filter((r) => r.status === "up").length;
-        const primaryStatus = upCount > downCount ? "up" : "down";
-
-        // 计算可用率
-        const availability =
-          records.length > 0 ? (upCount / records.length) * 100 : 0;
+    // 如果有每日统计数据，优先使用
+    if (dailyStats && dailyStats.length > 0) {
+      return dailyStats.map((stat) => {
+        // 确定每天的主要状态
+        const dailyStatus =
+          stat.up_checks > stat.down_checks
+            ? ("up" as const)
+            : ("down" as const);
 
         return {
-          date,
-          status: primaryStatus,
-          availability,
-          records: sortedRecords,
+          date: stat.date,
+          status: dailyStatus,
+          availability: stat.availability,
+          total_checks: stat.total_checks,
+          up_checks: stat.up_checks,
+          down_checks: stat.down_checks,
+          avg_response_time: stat.avg_response_time,
+          min_response_time: stat.min_response_time,
+          max_response_time: stat.max_response_time,
+          monitor_id: stat.monitor_id,
         };
-      })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    // 最多返回最近30天
-    const maxDays = 30;
-    return result.slice(-maxDays);
-  }, [history, status]);
-
-  // 显示详细信息对话框
-  const showDialog = (dayData: {
-    date: string;
-    status: string;
-    records: MonitorStatusHistory[];
-    availability: number;
-  }) => {
-    const date = new Date(dayData.date).toLocaleDateString();
-    const statusText =
-      dayData.status === "up"
-        ? t("monitor.status.normal")
-        : t("monitor.status.failure");
-
-    setDialogTitle(`📅 ${date} - ${statusText}`);
-
-    // 获取该天最新的10条记录
-    const latestRecords = dayData.records.slice(0, 10);
-
-    setDialogContent(
-      <Box p="4">
-        <p>
-          {t("common.date")}: {date}
-        </p>
-        <p>
-          {t("common.status")}: {statusText}
-        </p>
-        <p>
-          {t("monitor.history.records")}: {dayData.records.length}
-        </p>
-        <p>
-          {t("monitor.history.availability")}: {dayData.availability.toFixed(2)}
-          %
-        </p>
-
-        <Box mt="4">
-          <p>{t("monitor.history.latest")}:</p>
-          <ScrollArea style={{ height: "200px", marginTop: "10px" }}>
-            {latestRecords.map((record, idx) => {
-              const recordTime = record.timestamp
-                ? new Date(record.timestamp).toLocaleString()
-                : "";
-
-              return (
-                <Box
-                  key={record.id || `record-${idx}`}
-                  style={{
-                    padding: "8px",
-                    marginBottom: "8px",
-                    borderRadius: "4px",
-                    backgroundColor:
-                      record.status === "up"
-                        ? "var(--green-2)"
-                        : "var(--red-2)",
-                  }}
-                >
-                  <p>
-                    {t("common.status")}:{" "}
-                    {record.status === "up"
-                      ? t("monitor.status.normal")
-                      : t("monitor.status.failure")}
-                  </p>
-                  <p>
-                    {t("monitor.history.time")}: {recordTime}
-                  </p>
-                  <p>
-                    {t("monitor.history.responseTime")}: {record.response_time}
-                    ms
-                  </p>
-                  {record.error && (
-                    <p>
-                      {t("monitor.history.error")}: {record.error}
-                    </p>
-                  )}
-                </Box>
-              );
-            })}
-          </ScrollArea>
-        </Box>
-      </Box>
-    );
-
-    setDialogOpen(true);
-  };
+      });
+    }
+  }, [dailyStats]);
 
   return (
     <>
       {/* 状态历史条 - 使用Grid布局代替Flex */}
-      <Box 
-        style={{ 
-          display: 'grid', 
-          gridTemplateColumns: `repeat(${dailyHistory.length}, 1fr)`,
-          gap: '4px', 
-          width: '100%' 
+      <Box
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${dailyHistory?.length}, 1fr)`,
+          gap: "4px",
+          width: "100%",
         }}
       >
-        {dailyHistory.map((dayData, index) => {
+        {dailyHistory?.map((dayData) => {
           return (
             <Tooltip
-              key={dayData.date || `empty-${index}`}
+              key={`${dayData.monitor_id}-${Math.random()}`}
               content={
                 <>
                   <Text as="span" size="1" mb="1">
@@ -248,47 +109,27 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, history = [] }) => {
                   </Text>
                   <br></br>
                   <Text as="span" size="1" mb="1">
-                    {t("monitor.history.records")}: {dayData.records.length}
-                  </Text>
-                  <br></br>
-                  <Text as="span" size="1" mb="1">
                     {t("monitor.history.availability")}:{" "}
                     {dayData.availability.toFixed(2)}%
                   </Text>
                 </>
               }
             >
-              <Button
+              <Box
                 style={{
-                  width: '100%',
+                  width: "100%",
                   height: "50px",
                   backgroundColor: getColor(dayData.status),
                   borderRadius: "2px",
                   transition: "background-color 0.2s",
                   cursor: "pointer",
-                  padding: '0'
+                  padding: "0",
                 }}
-                onClick={() => showDialog(dayData)}
               />
             </Tooltip>
           );
         })}
       </Box>
-
-      {/* 详细信息对话框 */}
-      <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
-        <Dialog.Content style={{ maxWidth: "500px" }}>
-          <Dialog.Title>{dialogTitle}</Dialog.Title>
-          <Dialog.Description>{dialogContent}</Dialog.Description>
-          <Flex gap="3" mt="2" justify="end">
-            <Dialog.Close>
-              <button style={{ cursor: "pointer", padding: "6px 12px" }}>
-                {t("common.close")}
-              </button>
-            </Dialog.Close>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
     </>
   );
 };

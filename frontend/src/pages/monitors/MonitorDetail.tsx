@@ -22,8 +22,10 @@ import {
   getMonitor,
   deleteMonitor,
   checkMonitor,
+  getMonitorStatusHistoryById,
+  getMonitorDailyStats,
 } from "../../services/api/monitors";
-import { Monitor } from "../../types/monitors";
+import { MonitorWithDailyStatsAndStatusHistory } from "../../types/monitors";
 import { useTranslation } from "react-i18next";
 import ResponseTimeChart from "../../components/ResponseTimeChart";
 import StatusBar from "../../components/StatusBar";
@@ -43,27 +45,14 @@ const formatStatusCode = (code: number | undefined): string => {
 const MonitorDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [monitor, setMonitor] = useState<Monitor | null>(null);
+  const [monitor, setMonitor] =
+    useState<MonitorWithDailyStatsAndStatusHistory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
   const { t } = useTranslation();
-
-  // 获取监控详情数据
-  const fetchMonitorData = async () => {
-    if (!id) return;
-    setLoading(true);
-    const response = await getMonitor(parseInt(id));
-
-    if (response.success && response.monitor) {
-      setMonitor(response.monitor);
-    } else {
-      setError(t("common.error.fetch"));
-    }
-    setLoading(false);
-  };
 
   // 组件加载时获取数据
   useEffect(() => {
@@ -78,6 +67,34 @@ const MonitorDetail = () => {
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);
   }, [id]);
+
+  // 获取监控详情数据
+  const fetchMonitorData = async () => {
+    if (!id) return;
+    setLoading(true);
+    let monitorData: MonitorWithDailyStatsAndStatusHistory | null = null;
+    const monitor = await getMonitor(parseInt(id));
+    const history = await getMonitorStatusHistoryById(parseInt(id));
+    const dailyStats = await getMonitorDailyStats(parseInt(id));
+
+    console.log("dailyStats: ", dailyStats);
+    console.log("history: ", history);
+    console.log("monitor: ", monitor);
+
+    if (monitor.success && monitor.monitor) {
+      monitorData = {
+        ...monitor.monitor,
+        history: history.history || [],
+        dailyStats: dailyStats.dailyStats || [],
+      };
+    }
+    if (monitorData) {
+      setMonitor(monitorData);
+    } else {
+      setError(t("common.error.fetch"));
+    }
+    setLoading(false);
+  };
 
   // 手动检查监控状态
   const handleCheck = async () => {
@@ -234,12 +251,9 @@ const MonitorDetail = () => {
           </Card>
           <Card mt="4">
             <Flex direction="column" gap="3">
-              <Heading size="4">{t("monitor.threeMonthsHistory")}</Heading>
+              <Heading size="4">{t("monitor.MonthsHistory")}</Heading>
               <Box>
-                <StatusBar
-                  status={monitor.status}
-                  history={monitor.history || []}
-                />
+                <StatusBar dailyStats={monitor.dailyStats || []} />
               </Box>
             </Flex>
           </Card>

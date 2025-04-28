@@ -2,11 +2,11 @@ import { Bindings } from "../models";
 import * as repositories from "../repositories";
 
 export async function getDashboardData(db: Bindings["DB"]) {
-  const monitors = await repositories.getAllMonitorsWithoutHistory(db);
+  const monitors = await repositories.getAllMonitors(db);
   const agents = await repositories.getAllAgents(db);
 
-  if (monitors.results && monitors.results.length > 0) {
-    monitors.results.forEach((monitor) => {
+  if (monitors.monitors && monitors.monitors.length > 0) {
+    monitors.monitors.forEach((monitor) => {
       if (typeof monitor.headers === "string") {
         try {
           monitor.headers = JSON.parse(monitor.headers);
@@ -17,7 +17,7 @@ export async function getDashboardData(db: Bindings["DB"]) {
     });
   }
   return {
-    monitors: monitors.results,
+    monitors: monitors.monitors,
     agents: agents.results,
   };
 }

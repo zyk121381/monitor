@@ -223,13 +223,18 @@ export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
     if (monitorIds.length > 0) {
       for (const monitorId of monitorIds) {
         const monitor = await repositories.getMonitorById(env.DB, monitorId);
-        const historyResult = await repositories.getMonitorStatusHistory(
+        const monitorDailyStats = await repositories.getMonitorDailyStatsById(
           env.DB,
-          monitor.id
+          monitorId
+        );
+        const monitorHistory = await repositories.getMonitorStatusHistory(
+          env.DB,
+          monitorId
         );
         monitors.push({
           ...monitor,
-          history: historyResult.results,
+          dailyStats: monitorDailyStats.results,
+          history: monitorHistory.results,
         });
       }
     }
@@ -248,8 +253,6 @@ export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
       }
     }
   }
-
-
 
   return {
     title: config.title,

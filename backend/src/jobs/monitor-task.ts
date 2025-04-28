@@ -159,11 +159,220 @@ async function handleMonitorNotification(
   }
 }
 
+// 生成每日监控统计数据的函数
+async function generateDailyStats(c: any) {
+  try {
+    console.log("开始生成每日监控统计数据...");
+    
+    // 获取前一天的日期 (YYYY-MM-DD 格式)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateStr = yesterday.toISOString().split('T')[0];
+    
+    console.log(`正在处理日期 ${dateStr} 的数据`);
+    
+    // 时间范围
+    const startTime = `${dateStr}T00:00:00.000Z`;
+    const endTime = `${dateStr}T23:59:59.999Z`;
+    
+    // 一次性获取所有监控
+    const monitorsResult = await c.env.DB.prepare(
+      "SELECT id, name FROM monitors"
+    ).all();
+    
+    if (!monitorsResult.results || monitorsResult.results.length === 0) {
+      console.log("没有找到监控");
+      return { success: true, message: "没有监控", processed: 0 };
+    }
+    
+    const monitors = monitorsResult.results;
+    console.log(`找到 ${monitors.length} 个监控`);
+    
+    // 创建监控ID列表
+    const monitorIds = monitors.map((m: any) => m.id);
+    
+    // 一次性获取所有监控历史记录（指定日期范围内）
+    console.log(`一次性查询所有监控在 ${startTime} 至 ${endTime} 的历史记录`);
+    
+    const historyResult = await c.env.DB.prepare(`
+      SELECT 
+        monitor_id, 
+        status, 
+        response_time 
+      FROM 
+        monitor_status_history 
+      WHERE 
+        timestamp >= ? AND 
+        timestamp <= ?
+    `)
+    .bind(startTime, endTime)
+    .all();
+    
+    if (!historyResult.results || historyResult.results.length === 0) {
+      console.log(`在 ${dateStr} 没有找到任何监控历史记录`);
+      return { success: true, message: "没有历史记录", processed: 0 };
+    }
+    
+    console.log(`找到 ${historyResult.results.length} 条历史记录`);
+    
+    // 按监控ID分组处理数据
+    const statsMap = new Map();
+    
+    // 初始化每个监控的统计数据结构
+    for (const monitorId of monitorIds) {
+      statsMap.set(monitorId, {
+        monitorId,
+        totalChecks: 0,
+        upChecks: 0,
+        downChecks: 0,
+        responseTimes: [],
+        avgResponseTime: 0,
+        minResponseTime: 0,
+        maxResponseTime: 0,
+        availability: 0
+      });
+    }
+    
+    // 处理所有历史记录
+    for (const record of historyResult.results) {
+      const monitorId = record.monitor_id;
+      
+      // 如果这个监控ID不在我们的列表中，跳过
+      if (!statsMap.has(monitorId)) continue;
+      
+      const stats = statsMap.get(monitorId);
+      stats.totalChecks++;
+      
+      // 统计状态
+      if (record.status === 'up') {
+        stats.upChecks++;
+      } else if (record.status === 'down') {
+        stats.downChecks++;
+      }
+      
+      // 收集响应时间数据
+      if (record.response_time != null && record.response_time > 0) {
+        stats.responseTimes.push(record.response_time);
+      }
+    }
+    
+    // 处理每个监控的响应时间统计和可用率计算
+    for (const [monitorId, stats] of statsMap.entries()) {
+      // 只处理有记录的监控
+      if (stats.totalChecks === 0) continue;
+      
+      // 计算响应时间统计数据
+      if (stats.responseTimes.length > 0) {
+        stats.avgResponseTime = stats.responseTimes.reduce((sum: number, time: number) => sum + time, 0) / stats.responseTimes.length;
+        stats.minResponseTime = Math.min(...stats.responseTimes);
+        stats.maxResponseTime = Math.max(...stats.responseTimes);
+      }
+      
+      // 计算可用率
+      stats.availability = stats.totalChecks > 0 ? (stats.upChecks / stats.totalChecks) * 100 : 0;
+      
+      // 删除临时数据
+      delete stats.responseTimes;
+    }
+    
+    // 将数据写入数据库
+    const now = new Date().toISOString();
+    let processed = 0;
+    
+    // 批量构建 INSERT 语句
+    for (const [monitorId, stats] of statsMap.entries()) {
+      // 跳过没有记录的监控
+      if (stats.totalChecks === 0) continue;
+      
+      const monitor = monitors.find((m: any) => m.id === monitorId);
+      const monitorName = monitor ? monitor.name : `ID: ${monitorId}`;
+      
+      try {
+        console.log(`监控 ${monitorName} (ID: ${monitorId}) 数据: 总检查=${stats.totalChecks}, 正常=${stats.upChecks}, 故障=${stats.downChecks}, 可用率=${stats.availability.toFixed(2)}%`);
+        
+        // 使用 UPSERT 操作
+        await c.env.DB.prepare(`
+          INSERT INTO monitor_daily_stats (
+            monitor_id,
+            date,
+            total_checks,
+            up_checks,
+            down_checks,
+            avg_response_time,
+            min_response_time,
+            max_response_time,
+            availability,
+            created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(monitor_id, date) DO UPDATE SET
+            total_checks = excluded.total_checks,
+            up_checks = excluded.up_checks,
+            down_checks = excluded.down_checks,
+            avg_response_time = excluded.avg_response_time,
+            min_response_time = excluded.min_response_time,
+            max_response_time = excluded.max_response_time,
+            availability = excluded.availability
+        `).bind(
+          monitorId,
+          dateStr,
+          stats.totalChecks,
+          stats.upChecks,
+          stats.downChecks,
+          stats.avgResponseTime,
+          stats.minResponseTime,
+          stats.maxResponseTime,
+          stats.availability,
+          now
+        ).run();
+        
+        processed++;
+        console.log(`成功更新监控 ID ${monitorId} 的每日统计数据`);
+      } catch (error) {
+        console.error(`更新监控 ID ${monitorId} 的每日统计数据时出错:`, error);
+      }
+    }
+    
+    console.log(`每日统计数据生成完成，成功处理了 ${processed} 个监控`);
+    
+    return {
+      success: true,
+      message: "每日统计数据生成完成",
+      processed: processed,
+      date: dateStr
+    };
+  } catch (error) {
+    console.error("生成每日统计数据时出错:", error);
+    return { 
+      success: false, 
+      message: "生成每日统计数据时出错", 
+      error: String(error) 
+    };
+  }
+}
+
 // 在 Cloudflare Workers 中设置定时触发器
 export default {
   async scheduled(event: any, env: any, ctx: any) {
     const c = { env };
-    await checkMonitors(c);
+    
+    // 根据CRON表达式的触发时间决定执行哪个任务
+    const hour = new Date().getUTCHours();
+    const minute = new Date().getUTCMinutes();
+    
+    console.log(`定时任务触发，当前UTC时间: ${hour}:${minute}`);
+    
+    // 默认执行监控检查任务
+    let result: any = await checkMonitors(c);
+    
+    // 在每天凌晨00:05左右额外执行每日统计生成任务
+    // 由于定时任务精度的问题，检查0点左右的所有触发
+    if (hour === 0 && minute >= 0 && minute <= 10) {
+      console.log("执行每日统计数据生成任务");
+      const statsResult = await generateDailyStats(c);
+      result = { monitorCheck: result, dailyStats: statsResult };
+    }
+    
+    return result;
   },
   fetch: monitorTask.fetch,
 };

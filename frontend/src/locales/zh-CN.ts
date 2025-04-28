@@ -145,7 +145,7 @@ const zhCN = {
     "monitor.uptime": "正常运行时间",
     "monitor.responseTime": "响应时间",
     "monitor.oneDayHistory": "24小时记录",
-    "monitor.threeMonthsHistory": "90天记录",
+    "monitor.MonthsHistory": "30天记录",
     "monitor.noResponseTimeData": "暂无响应时间数据",
     "monitor.manualCheck": "手动检查",
     "monitor.checkCompleted": "监控检查已完成",

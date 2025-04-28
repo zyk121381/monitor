@@ -3,7 +3,7 @@
  */
 
 import { Agent } from "./agents";
-import { Monitor } from "./monitors";
+import { MonitorWithDailyStatsAndStatusHistory } from "./monitors";
 
 export interface ConfigMonitor {
   id: number;
@@ -40,7 +40,6 @@ export interface StatusPageData {
   description: string;
   logoUrl: string;
   customCss: string;
-  monitors: Monitor[];
+  monitors: MonitorWithDailyStatsAndStatusHistory[];
   agents: Agent[];
 }
-
