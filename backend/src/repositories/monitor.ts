@@ -200,7 +200,7 @@ export async function updateMonitorStatus(
          response_time = ?,
          uptime = (
            SELECT ROUND((COUNT(CASE WHEN status = 'up' THEN 1 ELSE NULL END) * 100.0 / COUNT(*)), 2)
-           FROM monitor_status_history
+           FROM monitor_status_history_24h
            WHERE monitor_id = ?
            ORDER BY timestamp DESC
            LIMIT 100
@@ -372,6 +372,11 @@ export async function deleteMonitor(db: Bindings["DB"], id: number) {
   // 先删除关联的历史数据
   await db
     .prepare("DELETE FROM monitor_status_history WHERE monitor_id = ?")
+    .bind(id)
+    .run();
+
+  await db
+    .prepare("DELETE FROM monitor_status_history_24h WHERE monitor_id = ?")
     .bind(id)
     .run();
 
