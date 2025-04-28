@@ -355,19 +355,14 @@ export default {
   async scheduled(event: any, env: any, ctx: any) {
     const c = { env };
     
-    // 根据CRON表达式的触发时间决定执行哪个任务
-    const hour = new Date().getUTCHours();
-    const minute = new Date().getUTCMinutes();
-    
-    console.log(`定时任务触发，当前UTC时间: ${hour}:${minute}`);
-    
     // 默认执行监控检查任务
     let result: any = await checkMonitors(c);
+
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const minute = now.getUTCMinutes();
     
-    // 在每天凌晨00:05左右额外执行每日统计生成任务
-    // 由于定时任务精度的问题，检查0点左右的所有触发
-    if (hour === 0 && minute >= 0 && minute <= 10) {
-      console.log("执行每日统计数据生成任务");
+    if (hour === 0 && minute === 5) {
       const statsResult = await generateDailyStats(c);
       result = { monitorCheck: result, dailyStats: statsResult };
     }
