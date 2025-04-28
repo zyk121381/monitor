@@ -227,7 +227,7 @@ export async function getStatusPagePublicData(env: { DB: Bindings["DB"] }) {
           env.DB,
           monitorId
         );
-        const monitorHistory = await repositories.getMonitorStatusHistory(
+        const monitorHistory = await repositories.getMonitorStatusHistoryIn24h(
           env.DB,
           monitorId
         );

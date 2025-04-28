@@ -165,7 +165,7 @@ export async function deleteNotificationTemplate(
 
 // 通知设置相关服务,获取所有的通知设置
 export async function getNotificationConfig(
-  db: D1Database,
+  db: D1Database
 ): Promise<models.NotificationConfig> {
   return await repositories.getNotificationConfig(db);
 }

@@ -3,13 +3,7 @@
  * 用于应用启动时检测数据库是否为空，如果为空则初始化
  */
 import { Bindings } from "../models/db";
-import {
-  createTables,
-  createAdminUser,
-  createDefaultStatusPage,
-  createNotificationTemplates,
-  createNotificationChannelsAndSettings,
-} from "./database";
+import { createTables } from "./database";
 import { runMigrations } from "../migrations/migration";
 import { cleanupOldRecords } from "../repositories/monitor";
 
@@ -41,6 +35,8 @@ export async function checkAndInitializeDatabase(
       "users",
       "monitors",
       "monitor_status_history",
+      "monitor_status_history_24h",
+      "monitor_daily_stats",
       "agents",
       "status_page_config",
       "status_page_monitors",
@@ -49,7 +45,6 @@ export async function checkAndInitializeDatabase(
       "notification_templates",
       "notification_settings",
       "notification_history",
-      "monitor_daily_stats",
     ];
 
     // 检查每个表是否存在

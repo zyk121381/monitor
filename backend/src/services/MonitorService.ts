@@ -148,7 +148,7 @@ export async function getMonitorDetails(db: Bindings["DB"], id: number) {
   }
 
   // 获取历史状态数据
-  const historyResult = await repositories.getMonitorStatusHistory(db, id);
+  const historyResult = await repositories.getMonitorStatusHistoryIn24h(db, id);
 
   return {
     ...monitor,
@@ -198,7 +198,7 @@ export async function getMonitorById(db: Bindings["DB"], id: number) {
   }
 
   // 获取历史状态数据
-  const historyResult = await repositories.getMonitorStatusHistory(db, id);
+  const historyResult = await repositories.getMonitorStatusHistoryIn24h(db, id);
 
   return {
     success: true,
@@ -392,7 +392,10 @@ export async function getMonitorStatusHistoryById(
     }
 
     // 获取历史状态
-    const historyResult = await repositories.getMonitorStatusHistory(db, id);
+    const historyResult = await repositories.getMonitorStatusHistoryIn24h(
+      db,
+      id
+    );
 
     return {
       success: true,
@@ -417,7 +420,7 @@ export async function getMonitorStatusHistoryById(
  * @returns 所有监控状态历史
  */
 export async function getAllMonitorStatusHistory(db: Bindings["DB"]) {
-  const result = await repositories.getAllMonitorStatusHistory(db);
+  const result = await repositories.getAllMonitorStatusHistoryIn24h(db);
   return {
     success: true,
     history: result.results || [],

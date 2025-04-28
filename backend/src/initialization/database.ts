@@ -24,6 +24,11 @@ export async function createTables(env: Bindings): Promise<void> {
     "CREATE TABLE IF NOT EXISTS monitor_status_history (id INTEGER PRIMARY KEY AUTOINCREMENT, monitor_id INTEGER NOT NULL, status TEXT NOT NULL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, response_time INTEGER, status_code INTEGER, error TEXT, FOREIGN KEY (monitor_id) REFERENCES monitors(id))"
   );
 
+  console.log("创建24小时监控状态历史表(热表)...");
+  await env.DB.exec(
+    "CREATE TABLE IF NOT EXISTS monitor_status_history_24h (id INTEGER PRIMARY KEY AUTOINCREMENT, monitor_id INTEGER NOT NULL, status TEXT NOT NULL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, response_time INTEGER, status_code INTEGER, error TEXT, FOREIGN KEY (monitor_id) REFERENCES monitors(id))"
+  );
+
   console.log("创建监控每日统计表...");
   await env.DB.exec(
     "CREATE TABLE IF NOT EXISTS monitor_daily_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, monitor_id INTEGER NOT NULL, date TEXT NOT NULL, total_checks INTEGER NOT NULL DEFAULT 0, up_checks INTEGER NOT NULL DEFAULT 0, down_checks INTEGER NOT NULL DEFAULT 0, avg_response_time INTEGER DEFAULT 0, min_response_time INTEGER DEFAULT 0, max_response_time INTEGER DEFAULT 0, availability REAL DEFAULT 0, created_at TEXT NOT NULL, FOREIGN KEY (monitor_id) REFERENCES monitors(id))"
