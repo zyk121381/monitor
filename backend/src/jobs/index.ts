@@ -1,7 +1,7 @@
 // 导出所有定时任务
 import monitorTask from "./monitor-task";
 import { checkAgentsStatus } from "./agent-task";
-import { cleanupOldRecords } from "../repositories/monitor";
+import { cleanupOldRecords } from "../services";
 // 统一的定时任务处理函数
 export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
   try {
