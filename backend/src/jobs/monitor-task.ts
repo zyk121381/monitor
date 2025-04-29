@@ -294,7 +294,6 @@ async function generateDailyStats(c: any) {
           }, 可用率=${stats.availability.toFixed(2)}%`
         );
 
-        // 使用 UPSERT 操作
         await c.env.DB.prepare(
           `
           INSERT INTO monitor_daily_stats (
@@ -309,14 +308,6 @@ async function generateDailyStats(c: any) {
             availability,
             created_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(monitor_id, date) DO UPDATE SET
-            total_checks = excluded.total_checks,
-            up_checks = excluded.up_checks,
-            down_checks = excluded.down_checks,
-            avg_response_time = excluded.avg_response_time,
-            min_response_time = excluded.min_response_time,
-            max_response_time = excluded.max_response_time,
-            availability = excluded.availability
         `
         )
           .bind(
@@ -369,7 +360,7 @@ async function migrateMonitorHistoryData(c: any) {
     // 获取24小时前的监控历史数据
     const historyResult = await c.env.DB.prepare(
       `
-      SELECT * FROM monitor_status_history_24h
+      SELECT monitor_id, status, timestamp, response_time, status_code, error FROM monitor_status_history_24h
       WHERE timestamp < ?
     `
     )
@@ -432,12 +423,13 @@ export default {
     const hour = now.getUTCHours();
     const minute = now.getUTCMinutes();
 
+    await migrateMonitorHistoryData(c);
+    // 生成每日监控统计数据
+    const statsResult = await generateDailyStats(c);
+    result = { monitorCheck: result, dailyStats: statsResult };
+
     if (hour === 0 && minute === 5) {
       // 迁移24小时以前的监控历史数据到冷表
-      await migrateMonitorHistoryData(c);
-      // 生成每日监控统计数据
-      const statsResult = await generateDailyStats(c);
-      result = { monitorCheck: result, dailyStats: statsResult };
     }
 
     return result;
