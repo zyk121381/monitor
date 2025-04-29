@@ -371,30 +371,30 @@ async function migrateMonitorHistoryData(c: any) {
       `找到 ${historyResult.results.length} 条24小时前的监控历史数据`
     );
 
-    // 将数据迁移到冷表
-    await c.env.DB.prepare(
+    // 将数据逐条迁移到冷表
+    for (const record of historyResult.results) {
+      await c.env.DB.prepare(
+        `
+        INSERT INTO monitor_status_history (
+          monitor_id,
+          status,
+          timestamp,
+          response_time,
+          status_code,
+          error
+        ) VALUES (?, ?, ?, ?, ?, ?)
       `
-      INSERT INTO monitor_status_history (
-        monitor_id,
-        status,
-        timestamp,
-        response_time,
-        status_code,
-        error
-      ) VALUES (?, ?, ?, ?, ?, ?)
-    `
-    )
-      .bind(
-        historyResult.results.map((record: any) => [
+      )
+        .bind(
           record.monitor_id,
           record.status,
           record.timestamp,
           record.response_time,
           record.status_code,
-          record.error,
-        ])
-      )
-      .run();
+          record.error
+        )
+        .run();
+    }
 
     // 删除热表中的数据
     await c.env.DB.prepare(
@@ -406,7 +406,7 @@ async function migrateMonitorHistoryData(c: any) {
       .bind(timestamp)
       .run();
 
-    console.log("迁移完成，成功迁移了 ${historyResult.results.length} 条数据");
+    console.log(`迁移完成，成功迁移了 ${historyResult.results.length} 条数据`);
   } catch (error) {
     console.error("迁移24小时以前的监控历史数据时出错:", error);
   }
