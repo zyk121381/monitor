@@ -423,13 +423,12 @@ export default {
     const hour = now.getUTCHours();
     const minute = now.getUTCMinutes();
 
-    await migrateMonitorHistoryData(c);
-    // 生成每日监控统计数据
-    const statsResult = await generateDailyStats(c);
-    result = { monitorCheck: result, dailyStats: statsResult };
-
     if (hour === 0 && minute === 5) {
       // 迁移24小时以前的监控历史数据到冷表
+      await migrateMonitorHistoryData(c);
+      // 生成每日监控统计数据
+      const statsResult = await generateDailyStats(c);
+      result = { monitorCheck: result, dailyStats: statsResult };
     }
 
     return result;
