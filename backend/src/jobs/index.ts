@@ -1,7 +1,7 @@
 // 导出所有定时任务
 import monitorTask from "./monitor-task";
-import { checkAgentsStatus } from "./agent-task";
-import { cleanupOldRecords } from "../services";
+import agentTask from "./agent-task";
+import { Bindings } from "../models/db";
 // 统一的定时任务处理函数
 export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
   try {
@@ -9,16 +9,50 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
     await monitorTask.scheduled(event, env, ctx);
 
     // 执行客户端状态检查任务
-    await checkAgentsStatus(env);
+    await agentTask.scheduled(event, env, ctx);
 
     // 执行清理任务 - 每30天执行一次
     const now = new Date();
     const dayOfMonth = now.getDate();
     if (dayOfMonth === 1 || dayOfMonth === 30) {
       console.log("执行清理任务...");
-      await cleanupOldRecords(env);
+      await cleanupOldRecords(env.DB);
     }
   } catch (error) {
     console.error("定时任务执行出错:", error);
   }
 };
+
+
+// 清理30天以前的历史记录
+export async function cleanupOldRecords(db: Bindings["DB"]) {
+  console.log("开始清理30天以前的历史记录...");
+
+  // 清理监控状态历史记录
+  const deleteStatusHistoryResult = await db
+    .prepare(
+      `
+      DELETE FROM monitor_status_history 
+      WHERE timestamp < datetime('now', '-30 days')
+    `
+    )
+    .run();
+
+  // 清理通知历史记录
+  const deleteNotificationHistoryResult = await db
+    .prepare(
+      `
+      DELETE FROM notification_history 
+      WHERE sent_at < datetime('now', '-30 days')
+    `
+    )
+    .run();
+
+  console.log(
+    `清理完成：删除了 ${deleteStatusHistoryResult} 条状态历史记录，${deleteNotificationHistoryResult} 条通知历史记录`
+  );
+
+  return {
+    success: true
+  };
+}

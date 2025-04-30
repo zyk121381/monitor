@@ -1,9 +1,9 @@
-import { Box, Card, Flex, Text, Badge } from "@radix-ui/themes";
+import { Box, Card, Flex, Text, Badge, Tabs } from "@radix-ui/themes";
 import { GlobeIcon } from "@radix-ui/react-icons";
-import ClientResourceSection from "./ClientResourceSection";
+import MetricsChart from "./MetricsChart";
 import "../styles/components.css";
 import { useTranslation } from "react-i18next";
-import { AgentCardProps } from "../types/components";
+import { AgentCardProps, MetricType } from "../types";
 
 /**
  * 客户端状态卡片组件
@@ -14,34 +14,10 @@ const AgentCard = ({
   showIpAddress = true,
   showHostname = true,
   showLastUpdated = true,
-  showDetailedResources = true,
 }: AgentCardProps) => {
   const { t } = useTranslation();
 
   console.log(t("agentCard.receivedData"), agent);
-
-  // 计算资源使用百分比
-  const cpuUsage = agent.cpu_usage || 0;
-  const memoryUsage =
-    agent.memory_total && agent.memory_used
-      ? Math.round((agent.memory_used / agent.memory_total) * 100)
-      : 0;
-  const diskUsage =
-    agent.disk_total && agent.disk_used
-      ? Math.round((agent.disk_used / agent.disk_total) * 100)
-      : 0;
-
-  // 传递原始网络流量数据 (KB/s)，ClientResourceSection 组件负责单位自适应显示
-  const networkRx = agent.network_rx || 0;
-  const networkTx = agent.network_tx || 0;
-
-  console.log(t("agentCard.calculatedResource"), {
-    cpuUsage,
-    memoryUsage,
-    diskUsage,
-    networkRx,
-    networkTx,
-  });
 
   // 根据status属性判断状态
   const agentStatus = agent.status || "inactive";
@@ -80,6 +56,15 @@ const AgentCard = ({
     }
   };
 
+  // 定义所有可用的指标类型
+  const metricTypes: MetricType[] = [
+    "cpu",
+    "memory",
+    "disk",
+    "network",
+    "load",
+  ];
+
   return (
     <Card className="agent-card">
       <Flex justify="between" align="center" p="4">
@@ -108,26 +93,40 @@ const AgentCard = ({
             </Text>
           )}
         </Flex>
+        {showLastUpdated && agent.updated_at && (
+          <Text size="1" color="gray" mt="2" mb="2">
+            {t("agent.lastUpdated")}: {formatLastUpdated()}
+          </Text>
+        )}
         <Badge color={statusColors[agentStatus] as any}>
           {statusText[agentStatus] || agentStatus}
         </Badge>
       </Flex>
 
-      <Box p="4" pt="0">
-        <ClientResourceSection
-          cpuUsage={cpuUsage}
-          memoryUsage={memoryUsage}
-          diskUsage={diskUsage}
-          networkRx={networkRx}
-          networkTx={networkTx}
-          showDetailedInfo={showDetailedResources}
-        />
+      <Box p="2" pt="0">
+        {/* 指标图表区域 */}
+        <Tabs.Root defaultValue="cpu">
+          <Tabs.List>
+            {metricTypes.map((type) => (
+              <Tabs.Trigger key={type} value={type}>
+                {t(`agent.metrics.${type}.title`) || type.toUpperCase()}
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
 
-        {showLastUpdated && agent.updated_at && (
-          <Text size="1" color="gray" mt="2">
-            {t("agent.lastUpdated")}: {formatLastUpdated()}
-          </Text>
-        )}
+          {metricTypes.map((type) => (
+            <Tabs.Content key={type} value={type}>
+              <MetricsChart
+                history={agent.metrics}
+                metricType={type}
+                height={180}
+                diskDevice="/"
+                networkInterface="en0"
+                loadType="1"
+              />
+            </Tabs.Content>
+          ))}
+        </Tabs.Root>
       </Box>
     </Card>
   );

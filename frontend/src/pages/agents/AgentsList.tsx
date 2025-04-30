@@ -23,7 +23,11 @@ import {
   ViewGridIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { getAllAgents, deleteAgent } from "../../services/api/agents";
+import {
+  getAllAgents,
+  deleteAgent,
+  getAllAgentMetrics,
+} from "../../services/api/agents";
 import AgentCard from "../../components/AgentCard";
 import { useTranslation } from "react-i18next";
 import { Agent } from "../../types";
@@ -62,14 +66,26 @@ const AgentsList = () => {
   const fetchAgents = async () => {
     setLoading(true);
     setError(null);
-      // 获取所有客户端
-      const response = await getAllAgents();
+    // 获取所有客户端
+    const response = await getAllAgents();
+    // 获取所有客户端的指标数据
+    const metricsResponse = await getAllAgentMetrics();
 
-      if (response.agents) {
-        setAgents(response.agents);
-      }
-      console.log("获取到的 agent 数据: ", response)
-      setLoading(false);
+    if (response.agents && metricsResponse.metrics) {
+      // 合并指标数据到客户端数据
+      const agentsWithMetrics = response.agents.map((agent) => {
+        const metrics = metricsResponse.metrics?.filter(
+          (metric) => metric.agent_id === agent.id
+        );
+        console.log("获取到的 metrics 数据: ", metrics);
+        console.log("获取到的 agent 数据: ", agent);
+        return { ...agent, metrics };
+      });
+      setAgents(agentsWithMetrics);
+    }
+    console.log("获取到的 agent 数据: ", response);
+
+    setLoading(false);
   };
 
   // 刷新客户端列表

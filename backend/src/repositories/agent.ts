@@ -25,16 +25,6 @@ export async function getAgentsByIds(db: Bindings["DB"], agentIds: number[]) {
     .all<Agent>();
 }
 
-// 获取用户创建的客户端
-export async function getAgentsByUser(db: Bindings["DB"], userId: number) {
-  return await db
-    .prepare(
-      "SELECT * FROM agents WHERE created_by = ? ORDER BY created_at DESC"
-    )
-    .bind(userId)
-    .all<Agent>();
-}
-
 // 获取单个客户端详情
 export async function getAgentById(db: Bindings["DB"], id: number) {
   return await db
@@ -101,13 +91,6 @@ export async function updateAgent(
     os?: string;
     version?: string;
     status?: string;
-    cpu_usage?: number;
-    memory_total?: number;
-    memory_used?: number;
-    disk_total?: number;
-    disk_used?: number;
-    network_rx?: number;
-    network_tx?: number;
   }
 ) {
   const fieldsToUpdate = [];
@@ -157,76 +140,7 @@ export async function updateAgent(
   }
 
   // 获取更新后的客户端
-  return await getAgentById(db, id);
-}
-
-// 更新客户端状态和指标
-export async function updateAgentStatus(
-  db: Bindings["DB"],
-  id: number,
-  status: string = "active",
-  metrics: {
-    cpu_usage?: number;
-    memory_total?: number;
-    memory_used?: number;
-    disk_total?: number;
-    disk_used?: number;
-    network_rx?: number;
-    network_tx?: number;
-    hostname?: string;
-    ip_addresses?: string[];
-    os?: string;
-    version?: string;
-  }
-) {
-  const now = new Date().toISOString();
-
-  // 将 ip_addresses 数组转换为 JSON 字符串
-  const ipAddressesJson = metrics.ip_addresses
-    ? JSON.stringify(metrics.ip_addresses)
-    : null;
-
-  const result = await db
-    .prepare(
-      `UPDATE agents SET 
-     status = ?,
-     cpu_usage = ?, 
-     memory_total = ?, 
-     memory_used = ?, 
-     disk_total = ?, 
-     disk_used = ?, 
-     network_rx = ?, 
-     network_tx = ?, 
-     hostname = ?,
-     ip_addresses = ?,
-     os = ?,
-     version = ?,
-     updated_at = ?
-     WHERE id = ?`
-    )
-    .bind(
-      status,
-      metrics.cpu_usage,
-      metrics.memory_total,
-      metrics.memory_used,
-      metrics.disk_total,
-      metrics.disk_used,
-      metrics.network_rx,
-      metrics.network_tx,
-      metrics.hostname,
-      ipAddressesJson,
-      metrics.os,
-      metrics.version,
-      now,
-      id
-    )
-    .run();
-
-  if (!result.success) {
-    throw new Error("更新客户端状态失败");
-  }
-
-  return { success: true, message: "客户端状态已更新" };
+  return result.success;
 }
 
 // 删除客户端
@@ -268,4 +182,27 @@ export async function setAgentInactive(db: Bindings["DB"], id: number) {
     )
     .bind(now, id)
     .run();
+}
+
+// 插入客户端资源指标
+export async function insertAgentMetrics(db: Bindings["DB"], metrics: any) {
+  return await db
+    .prepare("INSERT INTO agent_metrics_24h (agent_id, timestamp, cpu_usage, cpu_cores, cpu_model, memory_total, memory_used, memory_free, memory_usage_rate, load_1, load_5, load_15, disk_metrics, network_metrics) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(...metrics)
+    .run();
+}
+
+// 获取指定客户端资源指标
+export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
+  return await db
+   .prepare("SELECT * FROM agent_metrics_24h WHERE agent_id =?")
+   .bind(agentId)
+   .all();
+}
+
+// 获取所有客户端资源指标
+export async function getAllAgentMetrics(db: Bindings["DB"]) {
+  return await db
+   .prepare("SELECT * FROM agent_metrics_24h")
+   .all();
 }

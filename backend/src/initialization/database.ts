@@ -39,6 +39,16 @@ export async function createTables(env: Bindings): Promise<void> {
     "CREATE TABLE IF NOT EXISTS agents (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, token TEXT NOT NULL UNIQUE, created_by INTEGER NOT NULL, status TEXT DEFAULT 'inactive', created_at TEXT NOT NULL, updated_at TEXT NOT NULL, hostname TEXT, ip_addresses TEXT, os TEXT, version TEXT, cpu_usage REAL, memory_total INTEGER, memory_used INTEGER, disk_total INTEGER, disk_used INTEGER, network_rx INTEGER, network_tx INTEGER, FOREIGN KEY (created_by) REFERENCES users(id))"
   );
 
+  console.log("创建客户端资源指标表(24h热表)...");
+  await env.DB.exec(
+    "CREATE TABLE IF NOT EXISTS agent_metrics_24h (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id INTEGER NOT NULL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, cpu_usage REAL, cpu_cores INTEGER, cpu_model TEXT, memory_total INTEGER, memory_used INTEGER, memory_free INTEGER, memory_usage_rate REAL, load_1 REAL, load_5 REAL, load_15 REAL, disk_metrics TEXT, network_metrics TEXT, FOREIGN KEY (agent_id) REFERENCES agents(id))"
+  );
+
+  console.log("创建客户端每日统计表...");
+  await env.DB.exec(
+    "CREATE TABLE IF NOT EXISTS agent_daily_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id INTEGER NOT NULL, date TEXT NOT NULL, avg_cpu_usage REAL, max_cpu_usage REAL, min_cpu_usage REAL, avg_memory_usage REAL, max_memory_usage REAL, min_memory_usage REAL, avg_load_1 REAL, max_load_1 REAL, avg_load_5 REAL, max_load_5 REAL, avg_load_15 REAL, max_load_15 REAL, disk_stats TEXT, network_stats TEXT, FOREIGN KEY (agent_id) REFERENCES agents(id))"
+  );
+
   console.log("创建状态页配置表...");
   await env.DB.exec(
     "CREATE TABLE IF NOT EXISTS status_page_config (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, title TEXT NOT NULL DEFAULT '系统状态', description TEXT DEFAULT '系统当前运行状态', logo_url TEXT DEFAULT '', custom_css TEXT DEFAULT '', created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id))"

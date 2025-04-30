@@ -244,7 +244,7 @@ const zhCN = {
     "agent.uptime": "运行时间",
     "agent.lastUpdated": "上次更新",
     "agent.systemInfo": "系统信息",
-    "agent.systemResources": "系统资源",
+    "agent.metrics": "监控",
     "agent.os": "系统",
     "agent.version": "版本",
     "agent.hostname": "主机名",
@@ -254,6 +254,48 @@ const zhCN = {
     "agent.deleting": "正在删除客户端...",
     "agent.deleteSuccess": "客户端已成功删除",
     "agent.deleteError": "删除客户端失败",
+
+    // 客户端监控指标
+    "agent.metrics.cpu":{
+      "title": "CPU",
+      "usage": "使用情况",
+      "cores": "核心数",
+      "model": "型号",
+    },
+    "agent.metrics.memory": {
+      "title": "内存",
+      "total": "总内存",
+      "used": "已使用内存",
+      "free": "可用内存",
+      "usage": "使用情况",
+      "usageRate": "使用率",
+    },
+    "agent.metrics.disk": {
+      "title": "磁盘",
+      "usage": "使用情况",
+      "device": "设备",
+      "mountPoint": "挂载点",
+      "total": "总空间",
+      "used": "已使用空间",
+      "free": "可用空间",
+      "usageRate": "使用率",
+      "fsType": "文件系统类型"
+    },
+    "agent.metrics.network": {
+      "title": "网络",
+      "received": "接收",
+      "interface": "接口",
+      "sent": "发送",
+      "packetsReceived": "接收数据包",
+      "packetsSent": "发送数据包",
+    },
+    "agent.metrics.load": {
+      "title": "负载",
+      "1min": "1分钟负载",
+      "5min": "5分钟负载",
+      "15min": "15分钟负载",
+      "minute": "分钟",
+    },
 
     // 创建/编辑客户端
     "agent.form.title.create": "添加客户端",
@@ -387,10 +429,6 @@ const zhCN = {
     "statusPageConfig.agentStatusChange": "客户端状态变更",
     "statusPageConfig.from": "从",
     "statusPageConfig.to": "变为",
-    "statusPageConfig.components": "组件",
-    "statusPageConfig.addComponent": "添加组件",
-    "statusPageConfig.incidents": "事件",
-    "statusPageConfig.createIncident": "创建事件",
 
     // 通知设置
     "notifications.title": "通知配置",
@@ -524,14 +562,6 @@ const zhCN = {
     "agentCard.status.inactive": "离线",
     "agentCard.status.connecting": "连接中",
 
-    // ClientResourceSection 组件
-    "clientResource.cpu": "CPU",
-    "clientResource.memory": "内存",
-    "clientResource.disk": "磁盘",
-    "clientResource.network": "网络",
-    "clientResource.download": "下载",
-    "clientResource.upload": "上传",
-
     // MonitorCard 组件
     "monitorCard.status.up": "正常",
     "monitorCard.status.down": "故障",
@@ -544,12 +574,6 @@ const zhCN = {
 
     // StatusSummaryCard 组件
     "statusSummary.title": "状态摘要",
-
-    // HeartbeatGrid 组件
-    "heartbeatGrid.uptime": "正常运行",
-    "heartbeatGrid.up": "正常",
-    "heartbeatGrid.down": "故障",
-    "heartbeatGrid.unknownTime": "未知时间",
   },
 };
 

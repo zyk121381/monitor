@@ -10,15 +10,9 @@ export interface Agent {
   status: "active" | "inactive" | "connecting" | "unknown";
   version?: string;
   os?: string;
-  cpu_usage?: number;
-  memory_total?: number;
-  memory_used?: number;
-  disk_total?: number;
-  disk_used?: number;
-  network_rx?: number;
-  network_tx?: number;
   created_at: string;
   updated_at: string;
+  metrics?: MetricHistory[];
 }
 
 export interface AgentResponse {
@@ -30,3 +24,25 @@ export interface AgentsResponse {
   success: boolean;
   agents?: Agent[];
 }
+
+// 指标历史数据接口
+export interface MetricHistory {
+  id: number;
+  agent_id: number;
+  timestamp: string;
+  cpu_usage?: number;
+  cpu_cores?: number;
+  cpu_model?: string;
+  memory_total?: number;
+  memory_used?: number;
+  memory_free?: number;
+  memory_usage_rate?: number;
+  load_1?: number;
+  load_5?: number;
+  load_15?: number;
+  disk_metrics?: string; // JSON字符串
+  network_metrics?: string; // JSON字符串
+}
+
+// 指标类型定义
+export type MetricType = "cpu" | "memory" | "disk" | "network" | "load";

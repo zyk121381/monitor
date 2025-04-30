@@ -6,6 +6,10 @@ import {
   getFormattedIPAddresses,
 } from "../services";
 import { shouldSendNotification, sendNotification } from "../services";
+import { Hono } from "hono";
+import { Bindings } from "../models/db";
+
+const agentTask = new Hono<{ Bindings: Bindings }>();
 
 interface AgentResult {
   id: number;
@@ -275,3 +279,21 @@ export async function handleAgentThresholdNotification(
     console.error(`处理客户端阈值通知时出错 (ID: ${agentId}):`, error);
   }
 }
+
+// 在 Cloudflare Workers 中设置定时触发器
+export default {
+  async scheduled(event: any, env: any, ctx: any) {
+    const c = { env };
+
+    // 默认执行监控检查任务
+    let result: any = await checkAgentsStatus(c);
+
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const minute = now.getUTCMinutes();
+
+    return result;
+  },
+  fetch: agentTask.fetch,
+};
+

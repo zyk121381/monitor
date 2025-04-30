@@ -614,12 +614,6 @@ const enUS = {
     // StatusSummaryCard component
     "statusSummary.title": "Status Summary",
 
-    // HeartbeatGrid component
-    "heartbeatGrid.uptime": "Uptime",
-    "heartbeatGrid.up": "Up",
-    "heartbeatGrid.down": "Down",
-    "heartbeatGrid.unknownTime": "Unknown time",
-
     // Footer
     "footer.copyright": "© {year} XUGOU. All Rights Reserved.",
     "footer.blog": "Blog",

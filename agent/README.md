@@ -36,9 +36,6 @@ go build -o xugou-agent
 
 # 启动客户端
 ./xugou-agent start
-
-# 配置客户端
-./xugou-agent config
 ```
 
 ### 配置选项
@@ -48,9 +45,6 @@ go build -o xugou-agent
 #### 命令行参数
 
 ```bash
-# 指定配置文件
-./xugou-agent --config /path/to/config.yaml
-
 # 指定服务器地址
 ./xugou-agent --server https://monitor.example.com
 
@@ -67,17 +61,6 @@ go build -o xugou-agent
 ./xugou-agent start --proxy http://proxy.example.com:8080
 ```
 
-#### 配置文件
-
-默认配置文件位于 `$HOME/.xugou-agent.yaml`，格式如下：
-
-```yaml
-server: https://monitor.example.com
-token: YOUR_API_TOKEN
-interval: 60
-log_level: info
-```
-
 #### 环境变量
 
 所有配置选项也可以通过环境变量设置，环境变量名称格式为 `XUGOU_*`：
@@ -87,14 +70,6 @@ export XUGOU_SERVER=https://monitor.example.com
 export XUGOU_TOKEN=YOUR_API_TOKEN
 export XUGOU_INTERVAL=60
 export XUGOU_LOG_LEVEL=info
-```
-
-### 使用控制台输出
-
-如果您只想查看收集的系统信息而不上报到服务器，可以将服务器地址设置为 `console`：
-
-```bash
-./xugou-agent --server console start
 ```
 
 ## 开发
@@ -114,7 +89,6 @@ agent/
 │   └── agent/       # 命令行命令
 │       ├── root.go  # 根命令
 │       ├── start.go # 启动命令
-│       ├── config.go # 配置命令
 │       └── version.go # 版本命令
 ├── pkg/
 │   ├── collector/   # 数据收集器

@@ -63,51 +63,16 @@ export default {
       });
     }
 
-    try {
-      // 如果数据库尚未初始化，则进行初始化检查
-      if (!dbInitialized) {
-        console.log("首次请求，检查数据库状态...");
-        try {
-          const initResult = await initDb.checkAndInitializeDatabase(env);
-          dbInitialized = true;
-          console.log("数据库检查结果:", initResult.message);
-        } catch (error) {
-          console.error("数据库初始化检查失败:", error);
-          // 即使初始化失败，也设置标志位以避免重复检查
-          dbInitialized = true;
-        }
-      }
-
-      // 处理请求
-      const response = await app.fetch(request, env, ctx);
-
-      // 确保所有响应都有正确的CORS头
-      const newHeaders = new Headers(response.headers);
-      newHeaders.set("Access-Control-Allow-Origin", "*");
-      newHeaders.set(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-      );
-
-      // 创建新的响应，保留原始状态和正文，但确保CORS头存在
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: newHeaders,
-      });
-    } catch (error) {
-      console.error("请求处理错误:", error);
-      // 即使在错误响应中也添加CORS头
-      return new Response(JSON.stringify({ error: "服务器内部错误" }), {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods":
-            "GET, POST, PUT, DELETE, OPTIONS, PATCH",
-        },
-      });
+    // 如果数据库尚未初始化，则进行初始化检查
+    if (!dbInitialized) {
+      console.log("首次请求，检查数据库状态...");
+      const initResult = await initDb.checkAndInitializeDatabase(env);
+      dbInitialized = true;
+      console.log("数据库检查结果:", initResult.message);
     }
+
+    // 处理请求
+    return app.fetch(request, env, ctx);
   },
 
   // 添加定时任务，每分钟执行一次监控检查和客户端状态检查

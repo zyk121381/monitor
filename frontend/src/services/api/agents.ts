@@ -1,5 +1,10 @@
 import api from "./index";
-import { Agent, AgentResponse, AgentsResponse } from "../../types/agents";
+import {
+  Agent,
+  AgentResponse,
+  AgentsResponse,
+  MetricHistory,
+} from "../../types/agents";
 
 export const generateToken = async (): Promise<{
   success: boolean;
@@ -19,44 +24,19 @@ export const generateToken = async (): Promise<{
 };
 
 export const getAllAgents = async (): Promise<AgentsResponse> => {
-    const response = await api.get("/api/agents");
-    return {
-      success: true,
-      agents: response.data.agents,
-    }
-
-};
-
-export const updateAgentStatus = async (
-  id: number,
-  metrics: {
-    cpu_usage: number;
-    memory_total: number;
-    memory_used: number;
-    disk_total: number;
-    disk_used: number;
-    network_rx: number;
-    network_tx: number;
-  }
-): Promise<{ success: boolean; message: string }> => {
-  try {
-    const response = await api.post(`/api/agents/${id}/status`, metrics);
-    return response.data;
-  } catch (error) {
-    console.error("更新客户端状态失败:", error);
-    return {
-      success: false,
-      message: "更新客户端状态失败",
-    };
-  }
+  const response = await api.get("/api/agents");
+  return {
+    success: true,
+    agents: response.data.agents,
+  };
 };
 
 export const getAgent = async (id: number): Promise<AgentResponse> => {
   const response = await api.get(`/api/agents/${id}`);
-    return {
-      success: true,
-      agent: response.data.agent
-    }
+  return {
+    success: true,
+    agent: response.data.agent,
+  };
 };
 
 export const deleteAgent = async (
@@ -85,6 +65,42 @@ export const updateAgent = async (
     console.error(`更新客户端 ${id} 失败:`, error);
     return {
       success: false,
+    };
+  }
+};
+
+export const getAgentMetrics = async (
+  id: number
+): Promise<{
+  success: boolean;
+  metrics?: MetricHistory[];
+  message?: string;
+}> => {
+  try {
+    const response = await api.get(`/api/agents/${id}/metrics`);
+    return response.data;
+  } catch (error) {
+    console.error(`获取客户端 ${id} 的指标失败:`, error);
+    return {
+      success: false,
+      message: "获取客户端指标失败",
+    };
+  }
+};
+
+export const getAllAgentMetrics = async (): Promise<{
+  success: boolean;
+  metrics?: MetricHistory[];
+  message?: string;
+}> => {
+  try {
+    const response = await api.get(`/api/agents/metrics`);
+    return response.data;
+  } catch (error) {
+    console.error(`获取所有客户端的指标失败:`, error);
+    return {
+      success: false,
+      message: "获取所有客户端指标失败",
     };
   }
 };

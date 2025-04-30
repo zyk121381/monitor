@@ -3,12 +3,7 @@ import * as models from "../models";
 import * as repositories from "../repositories";
 import * as NotificationService from "./NotificationService";
 
-/**
- * 执行系统维护任务 - 清理旧记录
- */
-export async function cleanupOldRecords(db: Bindings["DB"]) {
-  return await repositories.cleanupOldRecords(db);
-}
+
 
 /**
  * 获取所有需要检查的监控

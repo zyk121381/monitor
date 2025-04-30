@@ -10,46 +10,6 @@ import {
  * 监控相关的数据库操作
  */
 
-// 清理30天以前的历史记录
-export async function cleanupOldRecords(db: Bindings["DB"]) {
-  console.log("开始清理30天以前的历史记录...");
-
-  // 清理监控状态历史记录
-  const deleteStatusHistoryResult = await db
-    .prepare(
-      `
-      DELETE FROM monitor_status_history 
-      WHERE timestamp < datetime('now', '-30 days')
-    `
-    )
-    .run();
-
-  // 清理通知历史记录
-  const deleteNotificationHistoryResult = await db
-    .prepare(
-      `
-      DELETE FROM notification_history 
-      WHERE sent_at < datetime('now', '-30 days')
-    `
-    )
-    .run();
-
-  const statusHistoryDeleted =
-    (deleteStatusHistoryResult.meta as DbResultMeta)?.changes || 0;
-  const notificationHistoryDeleted =
-    (deleteNotificationHistoryResult.meta as DbResultMeta)?.changes || 0;
-
-  console.log(
-    `清理完成：删除了 ${statusHistoryDeleted} 条状态历史记录，${notificationHistoryDeleted} 条通知历史记录`
-  );
-
-  return {
-    success: true,
-    statusHistoryDeleted,
-    notificationHistoryDeleted,
-  };
-}
-
 // 获取需要检查的监控列表
 export async function getMonitorsToCheck(db: Bindings["DB"]) {
   const result = await db

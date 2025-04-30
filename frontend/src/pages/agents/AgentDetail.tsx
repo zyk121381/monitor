@@ -8,7 +8,6 @@ import {
   Button,
   Card,
   Badge,
-  Tabs,
   Grid,
   Avatar,
 } from "@radix-ui/themes";
@@ -25,7 +24,11 @@ import {
   Link2Icon,
 } from "@radix-ui/react-icons";
 import * as Toast from "@radix-ui/react-toast";
-import { getAgent, deleteAgent } from "../../services/api/agents";
+import {
+  getAgent,
+  deleteAgent,
+  getAgentMetrics,
+} from "../../services/api/agents";
 import { Agent } from "../../types/agents";
 import { useTranslation } from "react-i18next";
 import AgentCard from "../../components/AgentCard";
@@ -54,14 +57,19 @@ const AgentDetail = () => {
     setLoading(true);
     setError(null);
 
-      console.log("AgentDetail: 正在获取客户端数据...");
-      const agentResponse = await getAgent(Number(id));
+    console.log("AgentDetail: 正在获取客户端数据...");
+    const agentResponse = await getAgent(Number(id));
+    const metricResponse = await getAgentMetrics(Number(id));
 
-      if (agentResponse.agent) {
-        setAgent(agentResponse.agent)
-      }
-      setLoading(false);
-
+    console.log("AgentDetail: 客户端数据获取成功:", agentResponse);
+    console.log("AgentDetail: 客户端指标数据获取成功:", metricResponse);
+    if (agentResponse.agent && metricResponse.metrics) {
+      setAgent({
+        ...agentResponse.agent,
+        metrics: metricResponse.metrics,
+      });
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -207,256 +215,227 @@ const AgentDetail = () => {
   }
 
   return (
-    <Box>
-      <div className="page-container detail-page">
-        <Flex justify="between" align="center" className="detail-header">
-          <Flex align="center" gap="2">
-            <Button variant="soft" size="1" onClick={() => navigate("/agents")}>
-              <ArrowLeftIcon />
-            </Button>
-            <Heading size="6">{t("agent.details")}</Heading>
-            <Badge color={statusColors[agent.status || "inactive"]}>
-              {agent.status === "active"
-                ? t("agent.status.online")
-                : t("agent.status.offline")}
-            </Badge>
-          </Flex>
-          <Flex gap="2">
-            <Button variant="soft" onClick={handleRefresh} disabled={loading}>
-              <ReloadIcon />
-              {t("common.refresh")}
-            </Button>
-            <Button
-              variant="soft"
-              onClick={() => navigate(`/agents/edit/${id}`)}
-            >
-              <Pencil1Icon />
-              {t("agent.edit")}
-            </Button>
-            <Button
-              variant="soft"
-              color="red"
-              onClick={handleDelete}
-              disabled={deleteLoading}
-            >
-              <Cross2Icon />
-              {deleteLoading ? t("common.deleting") : t("agent.delete")}
-            </Button>
-          </Flex>
+    <Box className="page-container detail-page">
+      <Flex justify="between" align="center" className="detail-header">
+        <Flex align="center" gap="2">
+          <Button variant="soft" size="1" onClick={() => navigate("/agents")}>
+            <ArrowLeftIcon />
+          </Button>
+          <Heading size="6">{t("agent.details")}</Heading>
+          <Badge color={statusColors[agent.status || "inactive"]}>
+            {agent.status === "active"
+              ? t("agent.status.online")
+              : t("agent.status.offline")}
+          </Badge>
         </Flex>
+        <Flex gap="2">
+          <Button variant="soft" onClick={handleRefresh} disabled={loading}>
+            <ReloadIcon />
+            {t("common.refresh")}
+          </Button>
+          <Button variant="soft" onClick={() => navigate(`/agents/edit/${id}`)}>
+            <Pencil1Icon />
+            {t("agent.edit")}
+          </Button>
+          <Button
+            variant="soft"
+            color="red"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+          >
+            <Cross2Icon />
+            {deleteLoading ? t("common.deleting") : t("agent.delete")}
+          </Button>
+        </Flex>
+      </Flex>
 
-        <div className="detail-content">
-          <Card mb="4">
-            <Flex align="center" gap="4" mb="4">
-              <Avatar size="5" fallback={agent.name.charAt(0)} color="indigo" />
-              <Box>
-                <Heading size="5">{agent.name}</Heading>
-                <Text color="gray" size="2">
-                  {agent.hostname ? agent.hostname : ""}
-                  {agent.hostname && agent.ip_addresses
-                    ? (() => {
+      <Box className="detail-content">
+        <Card mb="4">
+          <Flex align="center" gap="4" mb="4">
+            <Avatar size="5" fallback={agent.name.charAt(0)} color="indigo" />
+            <Box>
+              <Heading size="5">{agent.name}</Heading>
+            </Box>
+          </Flex>
+        </Card>
+        <Box pt="3">
+          <Grid columns={{ initial: "1" }} gap="4">
+            {/* 系统信息卡片 */}
+            <Card>
+              <Flex direction="column" gap="3">
+                <Heading size="3">{t("agent.systemInfo")}</Heading>
+
+                <Box>
+                  <Flex align="center" gap="2">
+                    <DesktopIcon />
+                    <Text as="div" size="2" weight="bold">
+                      {t("agent.os")}:
+                    </Text>
+                    <Text as="div" size="2">
+                      {agent.os || t("common.notFound")}
+                    </Text>
+                  </Flex>
+                </Box>
+
+                <Box>
+                  <Flex align="center" gap="2">
+                    <InfoCircledIcon />
+                    <Text as="div" size="2" weight="bold">
+                      {t("agent.version")}:
+                    </Text>
+                    <Text as="div" size="2">
+                      {agent.version || t("common.notFound")}
+                    </Text>
+                  </Flex>
+                </Box>
+
+                <Box>
+                  <Flex align="center" gap="2">
+                    <GlobeIcon />
+                    <Text as="div" size="2" weight="bold">
+                      {t("agent.hostname")}:
+                    </Text>
+                    <Text as="div" size="2">
+                      {agent.hostname || t("common.notFound")}
+                    </Text>
+                  </Flex>
+                </Box>
+
+                <Box>
+                  <Flex align="center" gap="2">
+                    <Link2Icon />
+                    <Text as="div" size="2" weight="bold">
+                      {t("agent.ipAddress")}:
+                    </Text>
+                    {agent.ip_addresses ? (
+                      (() => {
                         try {
                           const ipArray = JSON.parse(
                             String(agent.ip_addresses)
                           );
-                          return ipArray.length > 0 ? ` (${ipArray[0]})` : "";
+                          if (Array.isArray(ipArray) && ipArray.length > 0) {
+                            return (
+                              <Text as="div" size="2">
+                                {ipArray[0]}
+                                {ipArray.length > 1
+                                  ? ` (+${ipArray.length - 1})`
+                                  : ""}
+                              </Text>
+                            );
+                          } else {
+                            return (
+                              <Text as="div" size="2">
+                                {String(agent.ip_addresses)}
+                              </Text>
+                            );
+                          }
                         } catch (e) {
-                          return ` (${String(agent.ip_addresses)})`;
+                          return (
+                            <Text as="div" size="2">
+                              {String(agent.ip_addresses)}
+                            </Text>
+                          );
                         }
                       })()
-                    : ""}
-                </Text>
-              </Box>
-            </Flex>
+                    ) : (
+                      <Text as="div" size="2" color="gray">
+                        {t("common.unknown")}
+                      </Text>
+                    )}
+                  </Flex>
+                </Box>
 
-            <Grid columns={{ initial: "1", md: "2" }} gap="4">
-              <Flex align="center" gap="2">
-                <LapTimerIcon />
-                <Text as="div" size="2" weight="bold">
-                  {t("agent.uptime")}:
-                </Text>
-                <Text as="div" size="2">
-                  {formatUptime(agent)}
-                </Text>
+                <Box>
+                  <Flex align="center" gap="2">
+                    <LapTimerIcon />
+                    <Text as="div" size="2" weight="bold">
+                      {t("agent.uptime")}:
+                    </Text>
+                    <Text as="div" size="2">
+                      {formatUptime(agent)}
+                    </Text>
+                  </Flex>
+                </Box>
+
+                <Box>
+                  <Flex align="center" gap="2">
+                    <ClockIcon />
+                    <Text as="div" size="2" weight="bold">
+                      {t("agent.lastUpdated")}:
+                    </Text>
+                    <Text as="div" size="2">
+                      {formatDateTime(agent.updated_at)}
+                    </Text>
+                  </Flex>
+                </Box>
+
+                {/* 如果存在多个IP地址，展示完整列表 */}
+                {agent.ip_addresses &&
+                  (() => {
+                    try {
+                      const ipArray = JSON.parse(String(agent.ip_addresses));
+                      if (Array.isArray(ipArray) && ipArray.length > 1) {
+                        return (
+                          <Box pl="6" mt="1">
+                            <Flex direction="column" gap="1">
+                              {ipArray.slice(1).map((ip, index) => (
+                                <Text key={index} size="2" color="gray">
+                                  {ip}
+                                </Text>
+                              ))}
+                            </Flex>
+                          </Box>
+                        );
+                      }
+                      return null;
+                    } catch (e) {
+                      return null;
+                    }
+                  })()}
               </Flex>
+            </Card>
 
-              <Flex align="center" gap="2">
-                <ClockIcon />
-                <Text as="div" size="2" weight="bold">
-                  {t("agent.lastUpdated")}:
-                </Text>
-                <Text as="div" size="2">
-                  {formatDateTime(agent.updated_at)}
-                </Text>
+            {/* Agent 资源信息卡片 */}
+            <Card>
+              <Flex direction="column" gap="4">
+                <Heading size="3">{t("agent.metrics")}</Heading>
+                <AgentCard
+                  agent={agent}
+                  showIpAddress={false}
+                  showHostname={false}
+                  showLastUpdated={false}
+                ></AgentCard>
               </Flex>
-            </Grid>
-          </Card>
+            </Card>
+          </Grid>
+        </Box>
+      </Box>
 
-          <Tabs.Root defaultValue="system">
-            <Tabs.List>
-              <Tabs.Trigger value="system">{t("agents.system")}</Tabs.Trigger>
-            </Tabs.List>
-
-            <Box pt="3">
-              <Tabs.Content value="system">
-                <Grid columns={{ initial: "1", md: "2" }} gap="4">
-                  {/* 系统信息卡片 */}
-                  <Card>
-                    <Flex direction="column" gap="3">
-                      <Heading size="3">{t("agent.systemInfo")}</Heading>
-
-                      <Box>
-                        <Flex align="center" gap="2">
-                          <DesktopIcon />
-                          <Text as="div" size="2" weight="bold">
-                            {t("agent.os")}:
-                          </Text>
-                          <Text as="div" size="2">
-                            {agent.os || t("common.notFound")}
-                          </Text>
-                        </Flex>
-                      </Box>
-
-                      <Box>
-                        <Flex align="center" gap="2">
-                          <InfoCircledIcon />
-                          <Text as="div" size="2" weight="bold">
-                            {t("agent.version")}:
-                          </Text>
-                          <Text as="div" size="2">
-                            {agent.version || t("common.notFound")}
-                          </Text>
-                        </Flex>
-                      </Box>
-
-                      <Box>
-                        <Flex align="center" gap="2">
-                          <GlobeIcon />
-                          <Text as="div" size="2" weight="bold">
-                            {t("agent.hostname")}:
-                          </Text>
-                          <Text as="div" size="2">
-                            {agent.hostname || t("common.notFound")}
-                          </Text>
-                        </Flex>
-                      </Box>
-
-                      <Box>
-                        <Flex align="center" gap="2">
-                          <Link2Icon />
-                          <Text as="div" size="2" weight="bold">
-                            {t("agent.ipAddress")}:
-                          </Text>
-                          {agent.ip_addresses ? (
-                            (() => {
-                              try {
-                                const ipArray = JSON.parse(
-                                  String(agent.ip_addresses)
-                                );
-                                if (
-                                  Array.isArray(ipArray) &&
-                                  ipArray.length > 0
-                                ) {
-                                  return (
-                                    <Text as="div" size="2">
-                                      {ipArray[0]}
-                                      {ipArray.length > 1
-                                        ? ` (+${ipArray.length - 1})`
-                                        : ""}
-                                    </Text>
-                                  );
-                                } else {
-                                  return (
-                                    <Text as="div" size="2">
-                                      {String(agent.ip_addresses)}
-                                    </Text>
-                                  );
-                                }
-                              } catch (e) {
-                                return (
-                                  <Text as="div" size="2">
-                                    {String(agent.ip_addresses)}
-                                  </Text>
-                                );
-                              }
-                            })()
-                          ) : (
-                            <Text as="div" size="2" color="gray">
-                              {t("common.unknown")}
-                            </Text>
-                          )}
-                        </Flex>
-                      </Box>
-
-                      {/* 如果存在多个IP地址，展示完整列表 */}
-                      {agent.ip_addresses &&
-                        (() => {
-                          try {
-                            const ipArray = JSON.parse(
-                              String(agent.ip_addresses)
-                            );
-                            if (Array.isArray(ipArray) && ipArray.length > 1) {
-                              return (
-                                <Box pl="6" mt="1">
-                                  <Flex direction="column" gap="1">
-                                    {ipArray.slice(1).map((ip, index) => (
-                                      <Text key={index} size="2" color="gray">
-                                        {ip}
-                                      </Text>
-                                    ))}
-                                  </Flex>
-                                </Box>
-                              );
-                            }
-                            return null;
-                          } catch (e) {
-                            return null;
-                          }
-                        })()}
-                    </Flex>
-                  </Card>
-
-                  {/* Agent 资源信息卡片 */}
-                  <Card>
-                    <Flex direction="column" gap="4">
-                      <Heading size="3">{t("agent.systemResources")}</Heading>
-                      <AgentCard agent={agent} showIpAddress={false} showHostname={false} showLastUpdated={false} showDetailedResources={false}></AgentCard>
-                    </Flex>
-                  </Card>
-                </Grid>
-              </Tabs.Content>
-            </Box>
-          </Tabs.Root>
-        </div>
-
-        <Toast.Provider swipeDirection="right">
-          <Toast.Root
-            className={`ToastRoot`}
-            open={toastOpen}
-            onOpenChange={setToastOpen}
-            duration={3000}
-            style={{
-              backgroundColor:
-                toastType === "success" ? "var(--green-9)" : "var(--red-9)",
-              borderRadius: "8px",
-              zIndex: 9999,
-            }}
-          >
-            <Toast.Title className="ToastTitle">
-              {toastType === "success"
-                ? t("common.success")
-                : t("common.error")}
-            </Toast.Title>
-            <Toast.Description className="ToastDescription">
-              {toastMessage}
-            </Toast.Description>
-            <Toast.Close className="ToastClose">
-              <Cross2Icon />
-            </Toast.Close>
-          </Toast.Root>
-          <Toast.Viewport className="ToastViewport" />
-        </Toast.Provider>
-      </div>
+      <Toast.Provider swipeDirection="right">
+        <Toast.Root
+          className={`ToastRoot`}
+          open={toastOpen}
+          onOpenChange={setToastOpen}
+          duration={3000}
+          style={{
+            backgroundColor:
+              toastType === "success" ? "var(--green-9)" : "var(--red-9)",
+            borderRadius: "8px",
+            zIndex: 9999,
+          }}
+        >
+          <Toast.Title className="ToastTitle">
+            {toastType === "success" ? t("common.success") : t("common.error")}
+          </Toast.Title>
+          <Toast.Description className="ToastDescription">
+            {toastMessage}
+          </Toast.Description>
+          <Toast.Close className="ToastClose">
+            <Cross2Icon />
+          </Toast.Close>
+        </Toast.Root>
+        <Toast.Viewport className="ToastViewport" />
+      </Toast.Provider>
     </Box>
   );
 };
