@@ -608,9 +608,6 @@ const enUS = {
     "monitorCard.responseTime": "Response Time",
     "monitorCard.unknown": "Unknown",
 
-    // ResourceBar component
-    "resourceBar.title": "Resource Usage Progress Bar",
-
     // StatusSummaryCard component
     "statusSummary.title": "Status Summary",
 

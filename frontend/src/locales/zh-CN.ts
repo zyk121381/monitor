@@ -569,9 +569,6 @@ const zhCN = {
     "monitorCard.responseTime": "响应时间",
     "monitorCard.unknown": "未知",
 
-    // ResourceBar 组件
-    "resourceBar.title": "资源使用量进度条",
-
     // StatusSummaryCard 组件
     "statusSummary.title": "状态摘要",
   },

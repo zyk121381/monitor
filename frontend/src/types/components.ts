@@ -1,27 +1,11 @@
 /**
  * 组件相关类型定义
  */
-
-import { ButtonHTMLAttributes } from "react";
 import { NotificationChannel } from "./notification";
 import { Monitor } from "./monitors";
 import { Agent, MetricHistory } from "./agents";
 
-// Button 组件类型
-export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "danger"
-  | "success"
-  | "warning"
-  | "info";
-export type ButtonSize = "sm" | "md" | "lg";
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  isLoading?: boolean;
-}
 
 // ChannelSelector 组件类型
 export interface ChannelSelectorProps {
@@ -47,17 +31,6 @@ export interface StatusSummaryCardProps {
 // MonitorCard 组件类型
 export interface MonitorCardProps {
   monitor: Monitor;
-}
-
-// ResourceBar 组件类型
-export interface ResourceBarProps {
-  label: string;
-  value: number;
-  unit?: string;
-  colorThresholds?: {
-    warning: number;
-    danger: number;
-  };
 }
 
 // StatusCodeSelect 组件类型
