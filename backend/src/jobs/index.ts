@@ -23,13 +23,12 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
   }
 };
 
-
 // 清理30天以前的历史记录
 export async function cleanupOldRecords(db: Bindings["DB"]) {
   console.log("开始清理30天以前的历史记录...");
 
   // 清理监控状态历史记录
-  const deleteStatusHistoryResult = await db
+  await db
     .prepare(
       `
       DELETE FROM monitor_status_history 
@@ -38,8 +37,28 @@ export async function cleanupOldRecords(db: Bindings["DB"]) {
     )
     .run();
 
+  // 清理30天以前的 monitor_daily_stats
+  await db
+    .prepare(
+      `
+      DELETE FROM monitor_daily_stats
+      WHERE date < datetime('now', '-30 days')
+    `
+    )
+    .run();
+
+  // 清理30天以前的 agent_daily_stats
+  await db
+    .prepare(
+      `
+      DELETE FROM agent_daily_stats
+      WHERE date < datetime('now', '-30 days')
+    `
+    )
+    .run();
+
   // 清理通知历史记录
-  const deleteNotificationHistoryResult = await db
+  await db
     .prepare(
       `
       DELETE FROM notification_history 
@@ -48,11 +67,7 @@ export async function cleanupOldRecords(db: Bindings["DB"]) {
     )
     .run();
 
-  console.log(
-    `清理完成：删除了 ${deleteStatusHistoryResult} 条状态历史记录，${deleteNotificationHistoryResult} 条通知历史记录`
-  );
-
   return {
-    success: true
+    success: true,
   };
 }

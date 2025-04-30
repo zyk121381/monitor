@@ -288,9 +288,7 @@ export default {
     // 默认执行监控检查任务
     let result: any = await checkAgentsStatus(c);
 
-    const now = new Date();
-    const hour = now.getUTCHours();
-    const minute = now.getUTCMinutes();
+    // 每天应该生成 agent_daily_stats 记录，从 agent_metrics_24h 中聚合数据
 
     return result;
   },

@@ -11,6 +11,18 @@ export interface Agent {
   ip_addresses: string | null; // 存储多个IP地址的JSON字符串
   os: string | null;
   version: string | null;
+  metrics: Metrics[] | null;
+}
+
+export interface Metrics {
+  id: number;
+  agent_id: number;
+  timestamp: string;
+  cpu: CPUInfo;
+  memory: MemoryInfo;
+  disks: DiskInfo[];
+  networks: NetworkInfo[];
+  load: LoadInfo;
 }
 
 export interface CPUInfo {

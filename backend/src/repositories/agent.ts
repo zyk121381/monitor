@@ -1,5 +1,5 @@
 import { Bindings } from "../models/db";
-import { Agent } from "../models/agent";
+import { Agent, Metrics } from "../models/agent";
 
 /**
  * 客户端相关的数据库操作
@@ -23,6 +23,18 @@ export async function getAgentsByIds(db: Bindings["DB"], agentIds: number[]) {
     .prepare(`SELECT * FROM agents WHERE id IN (${placeholders})`)
     .bind(...agentIds)
     .all<Agent>();
+}
+
+// 批量获取客户端指标
+export async function getAgentMetricsByIds(db: Bindings["DB"], agentIds: number[]) {
+  if (agentIds.length === 0) {
+    return { results: [] };
+  }
+  const placeholders = agentIds.map(() => "?").join(",");
+  return await db
+   .prepare(`SELECT * FROM agent_metrics_24h WHERE agent_id IN (${placeholders})`)
+   .bind(...agentIds)
+  .all<Metrics>();
 }
 
 // 获取单个客户端详情
