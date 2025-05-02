@@ -8,7 +8,7 @@ import { Bindings } from "../models/db";
 /**
  * 检查表是否存在
  */
-async function tableExists(env: Bindings, table: string): Promise<boolean> {
+export async function tableExists(env: Bindings, table: string): Promise<boolean> {
   try {
     const result = await env.DB.prepare(
       `SELECT name FROM sqlite_master WHERE type='table' AND name=?`
@@ -32,12 +32,8 @@ export async function migrateFrom004To005(
     // 检查 notification_templates 表是否存在
     const hasTemplatesTable = await tableExists(env, "notification_templates");
 
-    const hasMonitorStatusHistoryTable = await tableExists(
-      env,
-      "monitor_status_history"
-    );
 
-    if (!hasTemplatesTable && !hasMonitorStatusHistoryTable) {
+    if (!hasTemplatesTable) {
       console.log("notification_templates 表不存在，跳过迁移");
       return {
         success: true,
@@ -51,17 +47,6 @@ export async function migrateFrom004To005(
     );
     await env.DB.exec(
       "UPDATE notification_templates SET type = 'monitor' WHERE name LIKE '%Monitor%' OR name LIKE '%monitor%'"
-    );
-
-    // 新增 monitor_status_history 表中的 response_time,status_code ,error;
-    await env.DB.exec(
-      "ALTER TABLE monitor_status_history ADD COLUMN response_time INTEGER"
-    );
-    await env.DB.exec(
-      "ALTER TABLE monitor_status_history ADD COLUMN status_code INTEGER"
-    );
-    await env.DB.exec(
-      "ALTER TABLE monitor_status_history ADD COLUMN error TEXT"
     );
 
     console.log(`迁移完成`);

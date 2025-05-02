@@ -315,10 +315,6 @@ export async function updateMonitorConfig(
 // 删除监控
 export async function deleteMonitor(db: Bindings["DB"], id: number) {
   // 先删除关联的历史数据
-  await db
-    .prepare("DELETE FROM monitor_status_history WHERE monitor_id = ?")
-    .bind(id)
-    .run();
 
   await db
     .prepare("DELETE FROM monitor_status_history_24h WHERE monitor_id = ?")

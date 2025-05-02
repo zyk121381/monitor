@@ -150,14 +150,14 @@ async function handleMonitorNotification(
   }
 }
 
-// 生成每日监控统计数据的函数
+// 从24小时热表生成每日监控统计数据的函数
 async function generateDailyStats(c: any) {
   try {
-    console.log("开始生成每日监控统计数据...");
+    console.log("开始从24小时热表生成每日监控统计数据...");
 
     // 获取前一天的日期 (YYYY-MM-DD 格式)
     const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setDate(yesterday.getDate());
     const dateStr = yesterday.toISOString().split("T")[0];
 
     console.log(`正在处理日期 ${dateStr} 的数据`);
@@ -182,8 +182,10 @@ async function generateDailyStats(c: any) {
     // 创建监控ID列表
     const monitorIds = monitors.map((m: any) => m.id);
 
-    // 一次性获取所有监控历史记录（指定日期范围内）
-    console.log(`一次性查询所有监控在 ${startTime} 至 ${endTime} 的历史记录`);
+    // 从24小时热表获取监控历史记录
+    console.log(
+      `从24小时热表查询所有监控在 ${startTime} 至 ${endTime} 的历史记录`
+    );
 
     const historyResult = await c.env.DB.prepare(
       `
@@ -192,7 +194,7 @@ async function generateDailyStats(c: any) {
         status, 
         response_time 
       FROM 
-        monitor_status_history 
+        monitor_status_history_24h 
       WHERE 
         timestamp >= ? AND 
         timestamp <= ?
@@ -230,20 +232,17 @@ async function generateDailyStats(c: any) {
     for (const record of historyResult.results) {
       const monitorId = record.monitor_id;
 
-      // 如果这个监控ID不在我们的列表中，跳过
       if (!statsMap.has(monitorId)) continue;
 
       const stats = statsMap.get(monitorId);
       stats.totalChecks++;
 
-      // 统计状态
       if (record.status === "up") {
         stats.upChecks++;
       } else if (record.status === "down") {
         stats.downChecks++;
       }
 
-      // 收集响应时间数据
       if (record.response_time != null && record.response_time > 0) {
         stats.responseTimes.push(record.response_time);
       }
@@ -251,10 +250,8 @@ async function generateDailyStats(c: any) {
 
     // 处理每个监控的响应时间统计和可用率计算
     for (const [monitorId, stats] of statsMap.entries()) {
-      // 只处理有记录的监控
       if (stats.totalChecks === 0) continue;
 
-      // 计算响应时间统计数据
       if (stats.responseTimes.length > 0) {
         stats.avgResponseTime =
           stats.responseTimes.reduce(
@@ -265,21 +262,17 @@ async function generateDailyStats(c: any) {
         stats.maxResponseTime = Math.max(...stats.responseTimes);
       }
 
-      // 计算可用率
       stats.availability =
         stats.totalChecks > 0 ? (stats.upChecks / stats.totalChecks) * 100 : 0;
 
-      // 删除临时数据
       delete stats.responseTimes;
     }
 
-    // 将数据写入数据库
+    // 将统计数据写入数据库
     const now = new Date().toISOString();
     let processed = 0;
 
-    // 批量构建 INSERT 语句
     for (const [monitorId, stats] of statsMap.entries()) {
-      // 跳过没有记录的监控
       if (stats.totalChecks === 0) continue;
 
       const monitor = monitors.find((m: any) => m.id === monitorId);
@@ -333,6 +326,20 @@ async function generateDailyStats(c: any) {
 
     console.log(`每日统计数据生成完成，成功处理了 ${processed} 个监控`);
 
+    // 从 24h 表中删除已处理的数据
+    console.log(`开始从24小时热表删除已处理的数据`);
+    const deleteResult = await c.env.DB.prepare(
+      `
+      DELETE FROM monitor_status_history_24h
+      WHERE
+        timestamp >=? AND
+        timestamp <=?
+    `
+    )
+      .bind(startTime, endTime)
+      .run();
+    console.log(`从24小时热表删除已处理的数据完成`);
+
     return {
       success: true,
       message: "每日统计数据生成完成",
@@ -348,69 +355,6 @@ async function generateDailyStats(c: any) {
     };
   }
 }
-
-// 迁移24小时以前的监控历史数据到冷表
-async function migrateMonitorHistoryData(c: any) {
-  try {
-    console.log("开始迁移24小时以前的监控历史数据...");
-    const oneDayAgo = new Date();
-    oneDayAgo.setHours(oneDayAgo.getHours() - 24);
-    const timestamp = oneDayAgo.toISOString();
-
-    // 获取24小时前的监控历史数据
-    const historyResult = await c.env.DB.prepare(
-      `
-      SELECT monitor_id, status, timestamp, response_time, status_code, error FROM monitor_status_history_24h
-      WHERE timestamp < ?
-    `
-    )
-      .bind(timestamp)
-      .all();
-
-    console.log(
-      `找到 ${historyResult.results.length} 条24小时前的监控历史数据`
-    );
-
-    // 将数据逐条迁移到冷表
-    for (const record of historyResult.results) {
-      await c.env.DB.prepare(
-        `
-        INSERT INTO monitor_status_history (
-          monitor_id,
-          status,
-          timestamp,
-          response_time,
-          status_code,
-          error
-        ) VALUES (?, ?, ?, ?, ?, ?)
-      `
-      )
-        .bind(
-          record.monitor_id,
-          record.status,
-          record.timestamp,
-          record.response_time,
-          record.status_code,
-          record.error
-        )
-        .run();
-    }
-
-    // 删除热表中的数据
-    await c.env.DB.prepare(
-      `
-      DELETE FROM monitor_status_history_24h
-      WHERE timestamp < ?
-    `
-    )
-      .bind(timestamp)
-      .run();
-
-    console.log(`迁移完成，成功迁移了 ${historyResult.results.length} 条数据`);
-  } catch (error) {
-    console.error("迁移24小时以前的监控历史数据时出错:", error);
-  }
-}
 // 在 Cloudflare Workers 中设置定时触发器
 export default {
   async scheduled(event: any, env: any, ctx: any) {
@@ -424,11 +368,11 @@ export default {
     const minute = now.getUTCMinutes();
 
     if (hour === 0 && minute === 5) {
-      // 迁移24小时以前的监控历史数据到冷表
-      await migrateMonitorHistoryData(c);
       // 生成每日监控统计数据
       const statsResult = await generateDailyStats(c);
-      result = { monitorCheck: result, dailyStats: statsResult };
+      if (statsResult.error) {
+        console.error("生成每日监控统计数据时出错:", statsResult.error);
+      }
     }
 
     return result;

@@ -14,8 +14,10 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
     // 执行清理任务 - 每30天执行一次
     const now = new Date();
     const dayOfMonth = now.getDate();
-    if (dayOfMonth === 1 || dayOfMonth === 30) {
-      console.log("执行清理任务...");
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    if (dayOfMonth === 1 && hour === 0 && minute === 30) {
+      console.log("每月1号零点30分执行清理任务...");
       await cleanupOldRecords(env.DB);
     }
   } catch (error) {
@@ -27,31 +29,10 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
 export async function cleanupOldRecords(db: Bindings["DB"]) {
   console.log("开始清理30天以前的历史记录...");
 
-  // 清理监控状态历史记录
-  await db
-    .prepare(
-      `
-      DELETE FROM monitor_status_history 
-      WHERE timestamp < datetime('now', '-30 days')
-    `
-    )
-    .run();
-
   // 清理30天以前的 monitor_daily_stats
-  await db
-    .prepare(
+  await db.prepare(
       `
       DELETE FROM monitor_daily_stats
-      WHERE date < datetime('now', '-30 days')
-    `
-    )
-    .run();
-
-  // 清理30天以前的 agent_daily_stats
-  await db
-    .prepare(
-      `
-      DELETE FROM agent_daily_stats
       WHERE date < datetime('now', '-30 days')
     `
     )

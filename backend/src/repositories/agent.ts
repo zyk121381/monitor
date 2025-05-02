@@ -216,5 +216,5 @@ export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
 export async function getAllAgentMetrics(db: Bindings["DB"]) {
   return await db
    .prepare("SELECT * FROM agent_metrics_24h")
-   .all();
+   .all<Metrics>();
 }

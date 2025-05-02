@@ -73,7 +73,7 @@ export const getAgentMetrics = async (
   id: number
 ): Promise<{
   success: boolean;
-  metrics?: MetricHistory[];
+  agent?: MetricHistory[];
   message?: string;
 }> => {
   try {

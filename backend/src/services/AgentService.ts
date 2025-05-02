@@ -463,12 +463,12 @@ export async function getAgentById(db: Bindings["DB"], id: number) {
   return await AgentRepository.getAgentById(db, id);
 }
 
-export async function getActiveAgents(db: Bindings["DB"]) {
-  return await AgentRepository.getActiveAgents(db);
+export async function getActiveAgents(env: any) {
+  return await AgentRepository.getActiveAgents(env.DB);
 }
 
-export async function setAgentInactive(db: Bindings["DB"], id: number) {
-  return await AgentRepository.setAgentInactive(db, id);
+export async function setAgentInactive(env: any, id: number) {
+  return await AgentRepository.setAgentInactive(env.DB, id);
 }
 
 

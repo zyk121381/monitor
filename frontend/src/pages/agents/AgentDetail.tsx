@@ -63,12 +63,17 @@ const AgentDetail = () => {
 
     console.log("AgentDetail: 客户端数据获取成功:", agentResponse);
     console.log("AgentDetail: 客户端指标数据获取成功:", metricResponse);
-    if (agentResponse.agent && metricResponse.metrics) {
+    console.log(agentResponse.agent, metricResponse.agent);
+    if (agentResponse.agent && metricResponse.agent) {
       setAgent({
         ...agentResponse.agent,
-        metrics: metricResponse.metrics,
+        metrics: metricResponse.agent,
       });
+
+      console.log("AgentDetail: 客户端数据处理成功:", agent);
     }
+    console.log("AgentDetail: 客户端数据处理完成");
+    console.log("AgentInfo ", agent);
     setLoading(false);
   };
 

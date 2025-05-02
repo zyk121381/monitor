@@ -19,11 +19,6 @@ export async function createTables(env: Bindings): Promise<void> {
     "CREATE TABLE IF NOT EXISTS monitors (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, url TEXT NOT NULL, method TEXT NOT NULL, interval INTEGER NOT NULL, timeout INTEGER NOT NULL, expected_status INTEGER NOT NULL, headers TEXT NOT NULL, body TEXT, created_by INTEGER NOT NULL, active BOOLEAN NOT NULL, status TEXT DEFAULT 'pending', uptime REAL DEFAULT 100.0, response_time INTEGER DEFAULT 0, last_checked TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, FOREIGN KEY (created_by) REFERENCES users(id))"
   );
 
-  console.log("创建监控状态历史表...");
-  await env.DB.exec(
-    "CREATE TABLE IF NOT EXISTS monitor_status_history (id INTEGER PRIMARY KEY AUTOINCREMENT, monitor_id INTEGER NOT NULL, status TEXT NOT NULL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, response_time INTEGER, status_code INTEGER, error TEXT, FOREIGN KEY (monitor_id) REFERENCES monitors(id))"
-  );
-
   console.log("创建24小时监控状态历史表(热表)...");
   await env.DB.exec(
     "CREATE TABLE IF NOT EXISTS monitor_status_history_24h (id INTEGER PRIMARY KEY AUTOINCREMENT, monitor_id INTEGER NOT NULL, status TEXT NOT NULL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, response_time INTEGER, status_code INTEGER, error TEXT, FOREIGN KEY (monitor_id) REFERENCES monitors(id))"
@@ -42,11 +37,6 @@ export async function createTables(env: Bindings): Promise<void> {
   console.log("创建客户端资源指标表(24h热表)...");
   await env.DB.exec(
     "CREATE TABLE IF NOT EXISTS agent_metrics_24h (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id INTEGER NOT NULL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, cpu_usage REAL, cpu_cores INTEGER, cpu_model TEXT, memory_total INTEGER, memory_used INTEGER, memory_free INTEGER, memory_usage_rate REAL, load_1 REAL, load_5 REAL, load_15 REAL, disk_metrics TEXT, network_metrics TEXT, FOREIGN KEY (agent_id) REFERENCES agents(id))"
-  );
-
-  console.log("创建客户端每日统计表...");
-  await env.DB.exec(
-    "CREATE TABLE IF NOT EXISTS agent_daily_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id INTEGER NOT NULL, date TEXT NOT NULL, avg_cpu_usage REAL, max_cpu_usage REAL, min_cpu_usage REAL, avg_memory_usage REAL, max_memory_usage REAL, min_memory_usage REAL, avg_load_1 REAL, max_load_1 REAL, avg_load_5 REAL, max_load_5 REAL, avg_load_15 REAL, max_load_15 REAL, disk_stats TEXT, network_stats TEXT, FOREIGN KEY (agent_id) REFERENCES agents(id))"
   );
 
   console.log("创建状态页配置表...");

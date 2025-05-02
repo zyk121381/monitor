@@ -33,12 +33,10 @@ export async function checkAndInitializeDatabase(
     const tablesToCheck = [
       "users",
       "monitors",
-      "monitor_status_history",
       "monitor_status_history_24h",
       "monitor_daily_stats",
       "agents",
       "agent_metrics_24h",
-      "agent_daily_stats",
       "status_page_config",
       "status_page_monitors",
       "status_page_agents",

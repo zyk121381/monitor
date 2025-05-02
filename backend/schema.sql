@@ -5,11 +5,9 @@ DROP TABLE IF EXISTS notification_channels;
 DROP TABLE IF EXISTS status_page_agents;
 DROP TABLE IF EXISTS status_page_monitors;
 DROP TABLE IF EXISTS status_page_config;
-DROP TABLE IF EXISTS monitor_status_history;
 DROP TABLE IF EXISTS monitor_status_history_24h;
 DROP TABLE IF EXISTS monitor_daily_stats;
 DROP TABLE IF EXISTS agent_metrics_24h;
-DROP TABLE IF EXISTS agent_daily_stats;
 DROP TABLE IF EXISTS agents;
 DROP TABLE IF EXISTS monitors;
 DROP TABLE IF EXISTS users;
@@ -45,18 +43,6 @@ CREATE TABLE IF NOT EXISTS monitors (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id)
-);
-
--- 监控状态历史表
-CREATE TABLE IF NOT EXISTS monitor_status_history (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  monitor_id INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  response_time INTEGER,
-  status_code INTEGER,
-  error TEXT,
-  FOREIGN KEY (monitor_id) REFERENCES monitors(id)
 );
 
 -- 24小时监控状态历史表(热表)
@@ -127,37 +113,6 @@ CREATE TABLE IF NOT EXISTS agent_metrics_24h (
   -- 磁盘和网络指标(JSON格式存储)
   disk_metrics TEXT,       -- JSON格式存储多个磁盘信息
   network_metrics TEXT,    -- JSON格式存储多个网络接口信息
-  
-  FOREIGN KEY (agent_id) REFERENCES agents(id)
-);
-
--- 客户端每日统计表
-CREATE TABLE IF NOT EXISTS agent_daily_stats (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  agent_id INTEGER NOT NULL,
-  date TEXT NOT NULL,      -- 日期，格式YYYY-MM-DD
-  
-  -- CPU统计
-  avg_cpu_usage REAL,      -- 平均CPU使用率(%)
-  max_cpu_usage REAL,      -- 最大CPU使用率(%)
-  min_cpu_usage REAL,      -- 最小CPU使用率(%)
-  
-  -- 内存统计
-  avg_memory_usage REAL,   -- 平均内存使用率(%)
-  max_memory_usage REAL,   -- 最大内存使用率(%)
-  min_memory_usage REAL,   -- 最小内存使用率(%)
-  
-  -- 负载统计
-  avg_load_1 REAL,         -- 平均1分钟负载
-  max_load_1 REAL,         -- 最大1分钟负载
-  avg_load_5 REAL,         -- 平均5分钟负载
-  max_load_5 REAL,         -- 最大5分钟负载
-  avg_load_15 REAL,        -- 平均15分钟负载
-  max_load_15 REAL,        -- 最大15分钟负载
-  
-  -- 磁盘和网络统计(每日聚合的JSON格式)
-  disk_stats TEXT,         -- 包含多个磁盘的平均和最大使用率
-  network_stats TEXT,      -- 包含多个网络接口的累计流量和平均传输速率
   
   FOREIGN KEY (agent_id) REFERENCES agents(id)
 );
