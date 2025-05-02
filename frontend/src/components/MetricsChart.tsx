@@ -258,7 +258,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
               selectedNetworkMetric === "received"
                 ? t("agent.metrics.network.received")
                 : t("agent.metrics.network.sent"),
-            unit: "KB/s",
+            unit: "B/s", // 修改为基本单位 B/s，在 scales.y.ticks.callback 中会根据实际值动态调整显示
             color: "rgba(153, 102, 255, 0.8)",
             bgColor: "rgba(153, 102, 255, 0.1)",
           };
@@ -291,7 +291,14 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
       case "disk":
         return `${Math.round(value * 100) / 100}%`;
       case "network":
-        return `${Math.round(value / 1024)} KB/s`;
+        // 根据大小自动选择合适的单位
+        if (value < 1024) {
+          return `${Math.round(value)} B/s`;
+        } else if (value < 1024 * 1024) {
+          return `${Math.round((value / 1024) * 100) / 100} KB/s`;
+        } else {
+          return `${Math.round((value / 1024 / 1024) * 100) / 100} MB/s`;
+        }
       case "load":
         return value.toFixed(2);
       default:
@@ -410,6 +417,26 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
                     selectedInterface.interface
                   }`
                 );
+
+                // 显示当前网络速率
+                const currentRate = dataPoint.y;
+                if (currentRate !== undefined) {
+                  if (selectedNetworkMetric === "sent") {
+                    lines.push(
+                      `${t(
+                        "agent.metrics.network.rate"
+                      )}: ${getValueDisplayText("network", currentRate)}`
+                    );
+                  } else {
+                    lines.push(
+                      `${t(
+                        "agent.metrics.network.rate"
+                      )}: ${getValueDisplayText("network", currentRate)}`
+                    );
+                  }
+                }
+
+                // 显示累计数据
                 lines.push(
                   `${t("agent.metrics.network.sent")}: ${formatBytes(
                     selectedInterface.bytes_sent
@@ -420,6 +447,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
                     selectedInterface.bytes_recv
                   )}`
                 );
+
                 lines.push(
                   `${t("agent.metrics.network.packetsSent")}: ${
                     selectedInterface.packets_sent
@@ -574,7 +602,20 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
             font: {
               size: 10,
             },
-            callback: (value) => `${value}${config.unit}`,
+            callback: (value) => {
+              // 对于网络指标，根据数值大小动态调整单位
+              if (metricType === "network" && typeof value === "number") {
+                if (value < 1024) {
+                  return `${value} B/s`;
+                } else if (value < 1024 * 1024) {
+                  return `${(value / 1024).toFixed(1)} KB/s`;
+                } else {
+                  return `${(value / 1024 / 1024).toFixed(1)} MB/s`;
+                }
+              }
+              // 其他指标使用固定单位
+              return `${value}${config.unit}`;
+            },
           },
         },
       },
@@ -640,6 +681,12 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     // 根据指标类型处理数据
     let metricsData: DataPoint[] = [];
 
+    // 用于存储上一个网络数据点的信息，计算网速时使用
+    let prevNetworkData: {
+      timestamp: number;
+      interfaces: Record<string, { bytes_sent: number; bytes_recv: number }>;
+    } | null = null;
+
     history.forEach((item, idx) => {
       try {
         // 解析时间
@@ -690,12 +737,67 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
                   (n) => n.interface === selectedNetworkInterface
                 );
 
-                // 根据选择显示发送或接收的流量
+                // 计算网络速率
                 if (selectedInterface) {
-                  value =
+                  const currentTimestamp = timestamp.getTime();
+                  const currentBytes =
                     selectedNetworkMetric === "received"
                       ? selectedInterface.bytes_recv
                       : selectedInterface.bytes_sent;
+
+                  // 如果有前一个数据点，计算速率
+                  if (
+                    prevNetworkData &&
+                    prevNetworkData.interfaces[selectedNetworkInterface] &&
+                    currentTimestamp > prevNetworkData.timestamp
+                  ) {
+                    const prevBytes =
+                      selectedNetworkMetric === "received"
+                        ? prevNetworkData.interfaces[selectedNetworkInterface]
+                            .bytes_recv
+                        : prevNetworkData.interfaces[selectedNetworkInterface]
+                            .bytes_sent;
+
+                    // 计算时间差（秒）
+                    const timeDiff =
+                      (currentTimestamp - prevNetworkData.timestamp) / 1000;
+
+                    // 如果时间差大于0且当前字节数大于等于前一个字节数，计算速率
+                    if (timeDiff > 0 && currentBytes >= prevBytes) {
+                      // 计算速率（字节/秒）
+                      value = (currentBytes - prevBytes) / timeDiff;
+                    } else {
+                      // 如果数据异常（如计数器重置），则跳过该点
+                      value = undefined;
+                    }
+                  } else {
+                    // 第一个数据点，无法计算速率
+                    value = undefined;
+                  }
+
+                  // 更新前一个数据点信息
+                  if (!prevNetworkData) {
+                    prevNetworkData = {
+                      timestamp: currentTimestamp,
+                      interfaces: {},
+                    };
+                  }
+
+                  // 保存当前接口的数据
+                  if (!prevNetworkData.interfaces[selectedNetworkInterface]) {
+                    prevNetworkData.interfaces[selectedNetworkInterface] = {
+                      bytes_sent: 0,
+                      bytes_recv: 0,
+                    };
+                  }
+
+                  prevNetworkData.timestamp = currentTimestamp;
+                  prevNetworkData.interfaces[
+                    selectedNetworkInterface
+                  ].bytes_sent = selectedInterface.bytes_sent;
+                  prevNetworkData.interfaces[
+                    selectedNetworkInterface
+                  ].bytes_recv = selectedInterface.bytes_recv;
                 }
               }
             } catch (e) {

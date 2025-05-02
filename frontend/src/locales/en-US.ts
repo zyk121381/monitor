@@ -1,9 +1,9 @@
 const enUS = {
   translation: {
-    // Navigation bar
+    // Navbar
     "navbar.dashboard": "Dashboard",
-    "navbar.apiMonitors": "API Monitoring",
-    "navbar.agentMonitors": "Agent Monitoring",
+    "navbar.apiMonitors": "API Monitors",
+    "navbar.agentMonitors": "Agent Monitors",
     "navbar.statusPage": "Status Page",
     "navbar.notifications": "Notifications",
     "navbar.userManagement": "User Management",
@@ -12,7 +12,7 @@ const enUS = {
     "navbar.login": "Login",
     "navbar.loggedInAs": "Logged in as",
 
-    // Common buttons and tips
+    // Common buttons and prompts
     "common.loading": "Loading...",
     "common.save": "Save",
     "common.cancel": "Cancel",
@@ -40,14 +40,14 @@ const enUS = {
     "common.retry": "Retry",
     "common.refresh": "Refresh",
     "common.deleting": "Deleting...",
-    "common.savingChanges": "Saving Changes...",
+    "common.savingChanges": "Saving changes...",
     "common.saveChanges": "Save Changes",
-    "common.loadingError": "Loading Error",
-    "common.notFound": "Not Found",
-    "common.backToList": "Back to List",
+    "common.loadingError": "Loading error",
+    "common.notFound": "Not found",
+    "common.backToList": "Back to list",
     "common.success.deleted": "Successfully deleted",
-    "common.success.updated": "Successfully updated",
-    "common.error.delete": "Delete failed, please try again",
+    "common.success.updated": "Update successful",
+    "common.error.delete": "Deletion failed, please try again",
     "common.error.update": "Update failed",
     "common.error.fetch": "Failed to fetch data",
     "common.required": "Required",
@@ -55,46 +55,42 @@ const enUS = {
     "common.copy": "Copy",
     "common.copied": "Copied",
     "common.deleteConfirmation": "Confirm Deletion",
-    "common.deleteConfirmMessage":
-      "Are you sure you want to delete? This action cannot be undone.",
+    "common.deleteConfirmMessage": "Are you sure you want to delete? This action cannot be undone.",
     "common.second": "second",
     "common.seconds": "seconds",
     "common.minute": "minute",
     "common.minutes": "minutes",
+    "common.date": "Date",
     "common.close": "Close",
     "common.unknown": "Unknown",
-    "common.comingSoon": "Coming Soon",
+    "common.comingSoon": "Coming soon feature",
     "common.default": "Default",
 
     // Language selection
-    "language.zhCN": "中文",
+    "language.zhCN": "Chinese",
     "language.enUS": "English",
 
     // Home page
     "home.title": "Welcome to XUGOU",
-    "home.subtitle": "Simple and easy-to-use monitoring platform",
+    "home.subtitle": "A simple and easy-to-use monitoring platform",
     "home.getStarted": "Get Started",
     "home.learnMore": "Learn More",
     "home.features.title": "Features",
     "home.features.monitoring": "Real-time Monitoring",
-    "home.features.monitoring.desc": "Monitor APIs and clients in real-time",
+    "home.features.monitoring.desc": "Real-time monitoring of APIs and agents",
     "home.features.alerts": "Alert Notifications",
-    "home.features.alerts.desc": "Get notified when issues are detected",
+    "home.features.alerts.desc": "Notify you promptly when monitoring anomalies occur",
     "home.features.dashboard": "Visual Dashboard",
-    "home.features.dashboard.desc":
-      "View monitoring data and statistics intuitively",
+    "home.features.dashboard.desc": "Intuitive display of monitoring data and statistics",
     "home.features.statusPage": "Status Page",
-    "home.features.statusPage.desc":
-      "Provide a public status page for your services",
+    "home.features.statusPage.desc": "Provides a public service status page",
 
     // Login page
     "login.title": "Login",
     "login.username": "Username",
     "login.password": "Password",
     "login.button": "Login",
-    "login.registerLink": "No account? Register",
-    "login.rememberMe": "Remember me",
-    "login.error": "Username or password is incorrect",
+    "login.error": "Incorrect username or password",
 
     // Register page
     "register.title": "Register",
@@ -111,35 +107,24 @@ const enUS = {
 
     // Dashboard
     "dashboard.title": "Dashboard",
-    "dashboard.summary": "Summary",
+    "dashboard.summary": "Overview",
     "dashboard.totalMonitors": "Total Monitors",
     "dashboard.activeMonitors": "Active Monitors",
-    "dashboard.failingMonitors": "Failing Monitors",
     "dashboard.uptime": "Uptime",
-    "dashboard.responseTime": "Response Time",
-    "dashboard.recent": "Recent Events",
-    "dashboard.noEvents": "No events",
     "dashboard.refresh": "Refresh",
 
-    // Monitors list
-    "monitors.title": "Monitors",
+    // Monitor list
+    "monitors.title": "Monitor List",
     "monitors.create": "Create Monitor",
-    "monitors.noMonitors": "No monitors",
-    "monitors.filter.all": "All",
-    "monitors.filter.active": "Active",
-    "monitors.filter.paused": "Paused",
+    "monitors.noMonitors": "No monitors available",
     "monitors.status.up": "Up",
     "monitors.status.down": "Down",
-    "monitors.status.paused": "Paused",
-    "monitors.lastChecked": "Last Checked",
-    "monitors.pageTitle": "API Monitoring",
-    "monitors.loadingError": "Failed to load monitor data",
+    "monitors.pageTitle": "API Monitors",
+    "monitors.loadingError": "Failed to fetch monitor data",
     "monitors.delete.confirm": "Are you sure you want to delete this monitor?",
     "monitors.delete.failed": "Failed to delete monitor",
     "monitors.addOne": "Add Monitor",
     "monitors.notFound": "No monitors found",
-    "monitors.cardView": "Card View",
-    "monitors.tableView": "List View",
     "monitors.refresh": "Refresh",
     "monitors.retry": "Retry",
     "monitors.table.name": "Name",
@@ -156,62 +141,44 @@ const enUS = {
     "monitor.details": "Monitor Details",
     "monitor.edit": "Edit Monitor",
     "monitor.delete": "Delete Monitor",
-    "monitor.pause": "Pause Monitor",
-    "monitor.resume": "Resume Monitor",
     "monitor.history": "History",
     "monitor.uptime": "Uptime",
     "monitor.responseTime": "Response Time",
-    "monitor.responseTimeHistory": "Response Time History",
+    "monitor.oneDayHistory": "24-hour history",
+    "monitor.MonthsHistory": "30-day history",
     "monitor.noResponseTimeData": "No response time data available",
-    "monitor.interpolatedData": "Interpolated data point",
-    "monitor.events": "Events",
-    "monitor.noEvents": "No events",
     "monitor.manualCheck": "Manual Check",
     "monitor.checkCompleted": "Monitor check completed",
     "monitor.checkFailed": "Check failed",
     "monitor.deleteSuccess": "Monitor successfully deleted",
     "monitor.deleteFailed": "Failed to delete monitor",
     "monitor.notExist": "Monitor does not exist",
-    "monitor.returnToList": "Return to monitors list",
-
-    // Monitor detail tabs
-    "monitor.tabs.overview": "Overview",
-    "monitor.tabs.history": "Check History",
-    "monitor.tabs.settings": "Configuration",
+    "monitor.returnToList": "Return to monitor list",
 
     // Monitor status information
-    "monitor.status.info": "Status Information",
-    "monitor.status.normal": "Up",
-    "monitor.status.failure": "Down",
-    "monitor.status.pending": "Pending Check",
-    "monitor.notChecked": "Not checked yet",
-    "monitor.lastCheck": "Last checked",
+    "monitor.status.normal": "Normal",
+    "monitor.status.failure": "Failure",
+    "monitor.status.pending": "Pending",
 
-    // Basic information
-    "monitor.detailInfo": "Basic Information",
+    // Detailed information
+    "monitor.detailInfo": "Detailed Information",
     "monitor.method": "Method",
     "monitor.interval": "Check Interval",
     "monitor.timeout": "Timeout",
     "monitor.expectedStatus": "Expected Status Code",
-    "monitor.createTime": "Created At",
+    "monitor.createTime": "Creation Time",
+    "monitor.headers": "Request Headers",
+    "monitor.body": "Request Body",
 
     // Check history
-    "monitor.checkHistory": "Check History",
-    "monitor.noCheckHistory": "No check history records",
     "monitor.history.time": "Time",
-    "monitor.history.status": "Status",
     "monitor.history.responseTime": "Response Time",
-    "monitor.history.statusCode": "Status Code",
+    "monitor.history.records": "Record Count",
+    "monitor.history.availability": "Availability",
+    "monitor.history.latest": "Latest Record",
     "monitor.history.error": "Error",
 
-    // Configuration details
-    "monitor.configDetails": "Configuration Details",
-    "monitor.active": "Active",
-    "monitor.inactive": "Inactive",
-    "monitor.headers": "Headers",
-    "monitor.body": "Body",
-
-    // Create/Edit monitor
+    // Create/Edit Monitor
     "monitor.form.title.create": "Create Monitor",
     "monitor.form.title.edit": "Edit Monitor",
     "monitor.form.name": "Monitor Name",
@@ -223,14 +190,13 @@ const enUS = {
     "monitor.form.intervalMin": "Minimum interval 1 minute",
     "monitor.form.timeout": "Timeout (seconds)",
     "monitor.form.expectedStatus": "Expected Status Code",
-    "monitor.form.headers": "Headers",
+    "monitor.form.headers": "Request Headers",
     "monitor.form.headerName": "Name",
     "monitor.form.headerValue": "Value",
     "monitor.form.headerNamePlaceholder": "Header Name",
     "monitor.form.headerValuePlaceholder": "Header Value",
-    "monitor.form.addHeader": "Add Header",
-    "monitor.form.headersHelp":
-      "Add headers, e.g.: Content-Type: application/json",
+    "monitor.form.addHeader": "Add Request Header",
+    "monitor.form.headersHelp": "Add request headers, e.g., Content-Type: application/json",
     "monitor.form.body": "Request Body",
     "monitor.form.bodyPlaceholder": "Request body content",
     "monitor.form.cancel": "Cancel",
@@ -238,21 +204,20 @@ const enUS = {
     "monitor.form.create": "Create Monitor",
     "monitor.form.updating": "Updating...",
     "monitor.form.update": "Update Monitor",
-    "monitor.form.createFailed":
-      "Failed to create monitor, please try again later",
+    "monitor.form.createFailed": "Failed to create monitor, please try again later",
     "monitor.form.updateFailed": "Failed to update monitor",
     "monitor.form.unknownError": "Unknown error",
     "monitor.form.required": "Required",
 
-    // Agents
+    // Agent Monitors
     "agents.title": "Agent List",
     "agents.create": "Add Agent",
-    "agents.noAgents": "No agents",
-    "agents.pageTitle": "Agent Monitoring",
+    "agents.noAgents": "No agents available",
+    "agents.pageTitle": "Agent Monitors",
     "agents.viewAll": "View All Agents",
     "agents.loadingDetail": "Loading agent details...",
     "agents.loadingList": "Loading agent list...",
-    "agents.notFound": "Agent Not Found",
+    "agents.notFound": "Agent not found",
     "agents.notFoundId": "Agent with ID {id} not found",
     "agents.cardView": "Card View",
     "agents.tableView": "Table View",
@@ -263,11 +228,11 @@ const enUS = {
     "agents.table.host": "Hostname",
     "agents.table.ip": "IP Address",
     "agents.table.status": "Status",
-    "agents.table.os": "OS",
+    "agents.table.os": "Operating System",
     "agents.table.version": "Version",
     "agents.table.actions": "Actions",
 
-    // Agent details
+    // Agent Details
     "agent.details": "Agent Details",
     "agent.edit": "Edit Agent",
     "agent.delete": "Delete Agent",
@@ -278,63 +243,95 @@ const enUS = {
     "agent.uptime": "Uptime",
     "agent.lastUpdated": "Last Updated",
     "agent.systemInfo": "System Info",
-    "agent.systemResources": "System Resources",
-    "agent.os": "System",
+    "agent.metrics": "Metrics",
+    "agent.os": "OS",
     "agent.version": "Version",
     "agent.hostname": "Hostname",
     "agent.ipAddress": "IP Address",
     "agent.systemStatus": "System Status",
-    "agent.deleteConfirm":
-      "Are you sure you want to delete this agent? This action cannot be undone.",
+    "agent.deleteConfirm": "Are you sure you want to delete this agent? This action cannot be undone.",
     "agent.deleting": "Deleting agent...",
-    "agent.deleteSuccess": "Agent has been deleted successfully",
+    "agent.deleteSuccess": "Agent successfully deleted",
     "agent.deleteError": "Failed to delete agent",
 
-    // Create/Edit agent
+    // Agent Metrics
+    "agent.metrics.cpu": {
+      "title": "CPU",
+      "usage": "Usage",
+      "cores": "Cores",
+      "model": "Model",
+    },
+    "agent.metrics.memory": {
+      "title": "Memory",
+      "total": "Total Memory",
+      "used": "Used Memory",
+      "free": "Free Memory",
+      "usage": "Usage",
+      "usageRate": "Usage Rate",
+    },
+    "agent.metrics.disk": {
+      "title": "Disk",
+      "usage": "Usage",
+      "device": "Device",
+      "mountPoint": "Mount Point",
+      "total": "Total Space",
+      "used": "Used Space",
+      "free": "Free Space",
+      "usageRate": "Usage Rate",
+      "fsType": "File System Type"
+    },
+    "agent.metrics.network": {
+      "title": "Network",
+      "rate": "Rate",
+      "received": "Received",
+      "interface": "Interface",
+      "sent": "Sent",
+      "packetsReceived": "Packets Received",
+      "packetsSent": "Packets Sent",
+    },
+    "agent.metrics.load": {
+      "title": "Load",
+      "1min": "1-minute Load",
+      "5min": "5-minute Load",
+      "15min": "15-minute Load",
+      "minute": "Minute",
+    },
+
+    // Create/Edit Agent
     "agent.form.title.create": "Add Agent",
     "agent.form.title.edit": "Edit Agent",
     "agent.form.editingClient": "Editing Agent: {name}",
     "agent.form.name": "Agent Name",
     "agent.form.namePlaceholder": "Enter agent name",
-    "agent.form.nameHelp": "Set a recognizable name for this agent",
+    "agent.form.nameHelp": "Set a recognizable name for the agent",
     "agent.form.updateSuccess": "Agent updated successfully",
     "agent.form.updateError": "Update failed",
 
-    // Add agent page
-    "agent.add.note":
-      "The agent will be automatically added to the system after running the installation command, no manual creation needed",
+    // Add Agent Page
+    "agent.add.note": "The agent will be automatically added to the system after running the installation command, no manual creation required",
     "agent.add.serverAddress": "Server Address",
-    "agent.add.serverAddressPlaceholder":
-      "Enter server address, e.g.: https://xugou.example.com",
-    "agent.add.serverAddressHelp":
-      "Make sure this address is accessible from the agent server",
+    "agent.add.serverAddressPlaceholder": "Enter server address, e.g., https://xugou.example.com",
+    "agent.add.serverAddressHelp": "Ensure this address is accessible from the client server",
     "agent.add.registrationToken": "Registration Token",
-    "agent.add.generatingToken": "Generating token...",
-    "agent.add.tokenHelp":
-      "This token will be used for your agent to register with the server, valid for 24 hours",
+    "agent.add.generatingToken": "Generating Token...",
+    "agent.add.tokenHelp": "This token will be used by your agent to register with the server, the token will only be displayed once, please keep it safe",
     "agent.add.installGuide": "Installation Guide",
-    "agent.add.installSteps":
-      "Follow these two steps to install and register the agent",
-    "agent.add.step1": "Step 1: Download the agent binary",
-    "agent.add.step1Help":
-      "This command will download the latest agent binary from Cloudflare R2 storage and give it executable permissions",
+    "agent.add.installSteps": "Follow these two steps to install and register the agent",
+    "agent.add.step1": "Step 1: Download the agent binary file",
+    "agent.add.step1Help": "This command will download the latest version of the agent binary file from Cloudflare R2 storage and set it as executable",
     "agent.add.step2": "Step 2: Register and start the agent",
-    "agent.add.step2Help":
-      "This command will start the agent and automatically register it with the server. The interval parameter represents the reporting interval (in seconds)",
-    "agent.add.optionalSetup":
-      "(Optional) Set up the agent as a system service",
-    "agent.add.optionalSetupHelp":
-      "On Linux/Unix systems, you can create a system service using the following commands",
-    "agent.add.returnToList": "Return to Agent List",
+    "agent.add.step2Help": "This command will start the agent and automatically register it to the server using the generated token. The parameter interval specifies the reporting interval (seconds)",
+    "agent.add.optionalSetup": "(Optional) Set up the agent as a system service",
+    "agent.add.optionalSetupHelp": "On Linux/Unix systems, you can use the following command to create a system service",
+    "agent.add.returnToList": "Return to agent list",
 
-    // Users
+    // User Management
     "users.title": "User Management",
     "users.create": "Create User",
-    "users.noUsers": "No user data",
+    "users.noUsers": "No user data available",
     "users.error.fetch": "Failed to fetch user list",
     "users.error.delete": "Failed to delete user",
-    "users.deleteConfirm":
-      'Are you sure you want to delete user "{username}"? This action cannot be undone.',
+    "users.deleteConfirm": 'Are you sure you want to delete user "{username}"? This action cannot be undone.',
     "user.username": "Username",
     "user.email": "Email",
     "user.role": "Role",
@@ -347,10 +344,7 @@ const enUS = {
     "profile.edit": "Edit Profile",
     "profile.changePassword": "Change Password",
     "profile.changePasswordButton": "Change Password",
-    "profile.apiKeys": "API Keys",
-    "profile.createApiKey": "Create API Key",
-    "profile.notifications": "Notification Settings",
-    "profile.basicInfo": "Basic Information",
+    "profile.basicInfo": "Basic Info",
     "profile.update": "Update Profile",
     "profile.currentPassword": "Current Password",
     "profile.newPassword": "New Password",
@@ -362,118 +356,89 @@ const enUS = {
     "profile.success.updated": "Profile updated successfully",
     "profile.success.passwordChanged": "Password changed successfully",
 
-    // Status page
+    // Status Page
     "statusPage.title": "System Status",
     "statusPage.allOperational": "All systems operational",
-    "statusPage.someIssues": "Some systems experiencing issues",
-    "statusPage.majorOutage": "Major system outage",
-    "statusPage.lastUpdated": "Last updated",
-    "statusPage.justNow": "just now",
-    "statusPage.apiServices": "API Services Status",
+    "statusPage.lastUpdated": "Last Updated",
+    "statusPage.justNow": "Just now",
+    "statusPage.apiServices": "API Service Status",
     "statusPage.agentStatus": "Agent Monitoring Status",
-    "statusPage.displayResourceData": "Displaying resource data:",
 
-    // Status page config
+    // Status Page Configuration
     "statusPageConfig.title": "Status Page Configuration",
     "statusPageConfig.preview": "Preview Status Page",
     "statusPageConfig.save": "Save Configuration",
     "statusPageConfig.general": "General Settings",
-    "statusPageConfig.services": "API Services Settings",
+    "statusPageConfig.services": "API Service Settings",
     "statusPageConfig.agents": "Agent Settings",
     "statusPageConfig.appearance": "Appearance Settings",
     "statusPageConfig.pageTitle": "Status Page Title",
     "statusPageConfig.pageTitlePlaceholder": "Enter status page title",
     "statusPageConfig.pageDescription": "Status Page Description",
-    "statusPageConfig.pageDescriptionPlaceholder":
-      "Enter status page description",
+    "statusPageConfig.pageDescriptionPlaceholder": "Enter status page description",
     "statusPageConfig.publicUrl": "Public Access URL",
-    "statusPageConfig.publicUrlHelp":
-      "This URL can be shared publicly and accessed without login",
-    "statusPageConfig.selectionNote":
-      "Note: If you don't select any API services or agents, the corresponding section will not appear on the status page.",
-    "statusPageConfig.selectServicesPrompt":
-      "Select API services to display on the status page",
-    "statusPageConfig.selectAgentsPrompt":
-      "Select agents to display on the status page",
-    "statusPageConfig.logoUrl": "Logo URL (optional)",
-    "statusPageConfig.logoUrlPlaceholder": "Enter logo image URL",
-    "statusPageConfig.customCss": "Custom CSS (optional)",
-    "statusPageConfig.customCssPlaceholder": "Enter custom CSS styles",
-    "statusPageConfig.customCssHelp":
-      "Advanced users can add custom CSS to modify the appearance of the status page",
+    "statusPageConfig.publicUrlHelp": "This URL can be shared publicly, no login required",
+    "statusPageConfig.selectionNote": "Note: If you do not select any API services or agents, the corresponding sections will not be displayed on the status page.",
+    "statusPageConfig.selectServicesPrompt": "Select API services to display on the status page",
+    "statusPageConfig.selectAgentsPrompt": "Select agents to display on the status page",
     "statusPageConfig.configSaved": "Status page configuration saved",
     "statusPageConfig.saveError": "Failed to save status page configuration",
-    "statusPageConfig.fetchingConfig":
-      "Starting to fetch status page config...",
-    "statusPageConfig.configFromProperty":
-      "Status page config from config property:",
-    "statusPageConfig.tryingDirectResponse":
-      "API response appears to directly contain config data, trying to use directly",
+    "statusPageConfig.fetchingConfig": "Fetching status page configuration...",
+    "statusPageConfig.configFromProperty": "Status page configuration fetched from config property:",
+    "statusPageConfig.tryingDirectResponse": "API response seems to directly contain configuration data, attempting to use directly",
     "statusPageConfig.parseError": "Failed to parse API response:",
-    "statusPageConfig.receivedConfig": "Received status page config:",
+    "statusPageConfig.receivedConfig": "Fetched status page configuration:",
     "statusPageConfig.monitorListType": "Monitor list type:",
-    "statusPageConfig.monitorCount": "Monitor count:",
-    "statusPageConfig.configMonitor": "Config monitor",
-    "statusPageConfig.noValidConfig":
-      "No valid status page config received or config is empty",
+    "statusPageConfig.monitorCount": "Number of monitors:",
+    "statusPageConfig.configMonitor": "Monitors in configuration",
+    "statusPageConfig.noValidConfig": "No valid status page configuration received or configuration is empty",
     "statusPageConfig.invalidResponse": "Invalid API response",
-    "statusPageConfig.fetchingMonitors": "Starting to fetch all monitors...",
-    "statusPageConfig.monitorsResponse": "All monitors response:",
-    "statusPageConfig.foundMonitor": "Found monitor in config",
+    "statusPageConfig.fetchingMonitors": "Fetching all monitors...",
+    "statusPageConfig.monitorsResponse": "Monitors fetch response:",
+    "statusPageConfig.foundMonitor": "Found monitor in configuration",
     "statusPageConfig.originalStatus": "Original selected status",
     "statusPageConfig.processedStatus": "Processed selected status",
-    "statusPageConfig.notFoundMonitor": "Monitor not found in config",
+    "statusPageConfig.notFoundMonitor": "Monitor not found in configuration",
     "statusPageConfig.finalMonitorResult": "Final monitor processing result",
     "statusPageConfig.selectedStatus": "Selected status",
     "statusPageConfig.processedMonitorList": "Processed monitor list",
-    "statusPageConfig.fetchingAgents": "Starting to fetch all agents...",
-    "statusPageConfig.foundAgent": "Found agent in config",
-    "statusPageConfig.notFoundAgent": "Agent not found in config",
+    "statusPageConfig.fetchingAgents": "Fetching all agents...",
+    "statusPageConfig.foundAgent": "Found agent in configuration",
+    "statusPageConfig.notFoundAgent": "Agent not found in configuration",
     "statusPageConfig.finalAgentResult": "Final agent processing result",
     "statusPageConfig.processedAgentList": "Processed agent list",
-    "statusPageConfig.fetchMonitorsError": "Failed to fetch monitors",
+    "statusPageConfig.fetchMonitorsError": "Failed to fetch monitor data",
     "statusPageConfig.fetchDataError": "Failed to fetch data",
-    "statusPageConfig.configLoaded":
-      "Status page config loaded, validating monitor selected status:",
-    "statusPageConfig.invalidAgentId": "Attempting to change invalid agent ID:",
-    "statusPageConfig.savingConfig": "Preparing to save config object:",
+    "statusPageConfig.configLoaded": "Status page configuration loaded, validating monitor selection status:",
+    "statusPageConfig.invalidAgentId": "Attempted to change invalid agent ID:",
+    "statusPageConfig.savingConfig": "Preparing to save configuration object:",
     "statusPageConfig.selectedMonitors": "Selected monitors:",
-    "statusPageConfig.selectedMonitorIds": "Selected monitor IDs list:",
-    "statusPageConfig.callingSaveApi": "Starting to call save config API...",
-    "statusPageConfig.saveApiResponse": "Save config API response:",
+    "statusPageConfig.selectedMonitorIds": "List of selected monitor IDs:",
+    "statusPageConfig.callingSaveApi": "Calling save configuration API...",
+    "statusPageConfig.saveApiResponse": "Save configuration API response:",
     "statusPageConfig.serviceRendering": "Service rendering",
     "statusPageConfig.agentRendering": "Agent rendering",
     "statusPageConfig.monitorStatusChange": "Monitor status change",
     "statusPageConfig.agentStatusChange": "Agent status change",
-    "statusPageConfig.from": "from",
-    "statusPageConfig.to": "to",
-    "statusPageConfig.components": "Components",
-    "statusPageConfig.addComponent": "Add Component",
-    "statusPageConfig.incidents": "Incidents",
-    "statusPageConfig.createIncident": "Create Incident",
+    "statusPageConfig.from": "From",
+    "statusPageConfig.to": "To",
 
-    // Notification settings
-    "notifications.title": "Notification Configuration",
-    "notifications.description":
-      "Configure system notifications for API monitors and agents events.",
+    // Notification Settings
+    "notifications.title": "Notification Settings",
+    "notifications.description": "Configure system notification settings, including API and agent notifications.",
     "notifications.tabs.channels": "Notification Channels",
     "notifications.tabs.settings": "Notification Settings",
     "notifications.tabs.templates": "Message Templates",
-    "notifications.tabs.global": "Global Settings",
-    "notifications.tabs.specificMonitors": "API Monitor Config",
-    "notifications.tabs.specificAgents": "Agent Config",
-    "notifications.globalSettings.description":
-      "Configure global notification settings, including notification channels, monitoring settings, and message templates. These settings will apply to all monitors and clients unless overridden by specific configurations.",
+    "notifications.tabs.global": "Global Notification Settings",
+    "notifications.tabs.specificMonitors": "API Monitor Configurations",
+    "notifications.tabs.specificAgents": "Agent Configurations",
     "notifications.channels.title": "Notification Channels",
-    "notifications.channels.description":
-      "Configure different notification channels to receive alerts about monitors and agents events.",
+    "notifications.channels.description": "Configure different notification channels to receive alerts about monitoring and agents.",
     "notifications.channels.add": "Add Channel",
-    "notifications.channels.edit": "Edit Channel",
-    "notifications.channels.delete": "Delete Channel",
-    "notifications.channels.noChannels":
-      "No notification channels configured. Please add a notification channel.",
-    "notifications.channels.tabDescription":
-      "Configure and manage system notification channels. You can add various types of notification methods.",
+    "notifications.channels.edit": "Edit Notification Channel",
+    "notifications.channels.delete": "Delete Notification Channel",
+    "notifications.channels.noChannels": "No notification channels configured, please add a notification channel",
+    "notifications.channels.tabDescription": "Configure and manage system notification channels, you can add multiple types of notification methods.",
     "notifications.channels.type.resend": "Resend Email",
     "notifications.channels.type.slack": "Slack",
     "notifications.channels.type.telegram": "Telegram",
@@ -484,60 +449,46 @@ const enUS = {
     "notifications.channels.name": "Channel Name",
     "notifications.channels.status": "Status",
     "notifications.channels.type": "Channel Type",
-    "notifications.channels.namePlaceholder": "Please enter channel name",
-    "notifications.channels.dialogDescription":
-      "Configure notification channels to receive system alerts and notifications.",
-    "notifications.channels.deleteConfirmTitle":
-      "Confirm Delete Notification Channel",
-    "notifications.channels.deleteConfirmMessage":
-      "Are you sure you want to delete this notification channel? This action cannot be undone.",
-    "notifications.channels.updateSuccess":
-      "Notification channel updated successfully",
-    "notifications.channels.createSuccess":
-      "Notification channel created successfully",
-    "notifications.channels.deleteSuccess":
-      "Notification channel deleted successfully",
+    "notifications.channels.namePlaceholder": "Enter channel name",
+    "notifications.channels.dialogDescription": "Configure notification channels to receive system alerts and notifications.",
+    "notifications.channels.deleteConfirmTitle": "Confirm Delete Notification Channel",
+    "notifications.channels.deleteConfirmMessage": "Are you sure you want to delete this notification channel? This action cannot be undone.",
+    "notifications.channels.updateSuccess": "Notification channel updated successfully",
+    "notifications.channels.createSuccess": "Notification channel created successfully",
+    "notifications.channels.deleteSuccess": "Notification channel deleted successfully",
     "notifications.channels.saveError": "Failed to save notification channel",
-    "notifications.channels.deleteError":
-      "Failed to delete notification channel",
+    "notifications.channels.deleteError": "Failed to delete notification channel",
     "notifications.channels.errors.nameRequired": "Channel name is required",
     "notifications.channels.errors.botTokenRequired": "Bot Token is required",
     "notifications.channels.errors.invalidBotToken": "Invalid Bot Token format",
     "notifications.channels.errors.chatIdRequired": "Chat ID is required",
-    "notifications.channels.errors.apiKeyRequired": "API key is required",
+    "notifications.channels.errors.apiKeyRequired": "API Key is required",
     "notifications.channels.errors.fromRequired": "Sender is required",
     "notifications.channels.errors.toRequired": "Recipient is required",
     "notifications.channels.errors.invalidFromEmail": "Invalid sender format",
     "notifications.channels.apiKey": "Resend API Key",
     "notifications.channels.getApiKey": "Get Resend API Key",
-    "notifications.channels.from": "From",
-    "notifications.channels.fromHint":
-      'Supported formats: "Your Name <email@example.com>" or "email@example.com"',
-    "notifications.channels.to": "To",
+    "notifications.channels.from": "Sender",
+    "notifications.channels.fromHint": 'Supported formats: "Your Name <email@example.com>" or "email@example.com"',
+    "notifications.channels.to": "Recipient",
     "notifications.channels.selectChannels": "Select Notification Channels",
     "notifications.channels.selected": "selected",
     "notifications.settings.title": "Notification Settings",
-    "notifications.settings.description":
-      "Configure events and conditions that trigger notifications",
+    "notifications.settings.description": "Configure events and conditions that trigger notifications",
     "notifications.settings.monitors": "API Monitor Notifications",
-    "notifications.settings.monitors.description":
-      "Send notifications when API monitor status changes",
+    "notifications.settings.monitors.description": "Send notifications when API monitor status changes",
     "notifications.settings.agents": "Agent Monitor Notifications",
-    "notifications.settings.agents.description":
-      "Send notifications when agent status or resource usage exceeds thresholds",
+    "notifications.settings.agents.description": "Send notifications when agent status or resource usage exceeds thresholds",
     "notifications.settings.enable": "Enable Notifications",
     "notifications.settings.threshold": "Trigger Threshold",
-    "notifications.specificMonitors.description":
-      "Configure notifications for specific API monitors that will override global settings",
-    "notifications.specificAgents.description":
-      "Configure notifications for specific agents that will override global settings",
+    "notifications.specificMonitors.description": "Configure notification settings for specific API monitors, these settings will override global notification settings",
+    "notifications.specificAgents.description": "Configure notification settings for specific agents, these settings will override global notification settings",
     "notifications.specificSettings.override": "Custom Settings",
     "notifications.specificSettings.channels": "Select Notification Channels",
     "notifications.templates.title": "Notification Templates",
     "notifications.templates.add": "Add Template",
-    "notifications.templates.comingSoon": "Template feature is coming soon!",
-    "notifications.templates.description":
-      "Notification templates are used to customize notification content format",
+    "notifications.templates.comingSoon": "Template feature coming soon, stay tuned!",
+    "notifications.templates.description": "Notification templates are used to customize the format of notification content",
     "notifications.templates.edit": "Edit Template",
     "notifications.templates.delete": "Delete Template",
     "notifications.templates.noTemplates": "No message templates created yet",
@@ -547,75 +498,60 @@ const enUS = {
     "notifications.templates.content": "Content",
     "notifications.templates.variables": "Available Variables",
     "notifications.templates.preview": "Preview",
-    "notifications.templates.tabDescription":
-      "Customize notification templates for different scenarios. You can edit message content and format as needed.",
+    "notifications.templates.tabDescription": "Customize notification templates for different scenarios, edit message content and format as needed.",
     "notifications.save.success": "Notification settings saved successfully",
     "notifications.save.error": "Failed to save notification settings",
+    "notifications.globalSettings.description": "Configure global notification settings, including notification channels, monitor settings, and message templates. These settings will apply to all monitors and agents unless overridden by specific configurations.",
 
-    // Notification event types
-    "notifications.events.onDownOnly":
-      "Send notification only when service is down",
-    "notifications.events.onRecovery":
-      "Send notification when service recovers",
-    "notifications.events.onOffline":
-      "Send notification when client is offline",
-    "notifications.events.onRecoveryAgent":
-      "Send notification when client comes back online",
-    "notifications.events.onCpuThreshold":
-      "Send notification when CPU usage exceeds threshold",
-    "notifications.events.onMemoryThreshold":
-      "Send notification when memory usage exceeds threshold",
-    "notifications.events.onDiskThreshold":
-      "Send notification when disk usage exceeds threshold",
+    // Notification Event Types
+    "notifications.events.onDownOnly": "Send notification only when service goes down",
+    "notifications.events.onRecovery": "Send notification when service recovers",
+    "notifications.events.onOffline": "Send notification when agent goes offline",
+    "notifications.events.onRecoveryAgent": "Send notification when agent comes online",
+    "notifications.events.onCpuThreshold": "Send notification when CPU usage exceeds threshold",
+    "notifications.events.onMemoryThreshold": "Send notification when memory usage exceeds threshold",
+    "notifications.events.onDiskThreshold": "Send notification when disk usage exceeds threshold",
 
-    // Notification thresholds
+    // Notification Thresholds
     "notifications.threshold.label": "Threshold:",
     "notifications.threshold.percent": "%",
 
     // 404 Page
     "notFound.title": "Page Not Found",
     "notFound.message": "The page you are looking for does not exist",
-    "notFound.button": "Go to Home",
+    "notFound.button": "Return to Home",
 
-    // Auth related
+    // Auth Related
     "auth.error.fetchUser": "Failed to fetch user information",
     "auth.error.login": "Login failed",
     "auth.error.register": "Registration failed",
     "login.error.tryAgain": "Login failed, please try again later",
     "register.error.tryAgain": "Registration failed, please try again later",
 
-    // AgentCard component
+    // Footer
+    "footer.copyright": "© {year} XUGOU. All rights reserved.",
+    "footer.blog": "Blog",
+    "footer.youtube": "YouTube Channel",
+    "footer.tempMail": "24-hour Temporary Email",
+
+    // AgentCard Component
     "agentCard.receivedData": "AgentCard received client data",
     "agentCard.calculatedResource": "Calculated resource usage",
-    "agentCard.noMetrics": "Client has no resource metrics data",
+    "agentCard.noMetrics": "Client has no metric data",
     "agentCard.resourceError": "Failed to parse client resource usage data",
     "agentCard.status.active": "Active",
     "agentCard.status.inactive": "Offline",
     "agentCard.status.connecting": "Connecting",
 
-    // ClientResourceSection component
-    "clientResource.cpu": "CPU",
-    "clientResource.memory": "Memory",
-    "clientResource.disk": "Disk",
-    "clientResource.network": "Network",
-    "clientResource.download": "Download",
-    "clientResource.upload": "Upload",
-
-    // MonitorCard component
+    // MonitorCard Component
     "monitorCard.status.up": "Up",
     "monitorCard.status.down": "Down",
     "monitorCard.status.pending": "Pending",
     "monitorCard.responseTime": "Response Time",
     "monitorCard.unknown": "Unknown",
 
-    // StatusSummaryCard component
+    // StatusSummaryCard Component
     "statusSummary.title": "Status Summary",
-
-    // Footer
-    "footer.copyright": "© {year} XUGOU. All Rights Reserved.",
-    "footer.blog": "Blog",
-    "footer.youtube": "YouTube Channel",
-    "footer.tempMail": "24h Temporary Email",
   },
 };
 

@@ -283,6 +283,7 @@ const zhCN = {
     },
     "agent.metrics.network": {
       "title": "网络",
+      "rate": "速率",
       "received": "接收",
       "interface": "接口",
       "sent": "发送",
