@@ -81,7 +81,6 @@ export async function getAllMonitors(db: Bindings["DB"]) {
   };
 }
 
-
 // 获取单个监控状态历史 24小时内
 export async function getMonitorStatusHistoryIn24h(
   db: Bindings["DB"],
@@ -318,6 +317,12 @@ export async function deleteMonitor(db: Bindings["DB"], id: number) {
 
   await db
     .prepare("DELETE FROM monitor_status_history_24h WHERE monitor_id = ?")
+    .bind(id)
+    .run();
+
+  // 删除每日统计数据
+  await db
+    .prepare("DELETE FROM monitor_daily_stats WHERE monitor_id = ?")
     .bind(id)
     .run();
 

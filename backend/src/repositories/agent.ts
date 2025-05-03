@@ -26,15 +26,20 @@ export async function getAgentsByIds(db: Bindings["DB"], agentIds: number[]) {
 }
 
 // 批量获取客户端指标
-export async function getAgentMetricsByIds(db: Bindings["DB"], agentIds: number[]) {
+export async function getAgentMetricsByIds(
+  db: Bindings["DB"],
+  agentIds: number[]
+) {
   if (agentIds.length === 0) {
     return { results: [] };
   }
   const placeholders = agentIds.map(() => "?").join(",");
   return await db
-   .prepare(`SELECT * FROM agent_metrics_24h WHERE agent_id IN (${placeholders})`)
-   .bind(...agentIds)
-  .all<Metrics>();
+    .prepare(
+      `SELECT * FROM agent_metrics_24h WHERE agent_id IN (${placeholders})`
+    )
+    .bind(...agentIds)
+    .all<Metrics>();
 }
 
 // 获取单个客户端详情
@@ -157,6 +162,12 @@ export async function updateAgent(
 
 // 删除客户端
 export async function deleteAgent(db: Bindings["DB"], id: number) {
+  // 先删除关联的指标数据
+  await db
+    .prepare("DELETE FROM agent_metrics_24h WHERE agent_id = ?")
+    .bind(id)
+    .run();
+
   const result = await db
     .prepare("DELETE FROM agents WHERE id = ?")
     .bind(id)
@@ -199,7 +210,9 @@ export async function setAgentInactive(db: Bindings["DB"], id: number) {
 // 插入客户端资源指标
 export async function insertAgentMetrics(db: Bindings["DB"], metrics: any) {
   return await db
-    .prepare("INSERT INTO agent_metrics_24h (agent_id, timestamp, cpu_usage, cpu_cores, cpu_model, memory_total, memory_used, memory_free, memory_usage_rate, load_1, load_5, load_15, disk_metrics, network_metrics) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .prepare(
+      "INSERT INTO agent_metrics_24h (agent_id, timestamp, cpu_usage, cpu_cores, cpu_model, memory_total, memory_used, memory_free, memory_usage_rate, load_1, load_5, load_15, disk_metrics, network_metrics) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )
     .bind(...metrics)
     .run();
 }
@@ -207,14 +220,12 @@ export async function insertAgentMetrics(db: Bindings["DB"], metrics: any) {
 // 获取指定客户端资源指标
 export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
   return await db
-   .prepare("SELECT * FROM agent_metrics_24h WHERE agent_id =?")
-   .bind(agentId)
-   .all();
+    .prepare("SELECT * FROM agent_metrics_24h WHERE agent_id =?")
+    .bind(agentId)
+    .all();
 }
 
 // 获取所有客户端资源指标
 export async function getAllAgentMetrics(db: Bindings["DB"]) {
-  return await db
-   .prepare("SELECT * FROM agent_metrics_24h")
-   .all<Metrics>();
+  return await db.prepare("SELECT * FROM agent_metrics_24h").all<Metrics>();
 }
