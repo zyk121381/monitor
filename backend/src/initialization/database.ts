@@ -240,43 +240,6 @@ export async function createNotificationChannelsAndSettings(
   }
 }
 
-// 初始化数据库，包括创建表和填充示例数据
-export async function initializeDatabase(
-  env: Bindings
-): Promise<{ success: boolean; message: string }> {
-  try {
-    console.log("开始初始化数据库...");
-
-    // 创建表结构
-    await createTables(env);
-
-    // 创建管理员用户
-    await createAdminUser(env);
-
-    // 添加默认通知模板
-    await createNotificationTemplates(env);
-
-    // 添加默认通知渠道和设置
-    await createNotificationChannelsAndSettings(env);
-
-    // 创建默认状态页配置和关联数据
-    await createDefaultStatusPage(env);
-
-    return {
-      success: true,
-      message: "数据库初始化成功",
-    };
-  } catch (error) {
-    console.error("数据库初始化错误:", error);
-    return {
-      success: false,
-      message: `数据库初始化失败: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    };
-  }
-}
-
 // 创建默认状态页配置
 export async function createDefaultStatusPage(env: Bindings): Promise<void> {
   // 检查是否已有状态页配置

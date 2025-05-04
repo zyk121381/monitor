@@ -3,7 +3,13 @@
  * 用于应用启动时检测数据库是否为空，如果为空则初始化
  */
 import { Bindings } from "../models/db";
-import { createTables } from "./database";
+import {
+  createTables,
+  createAdminUser,
+  createNotificationTemplates,
+  createNotificationChannelsAndSettings,
+  createDefaultStatusPage,
+} from "./database";
 import { runMigrations } from "../migrations/migration";
 
 // 检查表是否存在
@@ -71,8 +77,14 @@ export async function checkAndInitializeDatabase(
       // 创建表结构（只创建不存在的表）
       console.log("创建缺失的表结构...");
       await createTables(env);
-      initialized = true;
     }
+
+    await createAdminUser(env);
+    await createNotificationTemplates(env);
+    await createNotificationChannelsAndSettings(env);
+    await createDefaultStatusPage(env);
+
+    initialized = true;
 
     // 执行迁移
     await runMigrations(env);
@@ -84,7 +96,9 @@ export async function checkAndInitializeDatabase(
         : "数据库已经初始化，不需要重新初始化",
     };
   } catch (error) {
-    console.error("数据库初始化检查错误:", error);
-    throw error;
+    return {
+      initialized: false,
+      message: `数据库初始化失败: ${error}`,
+    };
   }
 }
