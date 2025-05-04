@@ -16,15 +16,6 @@ import { Ionicons } from "@expo/vector-icons";
 import agentService, { Agent } from "../../api/agents";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 
-// 资源历史记录
-interface ResourceHistory {
-  id: string;
-  timestamp: string;
-  cpu_usage: number;
-  memory_usage: number;
-  disk_usage: number;
-}
-
 // 路由参数类型
 type AgentDetailRouteProp = RouteProp<
   { AgentDetail: { agentId: string } },
@@ -38,7 +29,6 @@ const AgentDetailScreen: React.FC = () => {
   const { agentId } = route.params;
 
   const [agent, setAgent] = useState<Agent | null>(null);
-  const [resourceHistory, setResourceHistory] = useState<ResourceHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,53 +148,6 @@ const AgentDetailScreen: React.FC = () => {
       : t("agents.status_inactive", "离线");
   };
 
-  // 获取资源颜色
-  const getResourceColor = (usage: number) => {
-    if (usage > 80) return "#f76363";
-    if (usage > 60) return "#ffb224";
-    return "#30c85e";
-  };
-
-  // 格式化网络流量单位
-  const formatNetworkSpeed = (value?: number): string => {
-    if (value === undefined) return t("common.unknown", "未知");
-
-    // 当值小于 1024 KB/s 时，显示 KB/s
-    if (value < 1024) {
-      return `${value.toFixed(1)} KB/s`;
-    }
-    // 当值大于等于 1024 KB/s 时，显示 MB/s
-    else {
-      const valueMB = value / 1024;
-      return `${valueMB.toFixed(1)} MB/s`;
-    }
-  };
-
-  // 计算内存使用百分比
-  const calculateMemoryUsage = (agent: Agent): number => {
-    if (agent.memory_usage !== undefined) {
-      return agent.memory_usage;
-    }
-
-    if (agent.memory_total && agent.memory_used) {
-      return (agent.memory_used / agent.memory_total) * 100;
-    }
-
-    return 0;
-  };
-
-  // 计算磁盘使用百分比
-  const calculateDiskUsage = (agent: Agent): number => {
-    if (agent.disk_usage !== undefined) {
-      return agent.disk_usage;
-    }
-
-    if (agent.disk_total && agent.disk_used) {
-      return (agent.disk_used / agent.disk_total) * 100;
-    }
-
-    return 0;
-  };
 
   // 格式化日期
   const formatDate = (dateString?: string) => {
@@ -236,18 +179,6 @@ const AgentDetailScreen: React.FC = () => {
     }
 
     return Math.floor(seconds) + t("common.time.secondsAgo", "秒前");
-  };
-
-  // 格式化内存/磁盘大小
-  const formatSize = (sizeInMB?: number) => {
-    if (!sizeInMB) return t("common.unknown", "未知");
-
-    if (sizeInMB < 1024) {
-      return `${sizeInMB.toFixed(0)} MB`;
-    } else {
-      const sizeInGB = sizeInMB / 1024;
-      return `${sizeInGB.toFixed(1)} GB`;
-    }
   };
 
   // 组件挂载时加载数据
@@ -431,130 +362,6 @@ const AgentDetailScreen: React.FC = () => {
             </Text>
           </View>
         </View>
-
-        {/* 资源使用情况 */}
-        {agent.status === "active" && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              {t("agents.resources", "资源使用情况")}
-            </Text>
-
-            <View style={styles.resourceItem}>
-              <View style={styles.resourceHeader}>
-                <Text style={styles.resourceLabel}>CPU</Text>
-                <Text
-                  style={[
-                    styles.resourceValue,
-                    { color: getResourceColor(agent.cpu_usage || 0) },
-                  ]}
-                >
-                  {agent.cpu_usage?.toFixed(1) || 0}%
-                </Text>
-              </View>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${agent.cpu_usage || 0}%`,
-                      backgroundColor: getResourceColor(agent.cpu_usage || 0),
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-
-            <View style={styles.resourceItem}>
-              <View style={styles.resourceHeader}>
-                <Text style={styles.resourceLabel}>
-                  {t("agents.memory", "内存")}
-                </Text>
-                <Text
-                  style={[
-                    styles.resourceValue,
-                    { color: getResourceColor(calculateMemoryUsage(agent)) },
-                  ]}
-                >
-                  {calculateMemoryUsage(agent).toFixed(1)}%
-                </Text>
-              </View>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${calculateMemoryUsage(agent)}%`,
-                      backgroundColor: getResourceColor(
-                        calculateMemoryUsage(agent)
-                      ),
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-
-            <View style={styles.resourceItem}>
-              <View style={styles.resourceHeader}>
-                <Text style={styles.resourceLabel}>
-                  {t("agents.disk", "磁盘")}
-                </Text>
-                <Text
-                  style={[
-                    styles.resourceValue,
-                    { color: getResourceColor(calculateDiskUsage(agent)) },
-                  ]}
-                >
-                  {calculateDiskUsage(agent).toFixed(1)}%
-                </Text>
-              </View>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${calculateDiskUsage(agent)}%`,
-                      backgroundColor: getResourceColor(
-                        calculateDiskUsage(agent)
-                      ),
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-
-            {agent.network_rx !== undefined &&
-              agent.network_tx !== undefined && (
-                <View style={styles.networkContainer}>
-                  <View style={styles.networkItem}>
-                    <Ionicons
-                      name="arrow-down-outline"
-                      size={16}
-                      color="#30c85e"
-                    />
-                    <Text style={styles.networkLabel}>
-                      {t("agents.networkRx", "下载")}
-                    </Text>
-                    <Text style={styles.networkValue}>
-                      {formatNetworkSpeed(agent.network_rx)}
-                    </Text>
-                  </View>
-                  <View style={styles.networkItem}>
-                    <Ionicons
-                      name="arrow-up-outline"
-                      size={16}
-                      color="#0066cc"
-                    />
-                    <Text style={styles.networkLabel}>
-                      {t("agents.networkTx", "上传")}
-                    </Text>
-                    <Text style={styles.networkValue}>
-                      {formatNetworkSpeed(agent.network_tx)}
-                    </Text>
-                  </View>
-                </View>
-              )}
-          </View>
-        )}
 
         {/* 操作按钮 */}
         <View style={styles.actionsCard}>

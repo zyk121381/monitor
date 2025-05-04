@@ -205,7 +205,7 @@ export async function createNotificationChannelsAndSettings(
         1,
         userId,
         "global-monitor",
-        1, // enabled
+        0, // enabled
         1, // on_down
         1, // on_recovery
         "[1]", // channels (只有Telegram)
@@ -223,7 +223,7 @@ export async function createNotificationChannelsAndSettings(
         2,
         userId,
         "global-agent",
-        1, // enabled
+        0, // enabled
         1, // on_offline
         1, // on_recovery
         1, // on_cpu_threshold

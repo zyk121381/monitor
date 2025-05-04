@@ -10,7 +10,6 @@ import {
   Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 // 导入API服务
@@ -20,7 +19,6 @@ import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 
 const DashboardScreen: React.FC = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
 
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,59 +66,6 @@ const DashboardScreen: React.FC = () => {
   const offlineAgents = agents.filter(
     (a) => a.status !== "active" && a.status !== "online"
   ).length;
-
-  // 计算平均可用率，兼容可能缺少uptime属性的情况
-  const avgUptime =
-    monitors.length > 0
-      ? monitors.reduce(
-          (acc, m) => acc + (m.uptime !== undefined ? m.uptime : 0),
-          0
-        ) / monitors.length
-      : 0;
-
-  // 计算平均响应时间，兼容可能缺少response_time属性的情况
-  const avgResponseTime =
-    monitors.length > 0
-      ? Math.round(
-          monitors.reduce((acc, m) => {
-            const responseTime =
-              m.response_time !== undefined
-                ? m.response_time
-                : m.responseTime !== undefined
-                ? m.responseTime
-                : 0;
-            return acc + responseTime;
-          }, 0) / monitors.length
-        )
-      : 0;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "up":
-        return "#30c85e";
-      case "down":
-        return "#f76363";
-      case "pending":
-        return "#ffb224";
-      default:
-        return "#888";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "up":
-      case "active":
-      case "online":
-        return "checkmark-circle";
-      case "down":
-        return "alert-circle";
-      case "pending":
-        return "time";
-      default:
-        return "help-circle";
-    }
-  };
 
   // 获取当前日期格式化字符串
   const getCurrentDate = () => {
@@ -305,179 +250,6 @@ const DashboardScreen: React.FC = () => {
                 </View>
               </View>
             </View>
-          </View>
-
-          {/* 监控状态 */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Ionicons name="eye-outline" size={20} color="#0066cc" />
-              <Text style={styles.cardHeaderTitle}>
-                {t("navigation.monitors", "监控状态")}
-              </Text>
-              <TouchableOpacity
-                style={styles.viewAllButton}
-                onPress={() => navigation.navigate("Monitors")}
-              >
-                <Text style={styles.viewAllButtonText}>
-                  {t("common.viewAll", "查看全部")}
-                </Text>
-                <Ionicons name="chevron-forward" size={14} color="#0066cc" />
-              </TouchableOpacity>
-            </View>
-
-            {monitors.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Ionicons name="alert-circle-outline" size={36} color="#ccc" />
-                <Text style={styles.emptyText}>
-                  {t("common.notFound", "没有找到数据")}
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.itemList}>
-                {monitors.slice(0, 5).map((monitor) => (
-                  <TouchableOpacity
-                    key={monitor.id}
-                    style={styles.itemContainer}
-                    onPress={() =>
-                      navigation.navigate("MonitorDetail", {
-                        monitorId: monitor.id,
-                      })
-                    }
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.itemLeft}>
-                      <View
-                        style={[
-                          styles.statusIconContainer,
-                          {
-                            backgroundColor: `${getStatusColor(
-                              monitor.status
-                            )}20`,
-                          },
-                        ]}
-                      >
-                        <Ionicons
-                          name={getStatusIcon(monitor.status)}
-                          size={18}
-                          color={getStatusColor(monitor.status)}
-                        />
-                      </View>
-                      <View style={styles.itemTextContainer}>
-                        <Text style={styles.itemName} numberOfLines={1}>
-                          {monitor.name}
-                        </Text>
-                        <Text style={styles.itemDetail} numberOfLines={1}>
-                          {monitor.url || "-"}
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={styles.itemRight}>
-                      <Text
-                        style={[
-                          styles.itemStatus,
-                          { color: getStatusColor(monitor.status) },
-                        ]}
-                      >
-                        {t(
-                          `monitors.status_${monitor.status}`,
-                          monitor.status === "up" ? "正常" : "故障"
-                        )}
-                      </Text>
-                      <Ionicons name="chevron-forward" size={16} color="#ccc" />
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-
-          {/* 客户端状态 */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Ionicons name="server-outline" size={20} color="#0066cc" />
-              <Text style={styles.cardHeaderTitle}>
-                {t("navigation.agents", "客户端状态")}
-              </Text>
-              <TouchableOpacity
-                style={styles.viewAllButton}
-                onPress={() => navigation.navigate("Agents")}
-              >
-                <Text style={styles.viewAllButtonText}>
-                  {t("common.viewAll", "查看全部")}
-                </Text>
-                <Ionicons name="chevron-forward" size={14} color="#0066cc" />
-              </TouchableOpacity>
-            </View>
-
-            {agents.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Ionicons name="alert-circle-outline" size={36} color="#ccc" />
-                <Text style={styles.emptyText}>
-                  {t("common.notFound", "没有找到数据")}
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.itemList}>
-                {agents.slice(0, 5).map((agent) => (
-                  <TouchableOpacity
-                    key={agent.id}
-                    style={styles.itemContainer}
-                    onPress={() =>
-                      navigation.navigate("AgentDetail", { agentId: agent.id })
-                    }
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.itemLeft}>
-                      <View
-                        style={[
-                          styles.statusIconContainer,
-                          {
-                            backgroundColor:
-                              agent.status === "active" ? "#e6f7ee" : "#f5f5f5",
-                          },
-                        ]}
-                      >
-                        <Ionicons
-                          name={
-                            agent.status === "active"
-                              ? ("checkmark-circle" as any)
-                              : "alert-circle"
-                          }
-                          size={18}
-                          color={agent.status === "active" ? "#30c85e" : "#888"}
-                        />
-                      </View>
-                      <View style={styles.itemTextContainer}>
-                        <Text style={styles.itemName} numberOfLines={1}>
-                          {agent.name}
-                        </Text>
-                        <Text style={styles.itemDetail} numberOfLines={1}>
-                          {agent.hostname ||
-                            t("agents.unknownHost", "未知主机")}
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={styles.itemRight}>
-                      <Text
-                        style={[
-                          styles.itemStatus,
-                          {
-                            color:
-                              agent.status === "active" ? "#30c85e" : "#888",
-                          },
-                        ]}
-                      >
-                        {t(
-                          `agents.status_${agent.status}`,
-                          agent.status === "active" ? "在线" : "离线"
-                        )}
-                      </Text>
-                      <Ionicons name="chevron-forward" size={16} color="#ccc" />
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
           </View>
         </View>
       </ScrollView>
