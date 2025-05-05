@@ -1,5 +1,5 @@
 import api from "./client";
-import { LoginRequest, AuthResponse } from "../../types/auth";
+import { LoginRequest, AuthResponse } from "../types/auth";
 
 // 登录
 export const login = async (

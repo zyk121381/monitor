@@ -5,7 +5,7 @@ import {
   CreateUserRequest,
   UpdateUserRequest,
   ChangePasswordRequest,
-} from "../../types/users";
+} from "../types/users";
 
 // 获取所有用户
 export const getAllUsers = async (): Promise<{
