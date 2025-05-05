@@ -288,15 +288,17 @@ export default {
 
     // 默认执行监控检查任务
     let result: any = await checkAgentsStatus(c);
-    const now = new Date();
-    const hour = now.getUTCHours();
-    const minute = now.getUTCMinutes();
+    // 获取24小时前的时间
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const hour = new Date().getUTCHours();
+    const minute = new Date().getUTCMinutes()
     // 从 24h 表中删除24小时以前的 agent metrics 数据
 
-    if (hour === 0 && minute === 10){
+    if (hour === 0 && minute === 5){
+      console.log("定时任务: 正在清理 metrics 24h 表数据...");
       await env.DB.prepare(
-        "DELETE FROM agent_metrics_24h WHERE created_at < datetime('now', '-24 hours')"
-      )
+        "DELETE FROM agent_metrics_24h WHERE timestamp < ?"
+      ).bind(yesterday).run();
     }
 
     return result;
