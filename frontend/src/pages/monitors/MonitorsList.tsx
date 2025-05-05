@@ -31,7 +31,7 @@ import {
   deleteMonitor,
   getAllDailyStats,
   getAllMonitorHistory,
-} from "../../services/api/monitors";
+} from "../../api/monitors";
 import { MonitorWithDailyStatsAndStatusHistory } from "../../types/monitors";
 import MonitorCard from "../../components/MonitorCard";
 import { useTranslation } from "react-i18next";

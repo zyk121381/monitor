@@ -14,7 +14,7 @@ import {
   IconButton,
 } from "@radix-ui/themes";
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { createMonitor } from "../../services/api/monitors";
+import { createMonitor } from "../../api/monitors";
 import StatusCodeSelect from "../../components/StatusCodeSelect";
 import { useTranslation } from "react-i18next";
 

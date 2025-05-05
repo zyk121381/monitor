@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ENV_API_BASE_URL, ENV_API_TIMEOUT } from "../../config";
+import { ENV_API_BASE_URL, ENV_API_TIMEOUT } from "../config";
 
 // 创建 axios 实例
 const api = axios.create({

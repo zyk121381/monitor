@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box, Flex, Heading, Text, Grid, Badge, Theme } from "@radix-ui/themes";
-import { getStatusPageData } from "../../services/api/status";
+import { getStatusPageData } from "../../api/status";
 import AgentCard from "../../components/AgentCard";
 import MonitorCard from "../../components/MonitorCard";
 import { useTranslation } from "react-i18next";

@@ -23,9 +23,9 @@ import {
 import * as Toast from "@radix-ui/react-toast";
 import "../../styles/components.css";
 import { useTranslation } from "react-i18next";
-import { getAllMonitors } from "../../services/api/monitors";
+import { getAllMonitors } from "../../api/monitors";
 import { Monitor } from "../../types/monitors";
-import { getAllAgents } from "../../services/api/agents";
+import { getAllAgents } from "../../api/agents";
 import { Agent } from "../../types/agents";
 import {
   NotificationChannel as ApiNotificationChannel,
@@ -36,7 +36,7 @@ import {
   createNotificationChannel,
   updateNotificationChannel,
   deleteNotificationChannel,
-} from "../../services/api/notifications";
+} from "../../api/notifications";
 import ChannelSelector from "../../components/ChannelSelector";
 
 const NotificationsConfig = () => {

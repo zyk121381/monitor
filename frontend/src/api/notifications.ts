@@ -1,4 +1,4 @@
-import api from "./index";
+import api from "./client";
 
 // 通知渠道类型
 export interface NotificationChannel {

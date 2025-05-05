@@ -1,10 +1,10 @@
-import api from "./index";
+import api from "./client";
 import {
   Agent,
   AgentResponse,
   AgentsResponse,
   MetricHistory,
-} from "../../types/agents";
+} from "../types/agents";
 
 export const generateToken = async (): Promise<{
   success: boolean;

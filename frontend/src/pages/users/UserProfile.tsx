@@ -9,7 +9,7 @@ import {
   Box,
 } from "@radix-ui/themes";
 import { useAuth } from "../../providers/AuthProvider";
-import { updateUser, changePassword } from "../../services/api/users";
+import { updateUser, changePassword } from "../../api/users";
 import { UpdateUserRequest, ChangePasswordRequest } from "../../types/users";
 import { useTranslation } from "react-i18next";
 

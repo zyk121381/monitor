@@ -1,9 +1,9 @@
-import api from "./index";
+import api from "./client";
 import {
   StatusPageConfig,
   StatusPageConfigResponse,
   StatusPageData,
-} from "../../types/status";
+} from "../types/status";
 
 // 获取状态页配置
 export const getStatusPageConfig =

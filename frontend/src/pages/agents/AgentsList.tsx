@@ -27,7 +27,7 @@ import {
   getAllAgents,
   deleteAgent,
   getAllAgentMetrics,
-} from "../../services/api/agents";
+} from "../../api/agents";
 import AgentCard from "../../components/AgentCard";
 import { useTranslation } from "react-i18next";
 import { Agent } from "../../types";

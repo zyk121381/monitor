@@ -16,7 +16,7 @@ import {
   CheckIcon,
   InfoCircledIcon,
 } from "@radix-ui/react-icons";
-import { generateToken } from "../../services/api/agents";
+import { generateToken } from "../../api/agents";
 import { useTranslation } from "react-i18next";
 import { ENV_API_BASE_URL } from "../../config";
 

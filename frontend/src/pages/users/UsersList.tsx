@@ -8,7 +8,7 @@ import {
   AlertDialog,
   Box,
 } from "@radix-ui/themes";
-import { getAllUsers, deleteUser } from "../../services/api/users";
+import { getAllUsers, deleteUser } from "../../api/users";
 import { User } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";

@@ -1,4 +1,4 @@
-import api from "./index";
+import api from "./client";
 import { Monitor, Agent } from "../../types";
 
 // 获取仪表盘数据

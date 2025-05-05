@@ -11,7 +11,7 @@ import {
 } from "@radix-ui/themes";
 import { ArrowLeftIcon, Cross2Icon } from "@radix-ui/react-icons";
 import * as Toast from "@radix-ui/react-toast";
-import { getAgent, updateAgent } from "../../services/api/agents";
+import { getAgent, updateAgent } from "../../api/agents";
 import { useTranslation } from "react-i18next";
 
 const EditAgent = () => {

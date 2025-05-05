@@ -19,7 +19,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { getMonitor, updateMonitor } from "../../services/api/monitors";
+import { getMonitor, updateMonitor } from "../../api/monitors";
 import StatusCodeSelect from "../../components/StatusCodeSelect";
 import { useTranslation } from "react-i18next";
 

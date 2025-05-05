@@ -1,4 +1,4 @@
-import api from "./index";
+import api from "./client";
 import {
   MonitorResponse,
   MonitorsResponse,
@@ -6,7 +6,7 @@ import {
   UpdateMonitorRequest,
   MonitorStatusHistoryResponse,
   DailyStatsResponse,
-} from "../../types/monitors";
+} from "../types/monitors";
 
 // 获取所有监控
 export const getAllMonitors = async (): Promise<MonitorsResponse> => {

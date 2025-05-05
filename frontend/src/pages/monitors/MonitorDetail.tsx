@@ -24,7 +24,7 @@ import {
   checkMonitor,
   getMonitorStatusHistoryById,
   getMonitorDailyStats,
-} from "../../services/api/monitors";
+} from "../../api/monitors";
 import { MonitorWithDailyStatsAndStatusHistory } from "../../types/monitors";
 import { useTranslation } from "react-i18next";
 import ResponseTimeChart from "../../components/ResponseTimeChart";

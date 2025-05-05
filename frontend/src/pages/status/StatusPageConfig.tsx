@@ -16,7 +16,7 @@ import * as Toast from "@radix-ui/react-toast";
 import {
   getStatusPageConfig,
   saveStatusPageConfig,
-} from "../../services/api/status";
+} from "../../api/status";
 import { StatusPageConfig as StatusConfig } from "../../types/status";
 import "../../styles/components.css";
 import { useTranslation } from "react-i18next";

@@ -8,7 +8,7 @@ import {
   ExclamationTriangleIcon,
 } from "@radix-ui/react-icons";
 import { Monitor, Agent } from "../types";
-import { getDashboardData } from "../services/api/dashboard";
+import { getDashboardData } from "../api/dashboard";
 import StatusSummaryCard from "../components/StatusSummaryCard";
 import "../styles/components.css";
 import { useTranslation } from "react-i18next";

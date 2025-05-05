@@ -9,7 +9,7 @@ import {
   login as apiLogin,
   register as apiRegister,
   getCurrentUser,
-} from "../services/api/auth";
+} from "../api/auth";
 import {
   User,
   LoginRequest,

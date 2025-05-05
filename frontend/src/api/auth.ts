@@ -1,4 +1,4 @@
-import api from "./index";
+import api from "./client";
 import { LoginRequest, AuthResponse } from "../../types/auth";
 
 // 登录
