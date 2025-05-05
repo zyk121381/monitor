@@ -142,16 +142,9 @@ export async function updateMonitorStatus(
      SET status = ?, 
          last_checked = ?,
          response_time = ?,
-         uptime = (
-           SELECT ROUND((COUNT(CASE WHEN status = 'up' THEN 1 ELSE NULL END) * 100.0 / COUNT(*)), 2)
-           FROM monitor_status_history_24h
-           WHERE monitor_id = ?
-           ORDER BY timestamp DESC
-           LIMIT 100
-         )
      WHERE id = ?`
     )
-    .bind(status, now, responseTime, monitorId, monitorId)
+    .bind(status, now, responseTime, monitorId)
     .run();
 }
 
@@ -173,8 +166,8 @@ export async function createMonitor(
   const result = await db
     .prepare(
       `INSERT INTO monitors 
-     (name, url, method, interval, timeout, expected_status, headers, body, created_by, active, status, uptime, response_time, last_checked, created_at, updated_at) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     (name, url, method, interval, timeout, expected_status, headers, body, created_by, active, status, response_time, last_checked, created_at, updated_at) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       name,
@@ -188,7 +181,6 @@ export async function createMonitor(
       userId,
       1, // active
       "pending",
-      100.0,
       0,
       null,
       now,

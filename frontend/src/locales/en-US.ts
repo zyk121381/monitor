@@ -110,7 +110,6 @@ const enUS = {
     "dashboard.summary": "Overview",
     "dashboard.totalMonitors": "Total Monitors",
     "dashboard.activeMonitors": "Active Monitors",
-    "dashboard.uptime": "Uptime",
     "dashboard.refresh": "Refresh",
 
     // Monitor list

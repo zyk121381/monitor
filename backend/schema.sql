@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS monitors (
   created_by INTEGER NOT NULL,
   active BOOLEAN NOT NULL DEFAULT 1,
   status TEXT DEFAULT 'pending',
-  uptime REAL DEFAULT 100.0,
   response_time INTEGER DEFAULT 0,
   last_checked TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

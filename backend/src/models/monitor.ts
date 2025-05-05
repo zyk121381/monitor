@@ -12,7 +12,6 @@ export interface Monitor {
   created_by: number;
   active: boolean;
   status: string;
-  uptime: number;
   response_time: number;
   last_checked: string;
   created_at: string;

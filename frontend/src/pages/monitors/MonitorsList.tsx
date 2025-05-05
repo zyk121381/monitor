@@ -246,9 +246,6 @@ const MonitorsList = () => {
                     {t("monitors.table.responseTime")}
                   </Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell>
-                    {t("monitors.table.uptime")}
-                  </Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>
                     {t("monitors.table.actions")}
                   </Table.ColumnHeaderCell>
                 </Table.Row>
@@ -282,15 +279,6 @@ const MonitorsList = () => {
                         {monitor.response_time
                           ? `${monitor.response_time}ms`
                           : "-"}
-                      </Text>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Text>
-                        {Math.min(
-                          monitor.uptime || monitor.uptime_percentage || 0,
-                          100
-                        ).toFixed(2)}
-                        %
                       </Text>
                     </Table.Cell>
                     <Table.Cell>

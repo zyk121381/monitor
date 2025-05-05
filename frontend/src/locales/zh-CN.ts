@@ -110,8 +110,6 @@ const zhCN = {
     "dashboard.summary": "概览",
     "dashboard.totalMonitors": "监控总数",
     "dashboard.activeMonitors": "活动监控",
-    "dashboard.uptime": "正常运行时间",
-    "dashboard.refresh": "刷新",
 
     // 监控列表
     "monitors.title": "监控列表",
@@ -142,7 +140,6 @@ const zhCN = {
     "monitor.edit": "编辑监控",
     "monitor.delete": "删除监控",
     "monitor.history": "历史记录",
-    "monitor.uptime": "正常运行时间",
     "monitor.responseTime": "响应时间",
     "monitor.oneDayHistory": "24小时记录",
     "monitor.MonthsHistory": "30天记录",

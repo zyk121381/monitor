@@ -252,7 +252,6 @@ export async function updateMonitor(db: Bindings["DB"], id: number, data: any) {
     if (data.body !== undefined) updateData.body = data.body;
     if (data.active !== undefined) updateData.active = data.active;
     if (data.status !== undefined) updateData.status = data.status;
-    if (data.uptime !== undefined) updateData.uptime = data.uptime;
     if (data.responseTime !== undefined)
       updateData.response_time = data.responseTime;
     if (data.lastChecked !== undefined)
