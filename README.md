@@ -19,7 +19,7 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，提供系统�
 - ✅ 数据可视化 - 实时数据展示与历史趋势
 - ✅ 状态页面 - 可定制的服务状态页面
 - ✅ 告警通知 - 异常事件通过多渠道通知（电子邮件、Telegram等）
-- ✅ 移动APP - 方便在手机查看监控状态
+- ❌ 移动APP - 方便在手机查看监控状态（维护不过来，后面打算将pwa实现好，就这样吧）
 
 ## ✨ 核心特性
 
@@ -47,7 +47,7 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，提供系统�
 XUGOU 采用现代化的系统架构，包含以下组件：
 
 - **Agent**: 轻量级系统监控客户端
-- **Backend**: 基于 Cloudflare Workers 的后端服务
+- **Backend**: 基于 Hono 开发的后端服务，支持部署在 Cloudflare Workers 上
 - **Frontend**: 基于 React + TypeScript 的现代化前端界面
 
 ## 🚀 快速开始
@@ -61,12 +61,6 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 ### 视频教程
 
 还没录
-
-### 移动端
-
-安卓APP：[下载地址](https://dl.xugou.mdzz.uk/latest/xugou.apk)
-
-IOS：没交苹果保护费，所以没有 IOS 版本
 
 ## 常见问题
 

@@ -10,15 +10,18 @@ Xugou Agent 是一个系统监控客户端，用于收集系统信息并上报�
 - 监控磁盘使用情况
 - 监控网络接口状态
 - 支持自定义收集间隔
-- 支持 HTTP 上报和控制台输出
 - 支持配置文件和环境变量配置
+
+## 计划
+
+- 压缩二进制文件，最小化体积，我希望能够在更多的低功耗平台运行
 
 ## 安装
 
 ### 从源码构建
 
 ```bash
-git clone https://github.com/xugou/agent.git
+git clone https://github.com/zaunist/xugou.git
 cd agent
 go build -o xugou-agent
 ```
