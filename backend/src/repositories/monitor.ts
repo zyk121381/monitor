@@ -141,7 +141,7 @@ export async function updateMonitorStatus(
       `UPDATE monitors 
      SET status = ?, 
          last_checked = ?,
-         response_time = ?,
+         response_time = ?
      WHERE id = ?`
     )
     .bind(status, now, responseTime, monitorId)
