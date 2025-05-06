@@ -292,9 +292,9 @@ export default {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const hour = new Date().getUTCHours();
     const minute = new Date().getUTCMinutes()
-    // 从 24h 表中删除24小时以前的 agent metrics 数据
+    // 每隔6小时清理一次 metrics 24h 表数据
 
-    if (hour === 0 && minute === 5){
+    if ((hour%6) === 0 && minute === 5){
       console.log("定时任务: 正在清理 metrics 24h 表数据...");
       await env.DB.prepare(
         "DELETE FROM agent_metrics_24h WHERE timestamp < ?"
