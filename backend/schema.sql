@@ -5,8 +5,9 @@ DROP TABLE IF EXISTS notification_channels;
 DROP TABLE IF EXISTS status_page_agents;
 DROP TABLE IF EXISTS status_page_monitors;
 DROP TABLE IF EXISTS status_page_config;
-DROP TABLE IF EXISTS monitor_status_history;
-DROP TABLE IF EXISTS monitor_checks;
+DROP TABLE IF EXISTS monitor_status_history_24h;
+DROP TABLE IF EXISTS monitor_daily_stats;
+DROP TABLE IF EXISTS agent_metrics_24h;
 DROP TABLE IF EXISTS agents;
 DROP TABLE IF EXISTS monitors;
 DROP TABLE IF EXISTS users;
@@ -36,7 +37,6 @@ CREATE TABLE IF NOT EXISTS monitors (
   created_by INTEGER NOT NULL,
   active BOOLEAN NOT NULL DEFAULT 1,
   status TEXT DEFAULT 'pending',
-  uptime REAL DEFAULT 100.0,
   response_time INTEGER DEFAULT 0,
   last_checked TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -44,24 +44,30 @@ CREATE TABLE IF NOT EXISTS monitors (
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
--- 监控历史记录表
-CREATE TABLE IF NOT EXISTS monitor_checks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  monitor_id INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  response_time INTEGER,
-  status_code INTEGER,
-  error TEXT,
-  checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (monitor_id) REFERENCES monitors(id)
-);
-
--- 监控状态历史表（用于UI状态条展示）
-CREATE TABLE IF NOT EXISTS monitor_status_history (
+-- 24小时监控状态历史表(热表)
+CREATE TABLE IF NOT EXISTS monitor_status_history_24h (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   monitor_id INTEGER NOT NULL,
   status TEXT NOT NULL,
   timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  response_time INTEGER,
+  status_code INTEGER,
+  error TEXT,
+  FOREIGN KEY (monitor_id) REFERENCES monitors(id)
+);
+
+-- 监控每日统计表
+CREATE TABLE IF NOT EXISTS monitor_daily_stats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  monitor_id INTEGER NOT NULL,
+  date TEXT NOT NULL,
+  total_checks INTEGER NOT NULL DEFAULT 0,
+  up_checks INTEGER NOT NULL DEFAULT 0,
+  down_checks INTEGER NOT NULL DEFAULT 0,
+  avg_response_time INTEGER DEFAULT 0,
+  min_response_time INTEGER DEFAULT 0,
+  max_response_time INTEGER DEFAULT 0,
+  availability REAL DEFAULT 0,
   FOREIGN KEY (monitor_id) REFERENCES monitors(id)
 );
 
@@ -78,14 +84,36 @@ CREATE TABLE IF NOT EXISTS agents (
   ip_addresses TEXT, -- 存储多个IP地址的JSON字符串
   os TEXT,
   version TEXT,
-  cpu_usage REAL,
-  memory_total INTEGER,
-  memory_used INTEGER,
-  disk_total INTEGER,
-  disk_used INTEGER,
-  network_rx INTEGER,
-  network_tx INTEGER,
   FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+-- 客户端资源指标表 24h
+CREATE TABLE IF NOT EXISTS agent_metrics_24h (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  agent_id INTEGER NOT NULL,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  -- CPU指标
+  cpu_usage REAL,          -- CPU使用率(%)
+  cpu_cores INTEGER,       -- CPU核心数
+  cpu_model TEXT,          -- CPU型号名称
+  
+  -- 内存指标
+  memory_total BIGINT,     -- 总内存(字节)
+  memory_used BIGINT,      -- 已用内存(字节)
+  memory_free BIGINT,      -- 空闲内存(字节)
+  memory_usage_rate REAL,  -- 内存使用率(%)
+  
+  -- 负载指标
+  load_1 REAL,             -- 1分钟平均负载
+  load_5 REAL,             -- 5分钟平均负载
+  load_15 REAL,            -- 15分钟平均负载
+  
+  -- 磁盘和网络指标(JSON格式存储)
+  disk_metrics TEXT,       -- JSON格式存储多个磁盘信息
+  network_metrics TEXT,    -- JSON格式存储多个网络接口信息
+  
+  FOREIGN KEY (agent_id) REFERENCES agents(id)
 );
 
 -- 状态页配置表

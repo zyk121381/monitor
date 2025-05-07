@@ -1,17 +1,27 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import i18n from '../locales/config';
-import { LanguageContextType } from '../types/language';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import i18n from "../locales/config";
+import { LanguageContextType } from "../types/language";
 
 const availableLanguages = [
-  { code: 'zh-CN', name: '中文' },
-  { code: 'en-US', name: 'English' },
+  { code: "zh-CN", name: "中文" },
+  { code: "en-US", name: "English" },
 ];
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [currentLanguage, setCurrentLanguage] = useState(() => {
-    return localStorage.getItem('i18nextLng') || 'zh-CN';
+    return localStorage.getItem("i18nextLng") || "zh-CN";
   });
 
   const changeLanguage = (lang: string) => {
@@ -20,7 +30,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('i18nextLng');
+    const savedLang = localStorage.getItem("i18nextLng");
     if (savedLang) {
       setCurrentLanguage(savedLang);
     }
@@ -42,7 +52,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
-}; 
+};

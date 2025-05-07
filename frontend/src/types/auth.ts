@@ -1,15 +1,8 @@
+import { User } from "./users";
+
 /**
  * 认证相关类型定义
  */
-
-export interface User {
-  id: number;
-  username: string;
-  email?: string;
-  role?: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 export interface LoginRequest {
   username: string;
@@ -35,6 +28,8 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (data: LoginRequest) => Promise<{ success: boolean; message: string }>;
-  register: (data: RegisterRequest) => Promise<{ success: boolean; message: string }>;
+  register: (
+    data: RegisterRequest
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
-} 
+}

@@ -12,42 +12,35 @@ export interface Monitor {
   expected_status?: number;
   interval: number;
   timeout: number;
-  status: 'up' | 'down' | 'pending' | 'unknown';
+  status: "up" | "down" | "pending" | "unknown";
   last_checked?: string;
-  uptime_percentage?: number;
-  uptime?: number;
   response_time?: number;
   user_id: number;
   created_by?: number;
   active?: number;
   created_at: string;
   updated_at: string;
-  history?: MonitorStatusHistory[];
-  checks?: MonitorCheck[];
 }
 
-export interface MonitorWithSelection extends Monitor {
-  selected: boolean;
+export interface MonitorWithDailyStatsAndStatusHistory extends Monitor {
+  dailyStats: DailyStats[];
+  history: MonitorStatusHistory[];
 }
 
 export interface MonitorStatusHistory {
   id: number;
   monitor_id: number;
-  status: 'up' | 'down';
-  response_time: number;
-  created_at: string;
+  status: "up" | "down";
+  response_time?: number;
+  timestamp?: string;
+  status_code?: number;
+  error?: string;
 }
 
-export interface MonitorCheck {
-  id: number;
-  monitor_id: number;
-  status: 'up' | 'down';
-  response_time: number;
-  status_code: number;
-  response_body: string;
-  error?: string;
-  created_at: string;
-  checked_at?: string;
+export interface MonitorStatusHistoryResponse {
+  success: boolean;
+  message: string;
+  history?: MonitorStatusHistory[];
 }
 
 export interface MonitorResponse {
@@ -62,16 +55,10 @@ export interface MonitorsResponse {
   monitors?: Monitor[];
 }
 
-export interface HistoryResponse {
+export interface DailyStatsResponse {
   success: boolean;
   message: string;
-  history?: MonitorStatusHistory[];
-}
-
-export interface ChecksResponse {
-  success: boolean;
-  message: string;
-  checks?: MonitorCheck[];
+  dailyStats?: DailyStats[];
 }
 
 export interface CreateMonitorRequest {
@@ -96,8 +83,16 @@ export interface UpdateMonitorRequest {
   timeout?: number;
 }
 
-export interface CheckResponse {
-  success: boolean;
-  message: string;
-  check?: MonitorCheck;
-} 
+// 新增每日统计数据类型
+export interface DailyStats {
+  date: string;
+  total_checks: number;
+  up_checks: number;
+  down_checks: number;
+  avg_response_time: number;
+  min_response_time: number;
+  max_response_time: number;
+  availability: number;
+  monitor_id: number;
+  created_at: string;
+}
