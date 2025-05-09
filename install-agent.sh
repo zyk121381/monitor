@@ -188,6 +188,7 @@ Restart=on-failure
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
+Environment="HOME=/root"
 # 考虑为更佳安全性设置 User= 和 Group= (例如创建一个 'xugou' 用户)
 # User=nobody
 # Group=nogroup
