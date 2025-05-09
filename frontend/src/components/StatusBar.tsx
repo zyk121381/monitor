@@ -1,10 +1,15 @@
-import React, { useMemo } from "react";
-import { Box, Tooltip, Text } from "@radix-ui/themes";
+import React, { useMemo, useState } from "react";
+import { Box, Tooltip, Text, Dialog, Flex, Button } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
 import { DailyStats } from "../types/monitors";
 
+// 扩展 DailyStats 类型以匹配 dailyHistory 中的结构
+interface EnrichedDailyStats extends DailyStats {
+  status: "up" | "down"; // 确保 status 属性存在且类型正确
+}
+
 interface StatusBarProps {
-  dailyStats?: DailyStats[]; // 新增每日统计数据参数
+  dailyStats?: DailyStats[];
 }
 
 /**
@@ -13,8 +18,10 @@ interface StatusBarProps {
  */
 const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
   const { t } = useTranslation();
+  const [selectedDayData, setSelectedDayData] = useState<EnrichedDailyStats | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  console.log("StatusBar组件的dailyStats: ", dailyStats);
+  // console.log("StatusBar组件的dailyStats: ", dailyStats); // 调试信息可以暂时注释或移除
 
   // 根据状态或百分比确定颜色
   const getColor = (value: string | number, isHover = false) => {
@@ -62,20 +69,18 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
             : ("down" as const);
 
         return {
-          date: stat.date,
-          status: dailyStatus,
-          availability: stat.availability,
-          total_checks: stat.total_checks,
-          up_checks: stat.up_checks,
-          down_checks: stat.down_checks,
-          avg_response_time: stat.avg_response_time,
-          min_response_time: stat.min_response_time,
-          max_response_time: stat.max_response_time,
-          monitor_id: stat.monitor_id,
-        };
+          ...stat, // 包含所有原始 stat 属性
+          status: dailyStatus, // 覆盖或添加 status
+        } as EnrichedDailyStats; // 类型断言
       });
     }
+    return []; // 如果没有 dailyStats，返回空数组
   }, [dailyStats]);
+
+  const handleDayClick = (data: EnrichedDailyStats) => {
+    setSelectedDayData(data);
+    setIsModalOpen(true);
+  };
 
   return (
     <>
@@ -89,9 +94,13 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
         }}
       >
         {dailyHistory?.map((dayData) => {
+          // 确保 dayData 和 monitor_id 存在
+          const key = dayData && dayData.monitor_id
+                      ? `${dayData.monitor_id}-${dayData.date}-${Math.random()}`
+                      : `day-${dayData?.date}-${Math.random()}`;
           return (
             <Tooltip
-              key={`${dayData.monitor_id}-${Math.random()}`}
+              key={key}
               content={
                 <>
                   <Text as="span" size="1" mb="1">
@@ -125,11 +134,64 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
                   cursor: "pointer",
                   padding: "0",
                 }}
+                onClick={() => handleDayClick(dayData)}
               />
             </Tooltip>
           );
         })}
       </Box>
+
+      {selectedDayData && (
+        <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Dialog.Trigger />
+          <Dialog.Content style={{ maxWidth: 450 }}>
+            <Dialog.Title>
+              {t(`📅 ${new Date(selectedDayData.date).toLocaleDateString()} ${t("common.status")}: ${selectedDayData.status === "up"
+                  ? t("monitor.status.normal")
+                  : t("monitor.status.failure")}`)}
+            </Dialog.Title>
+
+            <Flex direction="column" gap="3">
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.availability")}:</strong>{" "}
+                {selectedDayData.availability.toFixed(2)}%
+              </Text>
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.totalChecks")}:</strong>{" "}
+                {selectedDayData.total_checks}
+              </Text>
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.upChecks")}:</strong>{" "}
+                {selectedDayData.up_checks}
+              </Text>
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.downChecks")}:</strong>{" "}
+                {selectedDayData.down_checks}
+              </Text>
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.avgResponseTime")}:</strong>{" "}
+                {selectedDayData.avg_response_time?.toFixed(2) ?? "N/A"} ms
+              </Text>
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.minResponseTime")}:</strong>{" "}
+                {selectedDayData.min_response_time ?? "N/A"} ms
+              </Text>
+              <Text as="div" size="2">
+                <strong>{t("monitor.history.maxResponseTime")}:</strong>{" "}
+                {selectedDayData.max_response_time ?? "N/A"} ms
+              </Text>
+            </Flex>
+
+            <Flex gap="3" mt="4" justify="end">
+              <Dialog.Close>
+                <Button variant="soft" color="gray">
+                  {t("common.close")}
+                </Button>
+              </Dialog.Close>
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Root>
+      )}
     </>
   );
 };
