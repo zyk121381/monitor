@@ -157,7 +157,7 @@ async function generateDailyStats(c: any) {
 
     // 获取前一天的日期 (YYYY-MM-DD 格式)
     const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate());
+    yesterday.setDate(yesterday.getDate() - 1); // 修正：获取前一天的日期
     const dateStr = yesterday.toISOString().split("T")[0];
 
     console.log(`正在处理日期 ${dateStr} 的数据`);
@@ -260,6 +260,11 @@ async function generateDailyStats(c: any) {
           ) / stats.responseTimes.length;
         stats.minResponseTime = Math.min(...stats.responseTimes);
         stats.maxResponseTime = Math.max(...stats.responseTimes);
+      } else {
+        // 改进：处理 responseTimes 为空的情况
+        stats.avgResponseTime = 0;
+        stats.minResponseTime = 0;
+        stats.maxResponseTime = 0;
       }
 
       stats.availability =
