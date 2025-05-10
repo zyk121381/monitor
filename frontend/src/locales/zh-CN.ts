@@ -169,6 +169,12 @@ const zhCN = {
 
     // 检查历史记录
     "monitor.history.time": "时间",
+    "monitor.history.totalChecks": "总检查",
+    "monitor.history.upChecks": "正常",
+    "monitor.history.downChecks": "故障",
+    "monitor.history.avgResponseTime": "平均响应时间",
+    "monitor.history.minResponseTime": "最小响应时间",
+    "monitor.history.maxResponseTime": "最大响应时间",
     "monitor.history.responseTime": "响应时间",
     "monitor.history.records": "记录数",
     "monitor.history.availability": "可用率",
