@@ -171,6 +171,12 @@ const enUS = {
 
     // Check history
     "monitor.history.time": "Time",
+    "monitor.history.totalChecks": "Total Checks",
+    "monitor.history.upChecks": "Normal",
+    "monitor.history.downChecks": "Error",
+    "monitor.history.avgResponseTime": "Avg Response Time",
+    "monitor.history.minResponseTime": "Min Response Time",
+    "monitor.history.maxResponseTime": "Max Response Time",
     "monitor.history.responseTime": "Response Time",
     "monitor.history.records": "Record Count",
     "monitor.history.availability": "Availability",
