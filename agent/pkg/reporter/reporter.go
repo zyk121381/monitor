@@ -17,6 +17,13 @@ import (
 	"github.com/xugou/agent/pkg/utils"
 )
 
+// setDefaultHeaders 设置所有请求的通用头部
+func setDefaultHeaders(req *http.Request) {
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
+	req.Header.Set("Referer", "https://www.google.com/")
+}
+
 // Reporter 定义数据上报器接口
 type Reporter interface {
 	Report(ctx context.Context, info *model.SystemInfo) error            // 上报单个采集的系统信息
@@ -81,16 +88,19 @@ func (r *DefaultReporter) Report(ctx context.Context, info *model.SystemInfo) er
 		return err
 	}
 
-	_, err = r.reporter.Client.Post(
-		reportURL,
-		"application/json",
-		bytes.NewBuffer(reportPaylod),
-	)
+	req, err := http.NewRequestWithContext(ctx, "POST", reportURL, bytes.NewBuffer(reportPaylod))
+	if err != nil {
+		log.Println("创建请求失败：", err)
+		return err
+	}
+	setDefaultHeaders(req)
 
+	resp, err := r.reporter.Client.Do(req)
 	if err != nil {
 		log.Println("上报数据失败：", err)
 		return err
 	}
+	defer resp.Body.Close()
 	return nil
 }
 
@@ -110,16 +120,19 @@ func (r *DefaultReporter) ReportBatch(ctx context.Context, infoList []*model.Sys
 		return err
 	}
 
-	_, err = r.reporter.Client.Post(
-		reportURL,
-		"application/json",
-		bytes.NewBuffer(reportPaylod),
-	)
+	req, err := http.NewRequestWithContext(ctx, "POST", reportURL, bytes.NewBuffer(reportPaylod))
+	if err != nil {
+		log.Println("创建请求失败：", err)
+		return err
+	}
+	setDefaultHeaders(req)
 
+	resp, err := r.reporter.Client.Do(req)
 	if err != nil {
 		log.Println("上报数据失败：", err)
 		return err
 	}
+	defer resp.Body.Close()
 	return nil
 }
 
@@ -144,16 +157,19 @@ func (r *DefaultReporter) register(ctx context.Context, info *model.SystemInfo) 
 		return err
 	}
 
-	resp, err := r.reporter.Client.Post(
-		registerURL,
-		"application/json",
-		bytes.NewBuffer(data),
-	)
+	req, err := http.NewRequestWithContext(ctx, "POST", registerURL, bytes.NewBuffer(data))
+	if err != nil {
+		log.Println("创建请求失败: ", err)
+		return err
+	}
+	setDefaultHeaders(req)
 
+	resp, err := r.reporter.Client.Do(req)
 	if err != nil {
 		log.Println("注册客户端失败: ", err)
 		return err
 	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 
