@@ -224,8 +224,3 @@ export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
     .bind(agentId)
     .all();
 }
-
-// 获取所有客户端资源指标
-export async function getAllAgentMetrics(db: Bindings["DB"]) {
-  return await db.prepare("SELECT * FROM agent_metrics_24h").all<Metrics>();
-}
