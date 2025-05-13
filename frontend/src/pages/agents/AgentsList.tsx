@@ -26,7 +26,7 @@ import {
 import {
   getAllAgents,
   deleteAgent,
-  getAllAgentMetrics,
+  getAgentMetrics,
 } from "../../api/agents";
 import AgentCard from "../../components/AgentCard";
 import { useTranslation } from "react-i18next";
@@ -68,19 +68,23 @@ const AgentsList = () => {
     setError(null);
     // 获取所有客户端
     const response = await getAllAgents();
-    // 获取所有客户端的指标数据
-    const metricsResponse = await getAllAgentMetrics();
 
-    if (response.agents && metricsResponse.metrics) {
+    if (response.agents) {
       // 合并指标数据到客户端数据
-      const agentsWithMetrics = response.agents.map((agent) => {
-        const metrics = metricsResponse.metrics?.filter(
-          (metric) => metric.agent_id === agent.id
-        );
-        console.log("获取到的 metrics 数据: ", metrics);
-        console.log("获取到的 agent 数据: ", agent);
-        return { ...agent, metrics };
-      });
+      const agentsWithMetrics = await Promise.all(
+        response.agents.map(async (agent) => {
+          // 获取指定客户端的指标数据
+          const metricsResponse = await getAgentMetrics(agent.id);
+          if (!metricsResponse.success) {
+            console.error("获取指标数据失败:", metricsResponse.message);
+            return agent; // 返回原始客户端数据
+          }
+          const metrics = metricsResponse.agent;
+          console.log("获取到的 metrics 数据: ", metrics);
+          console.log("获取到的 agent 数据: ", agent);
+          return { ...agent, metrics };
+        })
+      );
       setAgents(agentsWithMetrics);
     }
     console.log("获取到的 agent 数据: ", response);
