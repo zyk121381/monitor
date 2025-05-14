@@ -5,6 +5,7 @@ import AgentCard from "../../components/AgentCard";
 import MonitorCard from "../../components/MonitorCard";
 import { useTranslation } from "react-i18next";
 import { Agent, MonitorWithDailyStatsAndStatusHistory } from "../../types";
+import { getAgentMetrics } from "../../api";
 
 const StatusPage = () => {
   const { t } = useTranslation();
@@ -47,6 +48,15 @@ const StatusPage = () => {
       setPageDescription(
         response.description || t("statusPage.allOperational")
       );
+      if (response.agents) {
+        // 获取每个代理的指标数据
+        await Promise.all(
+          response.agents.map(async (agent) => {
+            const metrics = await getAgentMetrics(agent.id);
+            agent.metrics = metrics.agent || [];
+          })
+        );
+      }
       console.log(response);
       setData({
         monitors: response.monitors || [],
