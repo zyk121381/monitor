@@ -4,8 +4,8 @@ import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
 import { LanguageProvider } from "./providers/LanguageProvider";
 import "@radix-ui/themes/styles.css";
-import "./styles/index.css";
-import "./locales/config";
+import "./styles/global.css";
+import "./i18n/config";
 import router from "./router";
 
 if ("serviceWorker" in navigator) {

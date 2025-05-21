@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text, Grid, Badge, Theme } from "@radix-ui/themes";
+import { Box, Flex, Heading, Text, Grid, Theme } from "@radix-ui/themes";
+import { Badge } from "@/components/ui";
 import { getStatusPageData } from "../../api/status";
 import AgentCard from "../../components/AgentCard";
 import MonitorCard from "../../components/MonitorCard";
@@ -74,10 +75,8 @@ const StatusPage = () => {
       <Theme appearance="light">
         <Box>
           <div className="page-container">
-            <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
-              <Text size="3" style={{ color: "var(--red-9)" }}>
-                {error}
-              </Text>
+            <Flex justify="center" align="center">
+              <Text size="3">{error}</Text>
             </Flex>
           </div>
         </Box>
@@ -90,7 +89,7 @@ const StatusPage = () => {
       <Theme appearance="light">
         <Box>
           <div className="page-container">
-            <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
+            <Flex justify="center" align="center">
               <Text size="3">{t("common.loading")}</Text>
             </Flex>
           </div>
@@ -114,11 +113,11 @@ const StatusPage = () => {
             <Heading size="9" align="center">
               {pageTitle}
             </Heading>
-            <Text size="5" align="center" style={{ maxWidth: "800px" }}>
+            <Text size="5" align="center">
               {pageDescription}
             </Text>
             <Flex gap="2" mt="2">
-              <Badge size="2">
+              <Badge>
                 {t("statusPage.lastUpdated")}: {t("statusPage.justNow")}
               </Badge>
             </Flex>
@@ -146,7 +145,7 @@ const StatusPage = () => {
               </Heading>
               <Grid columns={{ initial: "1" }} gap="4">
                 {data.agents.map((agent) => (
-                  <Box key={agent.id} style={{ position: "relative" }}>
+                  <Box key={agent.id}>
                     <AgentCard agent={agent} showIpAddress={false} />
                   </Box>
                 ))}
