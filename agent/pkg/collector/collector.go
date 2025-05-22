@@ -34,6 +34,7 @@ func NewCollector() Collector {
 func (c *DefaultCollector) Collect(ctx context.Context) (*model.SystemInfo, error) {
 	info := &model.SystemInfo{
 		Timestamp: time.Now(),
+		Keepalive: config.Interval,
 	}
 
 	info.Token = config.Token

@@ -356,6 +356,7 @@ export async function updateAgentStatusService(
       hostname: statusData[0]?.hostname,
       os: statusData[0]?.os,
       version: statusData[0]?.version,
+      keepalive: statusData[0]?.keepalive,
       status: "active",
     };
 
