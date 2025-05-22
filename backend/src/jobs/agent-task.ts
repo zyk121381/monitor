@@ -41,7 +41,7 @@ export const checkAgentsStatus = async (c: any) => {
       const timeDiff = now.getTime() - lastUpdateTime.getTime();
 
       // 如果超过5个监控周期没有更新状态，将客户端状态设置为inactive
-      if (timeDiff > (parseInt(agent.keepalive) * 5 * 1000)) {
+      if (timeDiff > (parseInt(agent.keepalive || "60") * 5 * 1000)) {
         console.log(
           `定时任务: 客户端 ${agent.name} (ID: ${agent.id}) 超过5个监控周期未更新状态，设置为离线`
         );
