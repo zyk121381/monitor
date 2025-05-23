@@ -14,6 +14,48 @@ SERVER_URL=""
 AGENT_TOKEN=""
 AGENT_INTERVAL="60" # 默认间隔60秒
 
+# --- 环境变量相关函数 ---
+detect_shell_rc() {
+  if [ -n "$ZSH_VERSION" ] && [ -f "$HOME/.zshrc" ]; then
+    echo "$HOME/.zshrc"
+  elif [ -f "$HOME/.bashrc" ]; then
+    echo "$HOME/.bashrc"
+  elif [ -f "$HOME/.profile" ]; then
+    echo "$HOME/.profile"
+  else
+    echo "$HOME/.bashrc"
+  fi
+}
+
+set_env_vars() {
+  local rc_file
+  rc_file=$(detect_shell_rc)
+  # 先去除已有的同名变量
+  grep -v '^export XUGOU_SERVER=' "$rc_file" 2>/dev/null | grep -v '^export XUGOU_TOKEN=' > "${rc_file}.tmp" || true
+  mv "${rc_file}.tmp" "$rc_file"
+  echo "export XUGOU_SERVER=\"$SERVER_URL\"" >> "$rc_file"
+  echo "export XUGOU_TOKEN=\"$AGENT_TOKEN\"" >> "$rc_file"
+  
+  echo "已将 XUGOU_SERVER 和 XUGOU_TOKEN 写入 $rc_file"
+
+  # 让环境变量立即生效（仅限交互式 shell）
+  if [[ $- == *i* ]]; then
+    source "$rc_file"
+    echo "已自动刷新环境变量（source $rc_file）"
+  else
+    echo "请手动执行：source $rc_file 以使环境变量立即生效"
+  fi
+}
+
+read_env_vars() {
+  if [ -z "$XUGOU_SERVER" ]; then
+    XUGOU_SERVER=$(grep '^export XUGOU_SERVER=' "$(detect_shell_rc)" 2>/dev/null | tail -n1 | cut -d= -f2- | sed 's/^"//;s/"$//')
+  fi
+  if [ -z "$XUGOU_TOKEN" ]; then
+    XUGOU_TOKEN=$(grep '^export XUGOU_TOKEN=' "$(detect_shell_rc)" 2>/dev/null | tail -n1 | cut -d= -f2- | sed 's/^"//;s/"$//')
+  fi
+}
+
 # --- 辅助函数 ---
 print_usage() {
   echo "用法: $0 [command] [options]"
@@ -21,6 +63,8 @@ print_usage() {
   echo "Commands:"
   echo "  install (default)    下载、安装并配置 ${AGENT_NAME}."
   echo "                       在 Linux 上会尝试注册为 systemd 服务."
+  echo "  update               更新 ${AGENT_NAME} 到最新版."
+  echo "                       会自动读取环境变量并重启 agent."
   echo "  uninstall            卸载 ${AGENT_NAME}."
   echo "                       在 Linux 上会尝试移除 systemd 服务."
   echo "  help                 显示此帮助信息."
@@ -33,6 +77,7 @@ print_usage() {
   echo "示例:"
   echo "  $0 install --server http://localhost:8787 --token yoursecrettoken"
   echo "  $0 --server http://localhost:8787 --token yoursecrettoken --interval 300"
+  echo "  $0 update"
   echo "  $0 uninstall"
   exit 1
 }
@@ -231,6 +276,90 @@ WantedBy=multi-user.target"
     fi
   fi
   echo "安装完成。"
+  set_env_vars
+}
+
+# --- 更新 Agent ---
+do_update() {
+  detect_os_arch
+
+  read_env_vars
+  if [ -z "$XUGOU_SERVER" ] || [ -z "$XUGOU_TOKEN" ]; then
+    echo "错误: 未检测到 XUGOU_SERVER 或 XUGOU_TOKEN 环境变量，请先运行 install 命令。" >&2
+    exit 1
+  fi
+
+  echo "开始更新 ${AGENT_NAME}..."
+  echo "服务器地址: ${XUGOU_SERVER}"
+  echo "Agent 令牌: **** (已隐藏)"
+
+  if [ "$PLATFORM" = "linux" ] && command -v systemctl &> /dev/null; then
+    if ${SUDO_CMD} systemctl list-unit-files | grep -q "${SERVICE_NAME}"; then
+      echo "停止 ${SERVICE_NAME} 服务..."
+      ${SUDO_CMD} systemctl stop "${SERVICE_NAME}" || true
+    fi
+  fi
+
+  if [ -f "${AGENT_INSTALL_PATH}" ]; then
+    echo "删除旧版 Agent: ${AGENT_INSTALL_PATH}"
+    ${SUDO_CMD} rm -f "${AGENT_INSTALL_PATH}"
+  fi
+  LOCAL_AGENT_DOWNLOAD_PATH="./${AGENT_NAME}${EXTENSION}"
+  if [ -f "${LOCAL_AGENT_DOWNLOAD_PATH}" ]; then
+    echo "删除本地旧版 Agent: ${LOCAL_AGENT_DOWNLOAD_PATH}"
+    rm -f "${LOCAL_AGENT_DOWNLOAD_PATH}"
+  fi
+
+  DOWNLOAD_URL="${DOWNLOAD_BASE_URL}/${AGENT_NAME}-${PLATFORM}-${ARCH}${EXTENSION}"
+  echo "下载最新 Agent: ${DOWNLOAD_URL}"
+  if command -v curl >/dev/null 2>&1; then
+    curl -sSL "${DOWNLOAD_URL}" -o "${LOCAL_AGENT_DOWNLOAD_PATH}"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO "${LOCAL_AGENT_DOWNLOAD_PATH}" "${DOWNLOAD_URL}"
+  else
+    echo "错误: 系统中未找到 curl 或 wget。请先安装其中一个。" >&2
+    exit 1
+  fi
+  chmod +x "${LOCAL_AGENT_DOWNLOAD_PATH}"
+
+  if [ "$PLATFORM" = "linux" ] && command -v systemctl &> /dev/null; then
+    echo "将 Agent 移动到 ${AGENT_INSTALL_PATH}..."
+    ${SUDO_CMD} mv "${LOCAL_AGENT_DOWNLOAD_PATH}" "${AGENT_INSTALL_PATH}"
+
+    SERVICE_FILE_CONTENT="[Unit]
+Description=${AGENT_NAME}
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=${AGENT_INSTALL_PATH} start --server \"${XUGOU_SERVER}\" --token \"${XUGOU_TOKEN}\" --interval \"${AGENT_INTERVAL}\"
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+Environment=\"HOME=/root\"
+# 考虑为更佳安全性设置 User= 和 Group= (例如创建一个 'xugou' 用户)
+# User=nobody
+# Group=nogroup
+
+[Install]
+WantedBy=multi-user.target"
+    TEMP_SERVICE_FILE=$(mktemp)
+    echo "${SERVICE_FILE_CONTENT}" > "${TEMP_SERVICE_FILE}"
+    ${SUDO_CMD} mkdir -p "$(dirname "${SERVICE_FILE_PATH}")"
+    ${SUDO_CMD} cp "${TEMP_SERVICE_FILE}" "${SERVICE_FILE_PATH}"
+    rm "${TEMP_SERVICE_FILE}"
+    ${SUDO_CMD} chmod 644 "${SERVICE_FILE_PATH}"
+    ${SUDO_CMD} systemctl daemon-reload
+    ${SUDO_CMD} systemctl enable "${SERVICE_NAME}"
+    ${SUDO_CMD} systemctl restart "${SERVICE_NAME}"
+    echo "${AGENT_NAME} 已更新并重启 systemd 服务。"
+  else
+    echo "Agent 已下载到 ${LOCAL_AGENT_DOWNLOAD_PATH}"
+    echo "使用如下命令启动 Agent："
+    echo "  ${LOCAL_AGENT_DOWNLOAD_PATH} start --server \"${XUGOU_SERVER}\" --token \"${XUGOU_TOKEN}\" --interval \"${AGENT_INTERVAL}\""
+  fi
+  echo "更新完成。"
 }
 
 # --- 卸载 Agent ---
@@ -289,12 +418,11 @@ do_uninstall() {
   echo "卸载过程完成。"
 }
 
-
 # --- 主逻辑 ---
 SUBCOMMAND="install" # Default subcommand
 
 # Check for subcommand as the first argument
-if [[ "$1" == "install" || "$1" == "uninstall" || "$1" == "help" ]]; then
+if [[ "$1" == "install" || "$1" == "uninstall" || "$1" == "help" || "$1" == "update" ]]; then
   SUBCOMMAND="$1"
   shift
 elif [[ "$1" == -* ]]; then # If first arg is an option, assume 'install'
@@ -305,7 +433,6 @@ else # If first arg is not a known command or an option, show usage
   fi
   print_usage
 fi
-
 
 # Parse options based on subcommand
 if [[ "$SUBCOMMAND" == "install" ]]; then
@@ -338,6 +465,9 @@ fi
 case "$SUBCOMMAND" in
   install)
     do_install
+    ;;
+  update)
+    do_update
     ;;
   uninstall)
     do_uninstall
