@@ -476,3 +476,7 @@ export async function setAgentInactive(env: any, id: number) {
 export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
   return await AgentRepository.getAgentMetrics(db, agentId);
 }
+
+export async function getLatestAgentMetrics(db: Bindings["DB"], agentId: number) {
+  return await AgentRepository.getLatestAgentMetrics(db, agentId);
+}

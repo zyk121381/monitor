@@ -199,7 +199,7 @@ const MonitorsList = () => {
   }
 
   return (
-    <Container size="4">
+    <Container className="sm:px-6 lg:px-[8%]">
       <Flex justify="between" align="center">
         <Heading size="6">{t("monitors.pageTitle")}</Heading>
         <Flex className="mt-4 space-x-2">

@@ -74,7 +74,7 @@ const CreateAgent = () => {
   };
 
   return (
-    <Box>
+    <Box className="sm:px-6 lg:px-[8%]">
       <Flex justify="between" align="center">
         <Flex align="center" gap="2">
           <Button variant="secondary" onClick={() => navigate("/agents")}>
@@ -83,8 +83,8 @@ const CreateAgent = () => {
           <Heading size="6">{t("agent.form.title.create")}</Heading>
         </Flex>
       </Flex>
-      <Card>
-        <Flex direction="column" gap="5">
+      <Card className="mt-4">
+        <Flex direction="column" gap="2" className="ml-4">
           {/* 提示信息 */}
           <Box>
             <Flex gap="2">

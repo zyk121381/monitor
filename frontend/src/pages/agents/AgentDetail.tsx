@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Flex, Heading, Text, Grid, Container } from "@radix-ui/themes";
 
-import { Button, Card, Badge, Avatar, AvatarFallback } from "@/components/ui";
+import { Button, Card, Badge } from "@/components/ui";
 
 import {
   ArrowLeftIcon,
@@ -15,6 +15,7 @@ import {
   DesktopIcon,
   GlobeIcon,
   Link2Icon,
+  PersonIcon,
 } from "@radix-ui/react-icons";
 import { getAgent, deleteAgent, getAgentMetrics } from "../../api/agents";
 import { Agent } from "../../types/agents";
@@ -233,169 +234,164 @@ const AgentDetail = () => {
           </Button>
         </Flex>
       </Flex>
+      <Box pt="3">
+        <Grid columns={{ initial: "1" }} gap="4">
+          {/* 系统信息卡片 */}
+          <Card>
+            <Flex direction="column" gap="2" className="ml-4">
+              <Heading size="3">{t("agent.systemInfo")}</Heading>
+              <Box>
+                <Flex align="center" gap="2">
+                  <PersonIcon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agents.table.name")}:
+                  </Text>
+                  <Text as="div" size="2">
+                    {agent.name}
+                  </Text>
+                </Flex>
+              </Box>
+              <Box>
+                <Flex align="center" gap="2">
+                  <DesktopIcon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agent.os")}:
+                  </Text>
+                  <Text as="div" size="2">
+                    {agent.os || t("common.notFound")}
+                  </Text>
+                </Flex>
+              </Box>
 
-      <Box>
-        <Card>
-          <Flex align="center" gap="4" mb="4">
-            <Avatar>
-              <AvatarFallback>{agent.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <Box>
-              <Heading size="5">{agent.name}</Heading>
-            </Box>
-          </Flex>
-        </Card>
-        <Box pt="3">
-          <Grid columns={{ initial: "1" }} gap="4">
-            {/* 系统信息卡片 */}
-            <Card>
-              <Flex direction="column" gap="3">
-                <Heading size="3">{t("agent.systemInfo")}</Heading>
+              <Box>
+                <Flex align="center" gap="2">
+                  <InfoCircledIcon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agent.version")}:
+                  </Text>
+                  <Text as="div" size="2">
+                    {agent.version || t("common.notFound")}
+                  </Text>
+                </Flex>
+              </Box>
 
-                <Box>
-                  <Flex align="center" gap="2">
-                    <DesktopIcon />
-                    <Text as="div" size="2" weight="bold">
-                      {t("agent.os")}:
-                    </Text>
-                    <Text as="div" size="2">
-                      {agent.os || t("common.notFound")}
-                    </Text>
-                  </Flex>
-                </Box>
+              <Box>
+                <Flex align="center" gap="2">
+                  <GlobeIcon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agent.hostname")}:
+                  </Text>
+                  <Text as="div" size="2">
+                    {agent.hostname || t("common.notFound")}
+                  </Text>
+                </Flex>
+              </Box>
 
-                <Box>
-                  <Flex align="center" gap="2">
-                    <InfoCircledIcon />
-                    <Text as="div" size="2" weight="bold">
-                      {t("agent.version")}:
-                    </Text>
-                    <Text as="div" size="2">
-                      {agent.version || t("common.notFound")}
-                    </Text>
-                  </Flex>
-                </Box>
-
-                <Box>
-                  <Flex align="center" gap="2">
-                    <GlobeIcon />
-                    <Text as="div" size="2" weight="bold">
-                      {t("agent.hostname")}:
-                    </Text>
-                    <Text as="div" size="2">
-                      {agent.hostname || t("common.notFound")}
-                    </Text>
-                  </Flex>
-                </Box>
-
-                <Box>
-                  <Flex align="center" gap="2">
-                    <Link2Icon />
-                    <Text as="div" size="2" weight="bold">
-                      {t("agent.ipAddress")}:
-                    </Text>
-                    {agent.ip_addresses ? (
-                      (() => {
-                        try {
-                          const ipArray = JSON.parse(
-                            String(agent.ip_addresses)
+              <Box>
+                <Flex align="center" gap="2">
+                  <Link2Icon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agent.ipAddress")}:
+                  </Text>
+                  {agent.ip_addresses ? (
+                    (() => {
+                      try {
+                        const ipArray = JSON.parse(String(agent.ip_addresses));
+                        if (Array.isArray(ipArray) && ipArray.length > 0) {
+                          return (
+                            <Text as="div" size="2">
+                              {ipArray[0]}
+                              {ipArray.length > 1
+                                ? ` (+${ipArray.length - 1})`
+                                : ""}
+                            </Text>
                           );
-                          if (Array.isArray(ipArray) && ipArray.length > 0) {
-                            return (
-                              <Text as="div" size="2">
-                                {ipArray[0]}
-                                {ipArray.length > 1
-                                  ? ` (+${ipArray.length - 1})`
-                                  : ""}
-                              </Text>
-                            );
-                          } else {
-                            return (
-                              <Text as="div" size="2">
-                                {String(agent.ip_addresses)}
-                              </Text>
-                            );
-                          }
-                        } catch (e) {
+                        } else {
                           return (
                             <Text as="div" size="2">
                               {String(agent.ip_addresses)}
                             </Text>
                           );
                         }
-                      })()
-                    ) : (
-                      <Text as="div" size="2" color="gray">
-                        {t("common.unknown")}
-                      </Text>
-                    )}
-                  </Flex>
-                </Box>
-
-                <Box>
-                  <Flex align="center" gap="2">
-                    <LapTimerIcon />
-                    <Text as="div" size="2" weight="bold">
-                      {t("agent.uptime")}:
-                    </Text>
-                    <Text as="div" size="2">
-                      {formatUptime(agent)}
-                    </Text>
-                  </Flex>
-                </Box>
-
-                <Box>
-                  <Flex align="center" gap="2">
-                    <ClockIcon />
-                    <Text as="div" size="2" weight="bold">
-                      {t("agent.lastUpdated")}:
-                    </Text>
-                    <Text as="div" size="2">
-                      {formatDateTime(agent.updated_at)}
-                    </Text>
-                  </Flex>
-                </Box>
-
-                {/* 如果存在多个IP地址，展示完整列表 */}
-                {agent.ip_addresses &&
-                  (() => {
-                    try {
-                      const ipArray = JSON.parse(String(agent.ip_addresses));
-                      if (Array.isArray(ipArray) && ipArray.length > 1) {
+                      } catch (e) {
                         return (
-                          <Box pl="6" mt="1">
-                            <Flex direction="column" gap="1">
-                              {ipArray.slice(1).map((ip, index) => (
-                                <Text key={index} size="2" color="gray">
-                                  {ip}
-                                </Text>
-                              ))}
-                            </Flex>
-                          </Box>
+                          <Text as="div" size="2">
+                            {String(agent.ip_addresses)}
+                          </Text>
                         );
                       }
-                      return null;
-                    } catch (e) {
-                      return null;
-                    }
-                  })()}
-              </Flex>
-            </Card>
+                    })()
+                  ) : (
+                    <Text as="div" size="2" color="gray">
+                      {t("common.unknown")}
+                    </Text>
+                  )}
+                </Flex>
+              </Box>
 
-            {/* Agent 资源信息卡片 */}
-            <Card>
-              <Flex direction="column" gap="4">
-                <Heading size="3">{t("agent.metrics")}</Heading>
-                <AgentCard
-                  agent={agent}
-                  showIpAddress={false}
-                  showHostname={false}
-                  showLastUpdated={false}
-                ></AgentCard>
-              </Flex>
-            </Card>
-          </Grid>
-        </Box>
+              <Box>
+                <Flex align="center" gap="2">
+                  <LapTimerIcon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agent.uptime")}:
+                  </Text>
+                  <Text as="div" size="2">
+                    {formatUptime(agent)}
+                  </Text>
+                </Flex>
+              </Box>
+
+              <Box>
+                <Flex align="center" gap="2">
+                  <ClockIcon />
+                  <Text as="div" size="2" weight="bold">
+                    {t("agent.lastUpdated")}:
+                  </Text>
+                  <Text as="div" size="2">
+                    {formatDateTime(agent.updated_at)}
+                  </Text>
+                </Flex>
+              </Box>
+
+              {/* 如果存在多个IP地址，展示完整列表 */}
+              {agent.ip_addresses &&
+                (() => {
+                  try {
+                    const ipArray = JSON.parse(String(agent.ip_addresses));
+                    if (Array.isArray(ipArray) && ipArray.length > 1) {
+                      return (
+                        <Box pl="6" mt="1">
+                          <Flex direction="column" gap="1">
+                            {ipArray.slice(1).map((ip, index) => (
+                              <Text key={index} size="2" color="gray">
+                                {ip}
+                              </Text>
+                            ))}
+                          </Flex>
+                        </Box>
+                      );
+                    }
+                    return null;
+                  } catch (e) {
+                    return null;
+                  }
+                })()}
+            </Flex>
+          </Card>
+
+          {/* Agent 资源信息卡片 */}
+          <Card>
+            <Flex direction="column" gap="2" className="ml-4">
+              <Heading size="3">{t("agent.metrics")}</Heading>
+              <AgentCard
+                agent={agent}
+                showIpAddress={false}
+                showHostname={false}
+                showLastUpdated={false}
+              ></AgentCard>
+            </Flex>
+          </Card>
+        </Grid>
       </Box>
     </Container>
   );

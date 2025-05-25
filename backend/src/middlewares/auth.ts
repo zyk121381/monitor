@@ -20,7 +20,11 @@ export const jwtMiddleware = async (c: Context, next: Next) => {
     return next();
   }
   // 获取 metrics 时暂时先不验证。
-  if (c.req.path.endsWith("/metrics") && c.req.method === "GET") {
+  if (
+    (c.req.path.endsWith("/metrics") ||
+      c.req.path.endsWith("/metrics/latest")) &&
+    c.req.method === "GET"
+  ) {
     return next();
   }
   const middleware = jwt({

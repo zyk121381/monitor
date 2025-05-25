@@ -7,7 +7,7 @@ import {
 import { Card, Badge } from "./ui";
 import { MonitorWithDailyStatsAndStatusHistory } from "../types/monitors";
 import { useTranslation } from "react-i18next";
-import StatusBar from "./StatusBar";
+import StatusBar from "./MonitorStatusBar";
 import ResponseTimeChart from "./ResponseTimeChart";
 
 interface MonitorCardProps {

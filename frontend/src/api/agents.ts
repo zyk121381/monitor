@@ -87,3 +87,14 @@ export const getAgentMetrics = async (
     };
   }
 };
+
+export const getLatestAgentMetrics = async (
+  id: number
+): Promise<{
+  success: boolean;
+  agent?: MetricHistory;
+  message?: string;
+}> => {
+  const response = await api.get(`/api/agents/${id}/metrics/latest`);
+  return response.data;
+};

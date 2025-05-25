@@ -15,6 +15,19 @@ export interface Agent {
   metrics?: MetricHistory[];
 }
 
+export interface AgentWithLatestMetrics {
+  id: number;
+  name: string;
+  hostname?: string;
+  ip_addresses?: string;
+  status: "active" | "inactive" | "connecting" | "unknown";
+  version?: string;
+  os?: string;
+  created_at: string;
+  updated_at: string;
+  metrics?: MetricHistory;
+}
+
 export interface AgentResponse {
   success: boolean;
   agent?: Agent;

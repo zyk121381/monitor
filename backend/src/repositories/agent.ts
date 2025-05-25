@@ -227,3 +227,11 @@ export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
     .bind(agentId)
     .all();
 }
+
+// 获取指定客户端的最新指标
+export async function getLatestAgentMetrics(db: Bindings["DB"], agentId: number) {
+  return await db
+    .prepare("SELECT * FROM agent_metrics_24h WHERE agent_id =? ORDER BY timestamp DESC LIMIT 1")
+    .bind(agentId)
+    .all();
+}

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { Bindings } from "../models/db";
-import { Agent } from "../models/agent";
+import { Agent, Metrics } from "../models/agent";
 import {
   getAgents,
   getAgentDetail,
@@ -11,6 +11,7 @@ import {
   registerAgentService,
   updateAgentStatusService,
   getAgentMetrics,
+  getLatestAgentMetrics,
 } from "../services/AgentService";
 
 const agents = new Hono<{
@@ -55,11 +56,7 @@ agents.put("/:id", async (c) => {
   const payload = c.get("jwtPayload");
   const updateData = await c.req.json();
 
-  const result = await updateAgentService(
-    c.env.DB,
-    agentId,
-    updateData
-  );
+  const result = await updateAgentService(c.env.DB, agentId, updateData);
 
   return c.json(
     {
@@ -76,10 +73,7 @@ agents.delete("/:id", async (c) => {
   const agentId = Number(c.req.param("id"));
   const payload = c.get("jwtPayload");
 
-  const result = await deleteAgentService(
-    c.env.DB,
-    agentId
-  );
+  const result = await deleteAgentService(c.env.DB, agentId);
 
   return c.json(
     {
@@ -165,8 +159,22 @@ agents.get("/:id/metrics", async (c) => {
       message: "获取客户端指标成功",
     },
     200
-  )
-})
+  );
+});
+
+// 获取单个客户端的最新指标
+agents.get("/:id/metrics/latest", async (c) => {
+  const agentId = Number(c.req.param("id"));
+  const result = await getLatestAgentMetrics(c.env.DB, agentId);
+  return c.json(
+    {
+      success: result.success,
+      agent: result.results,
+      message: "获取客户端最新指标成功",
+    },
+    200
+  );
+});
 
 // 获取单个客户端
 agents.get("/:id", async (c) => {
@@ -183,6 +191,5 @@ agents.get("/:id", async (c) => {
     result.status as any
   );
 });
-
 
 export { agents };

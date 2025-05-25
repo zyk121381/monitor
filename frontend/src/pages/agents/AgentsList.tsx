@@ -37,10 +37,14 @@ import {
   ViewGridIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { getAllAgents, deleteAgent, getAgentMetrics } from "../../api/agents";
-import AgentCard from "../../components/AgentCard";
+import {
+  getAllAgents,
+  deleteAgent,
+  getLatestAgentMetrics,
+} from "../../api/agents";
+import AgentStatusBar from "../../components/AgentStatusBar";
 import { useTranslation } from "react-i18next";
-import { Agent } from "../../types";
+import { AgentWithLatestMetrics } from "../../types";
 
 // 定义客户端状态颜色映射
 const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
@@ -52,7 +56,7 @@ const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
 
 const AgentsList = () => {
   const navigate = useNavigate();
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<AgentWithLatestMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -84,20 +88,25 @@ const AgentsList = () => {
       const agentsWithMetrics = await Promise.all(
         response.agents.map(async (agent) => {
           // 获取指定客户端的指标数据
-          const metricsResponse = await getAgentMetrics(agent.id);
+          const metricsResponse = await getLatestAgentMetrics(agent.id);
           if (!metricsResponse.success) {
             console.error("获取指标数据失败:", metricsResponse.message);
-            return agent; // 返回原始客户端数据
+            return { ...agent, metrics: undefined } as AgentWithLatestMetrics;
           }
-          const metrics = metricsResponse.agent;
-          console.log("获取到的 metrics 数据: ", metrics);
-          console.log("获取到的 agent 数据: ", agent);
-          return { ...agent, metrics };
+          // 确保我们只取数组中的第一条记录（最新的）
+          const latestMetric = Array.isArray(metricsResponse.agent)
+            ? metricsResponse.agent[0]
+            : metricsResponse.agent;
+
+          return {
+            ...agent,
+            metrics: latestMetric,
+          } as AgentWithLatestMetrics;
         })
       );
-      setAgents(agentsWithMetrics);
+      console.log("获取到的 agentsWithMetrics 数据: ", agentsWithMetrics);
+      setAgents(agentsWithMetrics as AgentWithLatestMetrics[]);
     }
-    console.log("获取到的 agent 数据: ", response);
 
     setLoading(false);
   };
@@ -143,7 +152,7 @@ const AgentsList = () => {
       <Grid columns={{ initial: "1" }} gap="4">
         {agents.map((agent) => (
           <Box key={agent.id} className="relative">
-            <AgentCard agent={agent} />
+            <AgentStatusBar latestMetric={agent.metrics} agent={agent} />
             <Flex gap="2" className="absolute top-4 right-4">
               <IconButton
                 variant="ghost"

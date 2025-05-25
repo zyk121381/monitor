@@ -100,52 +100,59 @@ const EditAgent = () => {
 
   return (
     <Box>
-      <Flex justify="between" align="center">
-        <Flex align="center" gap="2">
-          <Button variant="secondary" onClick={() => navigate(`/agents/${id}`)}>
-            <ArrowLeftIcon />
-          </Button>
-          <Heading size="6">
-            {t("agent.form.editingClient", { name: formData.name })}
-          </Heading>
-        </Flex>
-      </Flex>
-      <Card>
-        <form onSubmit={handleSubmit}>
-          <Flex direction="column" gap="4">
-            <Box mb="4">
-              <Text as="label" size="2" mb="1" weight="bold">
-                {t("agent.form.name")}{" "}
-                <Text size="2" color="red">
-                  *
-                </Text>
-              </Text>
-              <TextField.Input
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder={t("agent.form.namePlaceholder")}
-                required
-              />
-              <Text size="1" color="gray" mt="1">
-                {t("agent.form.nameHelp")}
-              </Text>
-            </Box>
-
-            <Flex justify="end" mt="4" gap="2">
-              <Button
-                variant="secondary"
-                onClick={() => navigate(`/agents/${id}`)}
-              >
-                {t("common.cancel")}
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? t("common.savingChanges") : t("common.saveChanges")}
-              </Button>
-            </Flex>
+      <div className="sm:px-6 lg:px-[8%]">
+        <Flex justify="between" align="center">
+          <Flex align="center" gap="2">
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/agents/${id}`)}
+            >
+              <ArrowLeftIcon />
+            </Button>
+            <Heading size="6">
+              {t("agent.form.editingClient", { name: formData.name })}
+            </Heading>
           </Flex>
-        </form>
-      </Card>
+        </Flex>
+        <Card>
+          <form onSubmit={handleSubmit}>
+            <Flex direction="column" gap="2" className="ml-4">
+              <Box mb="4">
+                <Text as="label" size="2" mb="1" weight="bold">
+                  {t("agent.form.name")}{" "}
+                  <Text size="2" color="red">
+                    *
+                  </Text>
+                </Text>
+                <TextField.Input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder={t("agent.form.namePlaceholder")}
+                  required
+                />
+                <Text size="1" color="gray" mt="1">
+                  {t("agent.form.nameHelp")}
+                </Text>
+              </Box>
+
+              <Flex justify="end" mt="4" gap="2">
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate(`/agents/${id}`)}
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading
+                    ? t("common.savingChanges")
+                    : t("common.saveChanges")}
+                </Button>
+              </Flex>
+            </Flex>
+          </form>
+        </Card>
+      </div>
     </Box>
   );
 };

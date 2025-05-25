@@ -1,5 +1,5 @@
 import { Box, Card, Flex, Text } from "@radix-ui/themes";
-import { Tabs, TabsContent, TabsList, TabsTrigger,Badge } from "./ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger, Badge } from "./ui";
 import { GlobeIcon } from "@radix-ui/react-icons";
 import MetricsChart from "./MetricsChart";
 import { useTranslation } from "react-i18next";
