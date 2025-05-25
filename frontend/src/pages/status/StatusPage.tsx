@@ -143,7 +143,11 @@ const StatusPage = () => {
             <Heading size="9" align="center">
               {pageTitle}
             </Heading>
-            <Text size="5" align="center">
+            <Text 
+              size="5" 
+              align="center" 
+              className="whitespace-pre-wrap"
+            >
               {pageDescription}
             </Text>
           </Flex>
