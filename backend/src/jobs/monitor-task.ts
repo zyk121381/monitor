@@ -3,6 +3,9 @@ import { Bindings } from "../models/db";
 import { Monitor } from "../models/monitor";
 import { getMonitorsToCheck, checkMonitor } from "../services";
 import { shouldSendNotification, sendNotification } from "../services";
+import { db } from "../config";
+import { monitorDailyStats, monitorStatusHistory24h,monitors } from "../db/schema";
+import { and, gte, lte } from "drizzle-orm";
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
 
@@ -14,7 +17,7 @@ async function checkMonitors(c: any) {
     const now = new Date();
 
     // 查询需要检查的监控
-    const monitors = await getMonitorsToCheck(c.env.DB);
+    const monitors = await getMonitorsToCheck();
 
     console.log(`找到 ${monitors?.results?.length || 0} 个需要检查的监控`);
 
@@ -27,7 +30,7 @@ async function checkMonitors(c: any) {
       monitors.results.map(async (monitorItem: any) => {
         // 确保正确的类型转换
         const monitor = monitorItem as Monitor;
-        const checkResult = await checkMonitor(c.env.DB, monitor);
+        const checkResult = await checkMonitor(monitor);
 
         // 处理通知
         await handleMonitorNotification(c, monitor, checkResult);
@@ -74,7 +77,6 @@ async function handleMonitorNotification(
     // 检查是否需要发送通知
     console.log(`检查通知设置...`);
     const notificationCheck = await shouldSendNotification(
-      c.env.DB,
       "monitor",
       monitor.id,
       checkResult.previous_status,
@@ -127,7 +129,6 @@ async function handleMonitorNotification(
     // 发送通知
     console.log(`开始发送通知...`);
     const notificationResult = await sendNotification(
-      c.env.DB,
       "monitor",
       monitor.id,
       variables,
@@ -167,41 +168,34 @@ async function generateDailyStats(c: any) {
     const endTime = `${dateStr}T23:59:59.999Z`;
 
     // 一次性获取所有监控
-    const monitorsResult = await c.env.DB.prepare(
-      "SELECT id, name FROM monitors"
-    ).all();
+    const monitorsResult = await db.select().from(monitors);
 
     if (!monitorsResult.results || monitorsResult.results.length === 0) {
       console.log("没有找到监控");
       return { success: true, message: "没有监控", processed: 0 };
     }
 
-    const monitors = monitorsResult.results;
-    console.log(`找到 ${monitors.length} 个监控`);
+    const allMonitors = monitorsResult.results as Monitor[];
+    console.log(`找到 ${allMonitors.length} 个监控`);
 
     // 创建监控ID列表
-    const monitorIds = monitors.map((m: any) => m.id);
+    const monitorIds = allMonitors.map((m: any) => m.id);
 
     // 从24小时热表获取监控历史记录
     console.log(
       `从24小时热表查询所有监控在 ${startTime} 至 ${endTime} 的历史记录`
     );
 
-    const historyResult = await c.env.DB.prepare(
-      `
-      SELECT 
-        monitor_id, 
-        status, 
-        response_time 
-      FROM 
-        monitor_status_history_24h 
-      WHERE 
-        timestamp >= ? AND 
-        timestamp <= ?
-    `
-    )
-      .bind(startTime, endTime)
-      .all();
+    const historyResult = await db
+      .select()
+      .from(monitorStatusHistory24h)
+      .where(
+        and(
+          gte(monitorStatusHistory24h.timestamp, startTime),
+          lte(monitorStatusHistory24h.timestamp, endTime)
+        )
+      );
+ 
 
     if (!historyResult.results || historyResult.results.length === 0) {
       console.log(`在 ${dateStr} 没有找到任何监控历史记录`);
@@ -280,7 +274,7 @@ async function generateDailyStats(c: any) {
     for (const [monitorId, stats] of statsMap.entries()) {
       if (stats.totalChecks === 0) continue;
 
-      const monitor = monitors.find((m: any) => m.id === monitorId);
+      const monitor = allMonitors.find((m: any) => m.id === monitorId);
       const monitorName = monitor ? monitor.name : `ID: ${monitorId}`;
 
       try {
@@ -292,35 +286,18 @@ async function generateDailyStats(c: any) {
           }, 可用率=${stats.availability.toFixed(2)}%`
         );
 
-        await c.env.DB.prepare(
-          `
-          INSERT INTO monitor_daily_stats (
-            monitor_id,
-            date,
-            total_checks,
-            up_checks,
-            down_checks,
-            avg_response_time,
-            min_response_time,
-            max_response_time,
-            availability,
-            created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `
-        )
-          .bind(
-            monitorId,
-            dateStr,
-            stats.totalChecks,
-            stats.upChecks,
-            stats.downChecks,
-            stats.avgResponseTime,
-            stats.minResponseTime,
-            stats.maxResponseTime,
-            stats.availability,
-            now
-          )
-          .run();
+        await db.insert(monitorDailyStats).values({
+          monitor_id: monitorId,
+          date: dateStr,
+          total_checks: stats.totalChecks,
+          up_checks: stats.upChecks,
+          down_checks: stats.downChecks,
+          avg_response_time: stats.avgResponseTime,
+          min_response_time: stats.minResponseTime,
+          max_response_time: stats.maxResponseTime,
+          availability: stats.availability,
+          created_at: now,
+        });
 
         processed++;
         console.log(`成功更新监控 ID ${monitorId} 的每日统计数据`);
@@ -333,16 +310,12 @@ async function generateDailyStats(c: any) {
 
     // 从 24h 表中删除已处理的数据
     console.log(`开始从24小时热表删除已处理的数据`);
-    const deleteResult = await c.env.DB.prepare(
-      `
-      DELETE FROM monitor_status_history_24h
-      WHERE
-        timestamp >=? AND
-        timestamp <=?
-    `
-    )
-      .bind(startTime, endTime)
-      .run();
+    await db.delete(monitorStatusHistory24h).where(
+      and(
+        gte(monitorStatusHistory24h.timestamp, startTime),
+        lte(monitorStatusHistory24h.timestamp, endTime)
+      )
+    );
     console.log(`从24小时热表删除已处理的数据完成`);
 
     return {

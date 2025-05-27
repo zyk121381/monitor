@@ -25,7 +25,7 @@ status.get("/config", async (c) => {
   const userId = payload.id;
 
   try {
-    const config = await getStatusPageConfig(c.env, userId);
+    const config = await getStatusPageConfig(userId);
     return c.json(config);
   } catch (error) {
     console.error("获取状态页配置失败:", error);
@@ -47,7 +47,7 @@ status.post("/config", async (c) => {
   }
 
   try {
-    const result = await saveStatusPageConfig(c.env, userId, data);
+    const result = await saveStatusPageConfig(userId, data);
     return c.json(result);
   } catch (error) {
     console.error("保存状态页配置失败:", error);
@@ -56,7 +56,7 @@ status.post("/config", async (c) => {
 });
 
 status.get("/data", async (c) => {
-  const result = await getStatusPagePublicData(c.env);
+  const result = await getStatusPagePublicData();
   return c.json(result);
 });
 

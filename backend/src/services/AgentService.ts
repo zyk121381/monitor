@@ -8,14 +8,12 @@ import { handleAgentThresholdNotification } from "../jobs/agent-task";
  * @param db 数据库连接
  * @returns 客户端列表
  */
-export async function getAgents(
-  db: Bindings["DB"],
-) {
+export async function getAgents() {
   try {
-    const result = await AgentRepository.getAllAgents(db);
+    const result = await AgentRepository.getAllAgents();
     return {
       success: true,
-      agents: result.results || [],
+      agents: result || [],
       status: 200,
     };
   } catch (error) {
@@ -35,68 +33,21 @@ export async function getAgents(
  * @param agentId 客户端ID
  * @returns 客户端详情
  */
-export async function getAgentDetail(db: Bindings["DB"], agentId: number) {
+export async function getAgentDetail(agentId: number) {
   // 获取客户端信息
-  const agent = await AgentRepository.getAgentById(db, agentId);
+  const agent = await AgentRepository.getAgentById(agentId);
 
   if (!agent) {
-    return { success: false, message: "客户端不存在", status: 404 };
+    throw new Error("客户端不存在");
   }
 
   // 不返回令牌，但保留其他所有字段
   const { token, ...rest } = agent;
 
   return {
-    success: true,
-    agent: {
       ...rest,
-      ip_addresses: getFormattedIPAddresses(rest.ip_addresses as any),
-    },
-    status: 200,
+      ip_addresses: getFormattedIPAddresses(agent.ip_addresses as any),
   };
-}
-
-/**
- * 创建新客户端
- * @param db 数据库连接
- * @param env 环境变量
- * @param name 客户端名称
- * @param userId 创建者ID
- * @returns 创建结果
- */
-export async function createAgentService(
-  db: Bindings["DB"],
-  env: any,
-  name: string,
-  userId: number
-) {
-  try {
-    // 验证名称
-    if (!name || name.trim() === "") {
-      return { success: false, message: "客户端名称不能为空", status: 400 };
-    }
-
-    // 生成令牌
-    const token = await generateAgentToken(env);
-
-    // 创建新客户端
-    const newAgent = await AgentRepository.createAgent(db, name, token, userId);
-
-    return {
-      success: true,
-      message: "客户端创建成功",
-      agent: newAgent,
-      status: 201,
-    };
-  } catch (error) {
-    console.error("创建客户端错误:", error);
-    return {
-      success: false,
-      message: "创建客户端失败",
-      error: error instanceof Error ? error.message : String(error),
-      status: 500,
-    };
-  }
 }
 
 /**
@@ -116,11 +67,11 @@ export async function updateAgentService(
     os?: string;
     version?: string;
     status?: string;
-  },
+  }
 ) {
   try {
     // 获取当前客户端数据
-    const agent = await AgentRepository.getAgentById(db, agentId);
+    const agent = await AgentRepository.getAgentById(agentId);
 
     if (!agent) {
       return { success: false, message: "客户端不存在", status: 404 };
@@ -131,26 +82,25 @@ export async function updateAgentService(
       return { success: false, message: "客户端名称不能为空", status: 400 };
     }
 
-    // 执行更新
-    const result = await AgentRepository.updateAgent(db, agentId, updateData);
-
-    if (
-      typeof result === "object" &&
-      "message" in result &&
-      result.message === "没有更新任何字段"
-    ) {
-      return {
-        success: true,
-        message: "没有更新任何字段",
-        agent,
-        status: 200,
-      };
+    if (updateData.ip_addresses && updateData.ip_addresses.length > 0) {
+      agent.ip_addresses = JSON.stringify(updateData.ip_addresses);
+    } else {
+      agent.ip_addresses = "[]";
     }
 
+    agent.name = updateData.name;
+    agent.hostname = updateData.hostname;
+    agent.os = updateData.os;
+    agent.version = updateData.version;
+    agent.status = updateData.status;
+
+    // 执行更新
+    const updatedAgent = await AgentRepository.updateAgent(agent);
+  
     return {
       success: true,
       message: "客户端信息已更新",
-      agent: result,
+      agent: updatedAgent,
       status: 200,
     };
   } catch (error) {
@@ -170,34 +120,21 @@ export async function updateAgentService(
  * @param agentId 客户端ID
  * @returns 删除结果
  */
-export async function deleteAgentService(
-  db: Bindings["DB"],
-  agentId: number,
-) {
+export async function deleteAgentService( agentId: number) {
   try {
     // 获取客户端信息
-    const agent = await AgentRepository.getAgentById(db, agentId);
-
+    const agent = await AgentRepository.getAgentById(agentId);
     if (!agent) {
-      return { success: false, message: "客户端不存在", status: 404 };
+      throw new Error("客户端不存在");
     }
 
     // 执行删除客户端
-    await AgentRepository.deleteAgent(db, agent.id);
+    await AgentRepository.deleteAgent(agent.id);
 
-    return {
-      success: true,
-      message: "客户端已删除",
-      status: 200,
-    };
+    return true;
   } catch (error) {
     console.error("删除客户端错误:", error);
-    return {
-      success: false,
-      message: "删除客户端失败",
-      error: error instanceof Error ? error.message : String(error),
-      status: 500,
-    };
+    throw error;
   }
 }
 
@@ -249,20 +186,7 @@ export function getFormattedIPAddresses(
   }
 }
 
-/**
- * 客户端自注册
- * @param db 数据库连接
- * @param env 环境变量
- * @param token 注册令牌
- * @param name 客户端名称
- * @param hostname 主机名
- * @param ipAddresses IP地址
- * @param os 操作系统
- * @param version 版本
- * @returns 注册结果
- */
 export async function registerAgentService(
-  db: Bindings["DB"],
   env: any,
   token: string,
   name: string,
@@ -278,9 +202,9 @@ export async function registerAgentService(
     }
 
     // 通过token查找客户端
-    const existingAgent = await AgentRepository.getAgentByToken(db, token);
+    const existingAgent = await AgentRepository.getAgentByToken(token);
 
-    if (existingAgent) {
+    if (existingAgent && existingAgent.id) {
       return {
         success: true,
         message: "客户端已存在",
@@ -304,19 +228,18 @@ export async function registerAgentService(
     }
 
     // 查找管理员用户作为客户端创建者
-    const adminId = await AgentRepository.getAdminUserId(db);
+    const adminId = await AgentRepository.getAdminUserId();
 
     // 创建新客户端
     const newAgent = await AgentRepository.createAgent(
-      db,
-      name || "New Agent",
+      name,
       token,
       adminId,
       "active",
-      hostname || null,
-      os || null,
-      version || null,
-      ipAddresses
+      hostname || "unknown",
+      os || "unknown",
+      version || "unknown",
+      ipAddresses || []
     );
 
     return {
@@ -344,8 +267,6 @@ export async function registerAgentService(
  * @returns 更新结果
  */
 export async function updateAgentStatusService(
-  db: Bindings["DB"],
-  env: any,
   status: any
 ) {
   try {
@@ -363,12 +284,10 @@ export async function updateAgentStatusService(
     console.log("norlmalInfo", norlmalInfo);
 
     if (!norlmalInfo.token) {
-      return { success: false, message: "缺少API令牌", status: 400 };
+      throw new Error("缺少API令牌");
     }
     // 通过token查找客户端
-    const agent = await AgentRepository.getAgentByToken(db, norlmalInfo.token);
-
-    console.log("agent", agent);
+    const agent = await AgentRepository.getAgentByToken(norlmalInfo.token);
 
     if (
       agent.status != "active" ||
@@ -377,8 +296,16 @@ export async function updateAgentStatusService(
       agent.os != norlmalInfo.os ||
       agent.version != norlmalInfo.version
     ) {
-      console.log("更新客户端信息");
-      await AgentRepository.updateAgent(db, agent.id, norlmalInfo);
+      agent.ip_addresses = JSON.stringify(norlmalInfo.ip_addresses);
+      agent.hostname = norlmalInfo.hostname;
+      agent.os = norlmalInfo.os;
+      agent.version = norlmalInfo.version;
+      agent.keepalive = norlmalInfo.keepalive;
+      agent.status = norlmalInfo.status;
+
+      console.log("update agent info: ", agent);
+  
+      await AgentRepository.updateAgent(agent);
     }
 
     // 插入 metric 信息
@@ -402,81 +329,52 @@ export async function updateAgentStatusService(
 
     console.log("metrics", metrics);
 
-    // 插入 metric 信息到 24h 热表
-    for (const metric of metrics) {
-      console.log("准备插入指标数据:", metric);
-      const metricValues = [
-        metric.agent_id,
-        metric.timestamp,
-        metric.cpu_usage,
-        metric.cpu_cores,
-        metric.cpu_model,
-        metric.memory_total,
-        metric.memory_used,
-        metric.memory_free,
-        metric.memory_usage_rate,
-        metric.load_1,
-        metric.load_5,
-        metric.load_15,
-        metric.disk_metrics,
-        metric.network_metrics,
-      ];
-      console.log("指标数据值:", metricValues);
-      const result = await AgentRepository.insertAgentMetrics(db, metricValues);
-      console.log("插入指标结果:", result);
-    }
+    const result = await AgentRepository.insertAgentMetrics(metrics);
+    console.log("插入指标结果:", result);
 
     // 取出 metrics中的最新一条数据用于通知
     const latestMetric = metrics[metrics.length - 1];
     console.log("latestMetric cpu", latestMetric.cpu_usage);
     console.log("latestMetric memory", latestMetric.memory_usage_rate);
     await handleAgentThresholdNotification(
-      env,
       agent.id,
       "cpu",
       latestMetric.cpu_usage
     );
 
     await handleAgentThresholdNotification(
-      env,
       agent.id,
       "memory",
       latestMetric.memory_usage_rate
     );
 
     return {
-      success: true,
-      message: "客户端状态已更新",
       agentId: agent.id,
-      status: 200,
     };
   } catch (error) {
     console.error("更新客户端状态错误:", error);
-    return {
-      success: false,
-      message: "更新客户端状态失败",
-      error: error instanceof Error ? error.message : String(error),
-    };
+    throw error;
   }
 }
 
-export async function getAgentById(db: Bindings["DB"], id: number) {
-  return await AgentRepository.getAgentById(db, id);
+export async function getAgentById(id: number) {
+  return await AgentRepository.getAgentById(id);
 }
 
 export async function getActiveAgents(env: any) {
-  return await AgentRepository.getActiveAgents(env.DB);
+  return await AgentRepository.getActiveAgents();
 }
 
 export async function setAgentInactive(env: any, id: number) {
-  return await AgentRepository.setAgentInactive(env.DB, id);
+  return await AgentRepository.setAgentInactive(id);
 }
 
-
-export async function getAgentMetrics(db: Bindings["DB"], agentId: number) {
-  return await AgentRepository.getAgentMetrics(db, agentId);
+export async function getAgentMetrics( agentId: number) {
+  return await AgentRepository.getAgentMetrics(agentId);
 }
 
-export async function getLatestAgentMetrics(db: Bindings["DB"], agentId: number) {
-  return await AgentRepository.getLatestAgentMetrics(db, agentId);
+export async function getLatestAgentMetrics(
+  agentId: number
+) {
+  return await AgentRepository.getLatestAgentMetrics(agentId);
 }

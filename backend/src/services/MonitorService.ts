@@ -1,27 +1,12 @@
-import { Bindings } from "../models/db";
 import * as models from "../models";
 import * as repositories from "../repositories";
 import * as NotificationService from "./NotificationService";
 
-
-
-/**
- * 获取所有需要检查的监控
- */
-export async function getMonitorsToCheck(db: Bindings["DB"]) {
-  return await repositories.getMonitorsToCheck(db);
+export async function getMonitorsToCheck() {
+  return await repositories.getMonitorsToCheck();
 }
 
-/**
- * 检查单个监控的状态
- * @param db 数据库连接
- * @param monitor 监控配置
- * @returns 监控检查结果
- */
-export async function checkMonitor(
-  db: Bindings["DB"],
-  monitor: models.Monitor
-) {
+export async function checkMonitor(monitor: models.Monitor) {
   try {
     console.log(`开始检查监控项: ${monitor.name} (${monitor.url})`);
 
@@ -30,10 +15,8 @@ export async function checkMonitor(
 
     const startTime = Date.now();
     let response;
+    let headers: Headers = new Headers();
     let error = null;
-
-    // 使用 headers 对象
-    let customHeaders = monitor.headers || {};
 
     try {
       // 设置超时
@@ -43,14 +26,28 @@ export async function checkMonitor(
         (monitor.timeout || 30) * 1000
       );
 
+      // 如果headers是字符串，则转换为对象
+      if (typeof monitor.headers === "string") {
+        const parseHeaders = JSON.parse(monitor.headers);
+        if (
+          parseHeaders &&
+          typeof parseHeaders === "object" &&
+          !Array.isArray(parseHeaders)
+        ) {
+          const headerObj = Object.assign({}, parseHeaders);
+          if (Object.keys(headerObj).length === 0) {
+            headers = new Headers();
+          } else {
+            headers = new Headers(headerObj);
+          }
+        }
+      }
+
       // 发送请求
       response = await fetch(monitor.url, {
         method: monitor.method || "GET",
-        headers: customHeaders,
-        body:
-          monitor.method !== "GET" && monitor.method !== "HEAD"
-            ? monitor.body || undefined
-            : undefined,
+        headers: headers,
+        body: monitor.method !== "GET" && monitor.method !== "HEAD" ? monitor.body || "" : undefined,
         signal: controller.signal,
       });
 
@@ -76,7 +73,7 @@ export async function checkMonitor(
 
     // 检查状态码是否符合预期
     let isExpectedStatus = false;
-    const expectedStatus = monitor.expected_status || 200;
+    const expectedStatus = monitor.expected_status;
 
     // 处理范围状态码：如果预期状态码为个位数（1-5），则视为范围检查
     if (expectedStatus >= 1 && expectedStatus <= 5) {
@@ -92,7 +89,6 @@ export async function checkMonitor(
 
     // 记录状态历史
     await repositories.insertMonitorStatusHistory(
-      db,
       monitor.id,
       status,
       responseTime,
@@ -101,12 +97,7 @@ export async function checkMonitor(
     );
 
     // 更新监控状态
-    await repositories.updateMonitorStatus(
-      db,
-      monitor.id,
-      status,
-      responseTime
-    );
+    await repositories.updateMonitorStatus(monitor.id, status, responseTime);
 
     return {
       success: true,
@@ -133,68 +124,50 @@ export async function checkMonitor(
   }
 }
 
-/**
- * 获取所有监控（根据用户角色过滤）
- * @param db 数据库连接
- * @returns 监控列表和操作结果
- */
-export async function getAllMonitors(db: Bindings["DB"]) {
-  const result = await repositories.getAllMonitors(db);
+export async function getAllMonitors() {
+  const result = await repositories.getAllMonitors();
 
   return {
     success: true,
-    monitors: result.monitors || [],
+    monitors: result,
     status: 200,
   };
 }
 
-/**
- * 获取单个监控详情
- * @param db 数据库连接
- * @param id 监控ID
- * @returns 监控详情和操作结果
- */
-export async function getMonitorById(db: Bindings["DB"], id: number) {
-  const monitor = await repositories.getMonitorById(db, id);
+export async function getMonitorById(id: number) {
+  const monitor = await repositories.getMonitorById(id);
 
   if (!monitor) {
     return { success: false, message: "监控不存在", status: 404 };
   }
 
   // 获取历史状态数据
-  const historyResult = await repositories.getMonitorStatusHistoryIn24h(db, id);
+  const historyResult = await repositories.getMonitorStatusHistoryIn24h(id);
 
   return {
     success: true,
     monitor: {
       ...monitor,
-      history: historyResult.results || [],
+      history: historyResult,
     },
     status: 200,
   };
 }
 
-/**
- * 创建新监控
- * @param db 数据库连接
- * @param data 监控数据
- * @param userId 用户ID
- * @returns 创建结果
- */
-export async function createMonitor(
-  db: Bindings["DB"],
-  data: any,
-  userId: number
-) {
+export async function createMonitor(data: any, userId: number) {
   try {
     // 验证必填字段
     if (!data.name || !data.url || !data.method) {
       return { success: false, message: "缺少必填字段", status: 400 };
     }
 
+    // 如果headers是对象，则转换为字符串
+    if (typeof data.headers !== "string") {
+      data.headers = JSON.stringify(data.headers);
+    }
+
     // 创建新监控
     const newMonitor = await repositories.createMonitor(
-      db,
       data.name,
       data.url,
       data.method,
@@ -222,17 +195,10 @@ export async function createMonitor(
   }
 }
 
-/**
- * 更新监控信息
- * @param db 数据库连接
- * @param id 监控ID
- * @param data 更新数据
- * @returns 更新结果
- */
-export async function updateMonitor(db: Bindings["DB"], id: number, data: any) {
+export async function updateMonitor(id: number, data: any) {
   try {
     // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(db, id);
+    const monitor = await repositories.getMonitorById(id);
 
     if (!monitor) {
       return { success: false, message: "监控不存在", status: 404 };
@@ -259,7 +225,6 @@ export async function updateMonitor(db: Bindings["DB"], id: number, data: any) {
 
     // 执行更新
     const updatedMonitor = await repositories.updateMonitorConfig(
-      db,
       id,
       updateData
     );
@@ -289,23 +254,17 @@ export async function updateMonitor(db: Bindings["DB"], id: number, data: any) {
   }
 }
 
-/**
- * 删除监控
- * @param db 数据库连接
- * @param id 监控ID
- * @returns 删除结果
- */
-export async function deleteMonitor(db: Bindings["DB"], id: number) {
+export async function deleteMonitor(id: number) {
   try {
     // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(db, id);
+    const monitor = await repositories.getMonitorById(id);
 
     if (!monitor) {
       return { success: false, message: "监控不存在", status: 404 };
     }
 
     // 执行删除
-    const result = await repositories.deleteMonitor(db, id);
+    const result = await repositories.deleteMonitor(id);
 
     if (!result.success) {
       throw new Error("删除监控失败");
@@ -327,23 +286,14 @@ export async function deleteMonitor(db: Bindings["DB"], id: number) {
   }
 }
 
-/**
- * 获取监控状态历史
- * @param db 数据库连接
- * @param id 监控ID
- * @param userId 用户ID
- * @param userRole 用户角色
- * @returns 状态历史
- */
 export async function getMonitorStatusHistoryById(
-  db: Bindings["DB"],
   id: number,
   userId: number,
   userRole: string
 ) {
   try {
     // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(db, id);
+    const monitor = await repositories.getMonitorById(id);
 
     if (!monitor) {
       return { success: false, message: "监控不存在", status: 404 };
@@ -355,14 +305,11 @@ export async function getMonitorStatusHistoryById(
     }
 
     // 获取历史状态
-    const historyResult = await repositories.getMonitorStatusHistoryIn24h(
-      db,
-      id
-    );
+    const historyResult = await repositories.getMonitorStatusHistoryIn24h(id);
 
     return {
       success: true,
-      history: historyResult.results || [],
+      history: historyResult,
       status: 200,
     };
   } catch (error) {
@@ -376,43 +323,26 @@ export async function getMonitorStatusHistoryById(
   }
 }
 
-/**
- *
- * 获取所有监控状态历史
- * @param db 数据库连接
- * @returns 所有监控状态历史
- */
-export async function getAllMonitorStatusHistory(db: Bindings["DB"]) {
-  const result = await repositories.getAllMonitorStatusHistoryIn24h(db);
+export async function getAllMonitorStatusHistory() {
+  const result = await repositories.getAllMonitorStatusHistoryIn24h();
   return {
     success: true,
-    history: result.results || [],
+    history: result,
     status: 200,
   };
 }
 
-/**
- * 手动检查监控并处理通知
- * @param db 数据库连接
- * @param id 监控ID
- * @param env 环境变量
- * @returns 检查结果
- */
-export async function manualCheckMonitor(
-  db: Bindings["DB"],
-  id: number,
-  env: any
-) {
+export async function manualCheckMonitor(id: number) {
   try {
     // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(db, id);
+    const monitor = await repositories.getMonitorById(id);
 
     if (!monitor) {
       return { success: false, message: "监控不存在", status: 404 };
     }
 
     // 使用抽象出来的通用检查监控函数进行检查
-    const result = await checkMonitor(db, monitor);
+    const result = await checkMonitor(monitor);
 
     // 处理通知逻辑
     try {
@@ -426,7 +356,6 @@ export async function manualCheckMonitor(
         console.log(`检查通知设置...`);
         const notificationCheck =
           await NotificationService.shouldSendNotification(
-            db,
             "monitor",
             monitor.id,
             result.previous_status,
@@ -472,7 +401,6 @@ export async function manualCheckMonitor(
           // 发送通知
           console.log(`开始发送通知...`);
           const notificationResult = await NotificationService.sendNotification(
-            db,
             "monitor",
             monitor.id,
             variables,
@@ -522,11 +450,6 @@ export async function manualCheckMonitor(
   }
 }
 
-/**
- * 获取预期状态码的显示文本
- * @param expectedStatus 预期状态码
- * @returns 显示文本
- */
 function getExpectedStatusDisplay(expectedStatus: number): string {
   if (expectedStatus >= 1 && expectedStatus <= 5) {
     return `${expectedStatus}xx`;
@@ -534,34 +457,23 @@ function getExpectedStatusDisplay(expectedStatus: number): string {
   return String(expectedStatus);
 }
 
-/**
- * 获取单个监控的每日统计数据
- * @param db 数据库连接
- * @param id 监控ID
- * @returns 监控的每日统计数据和操作结果
- */
-export async function getMonitorDailyStats(db: Bindings["DB"], id: number) {
-  const result = await repositories.getMonitorDailyStatsById(db, id);
+export async function getMonitorDailyStats(id: number) {
+  const result = await repositories.getMonitorDailyStatsById(id);
 
   return {
     success: true,
-    dailyStats: result.results,
+    dailyStats: result,
     message: "获取监控每日统计数据成功",
     status: 200,
   };
 }
 
-/**
- * 获取所有监控的每日统计数据
- * @param db 数据库连接
- * @returns 所有监控的每日统计数据和操作结果
- */
-export async function getAllMonitorDailyStats(db: Bindings["DB"]) {
+export async function getAllMonitorDailyStats() {
   // 获取所有监控
-  const result = await repositories.getAllMonitorDailyStats(db);
+  const result = await repositories.getAllMonitorDailyStats();
   return {
     success: true,
-    dailyStats: result.results,
+    dailyStats: result,
     message: "获取所有监控的每日统计数据成功",
     status: 200,
   };

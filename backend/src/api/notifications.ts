@@ -8,9 +8,7 @@ const notifications = new Hono<{ Bindings: Bindings }>();
 // 获取通知配置
 notifications.get("/", async (c) => {
   try {
-    const db = c.env.DB;
-
-    const config = await NotificationService.getNotificationConfig(db);
+    const config = await NotificationService.getNotificationConfig();
 
     return c.json({
       success: true,
@@ -32,8 +30,7 @@ notifications.get("/", async (c) => {
 // 获取通知渠道列表
 notifications.get("/channels", async (c) => {
   try {
-    const db = c.env.DB;
-    const channels = await NotificationService.getNotificationChannels(db);
+    const channels = await NotificationService.getNotificationChannels();
 
     return c.json({
       success: true,
@@ -55,7 +52,6 @@ notifications.get("/channels", async (c) => {
 // 获取单个通知渠道
 notifications.get("/channels/:id", async (c) => {
   try {
-    const db = c.env.DB;
     const id = parseInt(c.req.param("id"));
 
     if (isNaN(id)) {
@@ -68,10 +64,7 @@ notifications.get("/channels/:id", async (c) => {
       );
     }
 
-    const channel = await NotificationService.getNotificationChannelById(
-      db,
-      id
-    );
+    const channel = await NotificationService.getNotificationChannelById(id);
 
     if (!channel) {
       return c.json(
@@ -118,7 +111,7 @@ notifications.post("/channels", async (c) => {
     const validatedData = schema.parse(body);
 
     // 创建渠道
-    const result = await NotificationService.createNotificationChannel(db, {
+    const result = await NotificationService.createNotificationChannel({
       name: validatedData.name,
       type: validatedData.type,
       config: validatedData.config,
@@ -163,7 +156,6 @@ notifications.post("/channels", async (c) => {
 // 更新通知渠道
 notifications.put("/channels/:id", async (c) => {
   try {
-    const db = c.env.DB;
     const id = parseInt(c.req.param("id"));
 
     if (isNaN(id)) {
@@ -190,7 +182,6 @@ notifications.put("/channels/:id", async (c) => {
 
     // 更新渠道
     const result = await NotificationService.updateNotificationChannel(
-      db,
       id,
       validatedData
     );
@@ -225,7 +216,6 @@ notifications.put("/channels/:id", async (c) => {
 // 删除通知渠道
 notifications.delete("/channels/:id", async (c) => {
   try {
-    const db = c.env.DB;
     const id = parseInt(c.req.param("id"));
 
     if (isNaN(id)) {
@@ -238,7 +228,7 @@ notifications.delete("/channels/:id", async (c) => {
       );
     }
 
-    const result = await NotificationService.deleteNotificationChannel(db, id);
+    const result = await NotificationService.deleteNotificationChannel(id);
 
     if (!result.success) {
       return c.json(
@@ -270,8 +260,7 @@ notifications.delete("/channels/:id", async (c) => {
 // 获取通知模板列表
 notifications.get("/templates", async (c) => {
   try {
-    const db = c.env.DB;
-    const templates = await NotificationService.getNotificationTemplates(db);
+    const templates = await NotificationService.getNotificationTemplates();
 
     return c.json({
       success: true,
@@ -293,7 +282,6 @@ notifications.get("/templates", async (c) => {
 // 获取单个通知模板
 notifications.get("/templates/:id", async (c) => {
   try {
-    const db = c.env.DB;
     const id = parseInt(c.req.param("id"));
 
     if (isNaN(id)) {
@@ -306,10 +294,7 @@ notifications.get("/templates/:id", async (c) => {
       );
     }
 
-    const template = await NotificationService.getNotificationTemplateById(
-      db,
-      id
-    );
+    const template = await NotificationService.getNotificationTemplateById(id);
 
     if (!template) {
       return c.json(
@@ -341,7 +326,6 @@ notifications.get("/templates/:id", async (c) => {
 // 创建通知模板
 notifications.post("/templates", async (c) => {
   try {
-    const db = c.env.DB;
     const userId = c.get("jwtPayload").id;
     const body = await c.req.json();
 
@@ -357,7 +341,7 @@ notifications.post("/templates", async (c) => {
     const validatedData = schema.parse(body);
 
     // 创建模板
-    const result = await NotificationService.createNotificationTemplate(db, {
+    const result = await NotificationService.createNotificationTemplate({
       name: validatedData.name,
       type: validatedData.type,
       subject: validatedData.subject,
@@ -405,7 +389,6 @@ notifications.post("/templates", async (c) => {
 // 更新通知模板
 notifications.put("/templates/:id", async (c) => {
   try {
-    const db = c.env.DB;
     const id = parseInt(c.req.param("id"));
 
     if (isNaN(id)) {
@@ -433,7 +416,6 @@ notifications.put("/templates/:id", async (c) => {
 
     // 更新模板
     const result = await NotificationService.updateNotificationTemplate(
-      db,
       id,
       validatedData
     );
@@ -468,7 +450,6 @@ notifications.put("/templates/:id", async (c) => {
 // 删除通知模板
 notifications.delete("/templates/:id", async (c) => {
   try {
-    const db = c.env.DB;
     const id = parseInt(c.req.param("id"));
 
     if (isNaN(id)) {
@@ -481,7 +462,7 @@ notifications.delete("/templates/:id", async (c) => {
       );
     }
 
-    const result = await NotificationService.deleteNotificationTemplate(db, id);
+    const result = await NotificationService.deleteNotificationTemplate(id);
 
     if (!result.success) {
       return c.json(
@@ -513,7 +494,6 @@ notifications.delete("/templates/:id", async (c) => {
 // 保存通知设置
 notifications.post("/settings", async (c) => {
   try {
-    const db = c.env.DB;
     const userId = c.get("jwtPayload").id;
     const body = await c.req.json();
 
@@ -542,10 +522,10 @@ notifications.post("/settings", async (c) => {
         : JSON.stringify(validatedData.channels);
 
     // 保存设置
-    const result = await NotificationService.createOrUpdateSettings(db, {
+    const result = await NotificationService.createOrUpdateSettings({
       user_id: userId,
       target_type: validatedData.target_type,
-      target_id: validatedData.target_id || null,
+      target_id: validatedData.target_id || 0,
       enabled: validatedData.enabled,
       on_down: validatedData.on_down || false,
       on_recovery: validatedData.on_recovery || false,
@@ -590,7 +570,6 @@ notifications.post("/settings", async (c) => {
 // 获取通知历史记录
 notifications.get("/history", async (c) => {
   try {
-    const db = c.env.DB;
     const type = c.req.query("type") || "";
     const target_id = c.req.query("target_id")
       ? parseInt(c.req.query("target_id")!)
@@ -600,7 +579,7 @@ notifications.get("/history", async (c) => {
     const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
     const offset = (page - 1) * limit;
 
-    const result = await NotificationService.getNotificationHistory(db, {
+    const result = await NotificationService.getNotificationHistory({
       type,
       targetId: target_id,
       status,

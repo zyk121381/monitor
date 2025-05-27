@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --test-scheduled",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "deploy": "wrangler deploy"
+    "build": "tsc && npm run generate:migrations",
+    "deploy": "wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "generate:migrations": "tsx scripts/generate-migrations.ts"
   },
   "keywords": [],
   "author": "",
@@ -25,8 +26,11 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250317.0",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.31.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.4",
     "wrangler": "^4.13.1"
   }
 }

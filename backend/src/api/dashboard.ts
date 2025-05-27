@@ -5,7 +5,7 @@ export const dashboard = new Hono<{ Bindings: Bindings }>();
 
 // 获取仪表盘数据
 dashboard.get("/", async (c) => {
-  const result = await getDashboardData(c.env.DB);
+  const result = await getDashboardData();
   return c.json(
     {
       monitors: result.monitors,

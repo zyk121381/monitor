@@ -28,7 +28,7 @@ export interface NotificationSettings {
   id: number;
   user_id: number;
   target_type: string; // global-monitor, global-agent, monitor, agent
-  target_id: number | null; // 当target_type为monitor或agent时有效，存储monitor_id或agent_id
+  target_id: number | 0; // 当target_type为monitor或agent时有效，存储monitor_id或agent_id
 
   enabled: boolean;
   on_down: boolean; // 适用于monitor类型
