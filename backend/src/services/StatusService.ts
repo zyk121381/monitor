@@ -184,8 +184,8 @@ export async function getStatusPagePublicData() {
         );
         monitors.push({
           ...monitor,
-          dailyStats: monitorDailyStats.results,
-          history: monitorHistory.results,
+          dailyStats: monitorDailyStats,
+          history: monitorHistory,
         });
       }
     }
