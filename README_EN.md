@@ -68,13 +68,15 @@ Default username: admin  Default password: admin123
 
 ## ⭐ Support the Author
 
-Support us in any way you can:
+Sponsor me in any way you can:
 
 - Star the project and share it with your friends
-- Support ongoing development through WeChat donations
+- Buy me a coffee
 
 <div align="center">
-  <img src="frontend/public/wechat-reward.png" alt="WeChat Reward Code" width="300">
+  <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
+  </a>
 </div>
 
 ## 🤝 Contribution
