@@ -14,12 +14,6 @@ export interface D1PreparedStatement {
   raw<T = unknown>(): Promise<T[]>;
 }
 
-// 定义操作结果的元数据类型
-export interface DbResultMeta {
-  changes?: number;
-  [key: string]: any;
-}
-
 // 扩展D1Result meta属性的类型
 export interface D1Meta {
   last_row_id?: number;

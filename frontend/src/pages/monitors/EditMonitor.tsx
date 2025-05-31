@@ -404,7 +404,10 @@ const EditMonitor = () => {
                               variant="soft"
                               color="red"
                               size="1"
-                              onClick={() => removeHeader(index)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                removeHeader(index);
+                              }}
                             >
                               <TrashIcon />
                             </IconButton>

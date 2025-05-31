@@ -2,16 +2,12 @@ import { Hono, ExecutionContext } from "hono";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 
-import * as initDb from "./initialization";
+import * as seed from "./db";
 import { Bindings } from "./models/db";
 import * as middlewares from "./middlewares";
 import * as jobs from "./jobs";
 import * as api from "./api";
-
-// 添加全局变量声明
-declare global {
-  var isInitialized: boolean;
-}
+import * as config from "./config";
 
 // 创建Hono应用
 const app = new Hono<{ Bindings: Bindings }>();
@@ -40,13 +36,6 @@ let dbInitialized = false;
 export default {
   // 处理 HTTP 请求
   async fetch(request: Request, env: Bindings, ctx: ExecutionContext) {
-    // 静态初始化标志
-    if (!globalThis.isInitialized) {
-      console.log("第一次请求，初始化应用...");
-
-      // 设置初始化标志
-      globalThis.isInitialized = true;
-    }
 
     // 如果是 OPTIONS 请求，直接处理
     if (request.method === "OPTIONS") {
@@ -63,10 +52,14 @@ export default {
       });
     }
 
+
+    // 初始化 drizzle 实例
+    config.initDb(env);
+
     // 如果数据库尚未初始化，则进行初始化检查
     if (!dbInitialized) {
       console.log("首次请求，检查数据库状态...");
-      const initResult = await initDb.checkAndInitializeDatabase(env);
+      const initResult = await seed.checkAndInitializeDatabase(env.DB);
       dbInitialized = true;
       console.log("数据库检查结果:", initResult.message);
     }

@@ -9,7 +9,7 @@ monitors.get("/", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层获取监控列表
-  const result = await MonitorService.getAllMonitors(c.env.DB);
+  const result = await MonitorService.getAllMonitors();
 
   return c.json(
     {
@@ -23,7 +23,7 @@ monitors.get("/", async (c) => {
 // 获取所有监控的每日统计数据
 monitors.get("/daily", async (c) => {
   // 调用服务层获取所有监控的每日统计数据
-  const result = await MonitorService.getAllMonitorDailyStats(c.env.DB);
+  const result = await MonitorService.getAllMonitorDailyStats();
 
   return c.json({
     success: result.success,
@@ -38,7 +38,7 @@ monitors.post("/", async (c) => {
   const data = await c.req.json();
 
   // 调用服务层创建监控
-  const result = await MonitorService.createMonitor(c.env.DB, data, payload.id);
+  const result = await MonitorService.createMonitor(data, payload.id);
 
   return c.json(
     {
@@ -53,7 +53,7 @@ monitors.post("/", async (c) => {
 // 获取所有监控状态历史
 monitors.get("/history", async (c) => {
   // 调用服务层获取监控历史
-  const result = await MonitorService.getAllMonitorStatusHistory(c.env.DB);
+  const result = await MonitorService.getAllMonitorStatusHistory();
 
   return c.json(
     {
@@ -70,7 +70,7 @@ monitors.get("/:id", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层获取监控详情
-  const result = await MonitorService.getMonitorById(c.env.DB, id);
+  const result = await MonitorService.getMonitorById(id);
 
   return c.json(
     {
@@ -85,11 +85,10 @@ monitors.get("/:id", async (c) => {
 // 更新监控
 monitors.put("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const payload = c.get("jwtPayload");
   const data = await c.req.json();
 
   // 调用服务层更新监控
-  const result = await MonitorService.updateMonitor(c.env.DB, id, data);
+  const result = await MonitorService.updateMonitor(id, data);
 
   return c.json(
     {
@@ -107,7 +106,7 @@ monitors.delete("/:id", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层删除监控
-  const result = await MonitorService.deleteMonitor(c.env.DB, id);
+  const result = await MonitorService.deleteMonitor(id);
 
   return c.json(
     {
@@ -125,7 +124,6 @@ monitors.get("/:id/history", async (c) => {
 
   // 调用服务层获取监控历史
   const result = await MonitorService.getMonitorStatusHistoryById(
-    c.env.DB,
     id,
     payload.id,
     payload.role
@@ -146,7 +144,7 @@ monitors.get("/:id/daily", async (c) => {
   const id = parseInt(c.req.param("id"));
 
   // 调用服务层获取每日统计数据
-  const result = await MonitorService.getMonitorDailyStats(c.env.DB, id);
+  const result = await MonitorService.getMonitorDailyStats(id);
 
   return c.json({
     success: result.success,
@@ -158,10 +156,9 @@ monitors.get("/:id/daily", async (c) => {
 // 手动检查单个监控
 monitors.post("/:id/check", async (c) => {
   const id = parseInt(c.req.param("id"));
-  const payload = c.get("jwtPayload");
 
   // 调用服务层手动检查监控
-  const result = await MonitorService.manualCheckMonitor(c.env.DB, id, c.env);
+  const result = await MonitorService.manualCheckMonitor(id);
 
   return c.json(
     {

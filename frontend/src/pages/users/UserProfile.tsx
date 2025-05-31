@@ -106,138 +106,134 @@ const UserProfile = () => {
   }
 
   return (
-    <Box>
-      <div className="page-container detail-page">
-        <Flex justify="between" align="center" className="detail-header">
-          <Heading size="6">{t("profile.title")}</Heading>
-        </Flex>
+    <Box className="sm:px-6 lg:px-[8%]">
+      <Flex justify="between" align="center">
+        <Heading size="6">{t("profile.title")}</Heading>
+      </Flex>
 
-        <div className="detail-content">
-          <Flex direction="column" gap="6">
-            <Card>
-              <Heading size="4" mb="4">
-                {t("profile.basicInfo")}
-              </Heading>
+      <Flex direction="column" gap="6" className="mt-4 mb-4">
+        <Card>
+          <Heading size="4" mb="4" className="ml-4">
+            {t("profile.basicInfo")}
+          </Heading>
 
-              {profileError && (
-                <Text color="red" mb="3">
-                  {profileError}
+          {profileError && (
+            <Text color="red" mb="3">
+              {profileError}
+            </Text>
+          )}
+          {profileSuccess && (
+            <Text color="green" mb="3">
+              {profileSuccess}
+            </Text>
+          )}
+
+          <form onSubmit={handleProfileUpdate}>
+            <Flex direction="column" gap="3" className="ml-4">
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {t("user.username")}
                 </Text>
-              )}
-              {profileSuccess && (
-                <Text color="green" mb="3">
-                  {profileSuccess}
+                <TextField.Input
+                  value={username}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setUsername(e.target.value)
+                  }
+                  required
+                />
+              </Flex>
+
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {t("user.email")}
                 </Text>
-              )}
+                <TextField.Input
+                  type="email"
+                  value={email}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
+                  }
+                />
+              </Flex>
 
-              <form onSubmit={handleProfileUpdate}>
-                <Flex direction="column" gap="3">
-                  <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">
-                      {t("user.username")}
-                    </Text>
-                    <TextField.Input
-                      value={username}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setUsername(e.target.value)
-                      }
-                      required
-                    />
-                  </Flex>
+              <Button type="submit" disabled={isProfileLoading}>
+                {isProfileLoading
+                  ? t("common.savingChanges")
+                  : t("profile.update")}
+              </Button>
+            </Flex>
+          </form>
+        </Card>
 
-                  <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">
-                      {t("user.email")}
-                    </Text>
-                    <TextField.Input
-                      type="email"
-                      value={email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setEmail(e.target.value)
-                      }
-                    />
-                  </Flex>
+        <Card>
+          <Heading size="4" mb="4">
+            {t("profile.changePassword")}
+          </Heading>
 
-                  <Button type="submit" disabled={isProfileLoading}>
-                    {isProfileLoading
-                      ? t("common.savingChanges")
-                      : t("profile.update")}
-                  </Button>
-                </Flex>
-              </form>
-            </Card>
+          {passwordError && (
+            <Text color="red" mb="3">
+              {passwordError}
+            </Text>
+          )}
+          {passwordSuccess && (
+            <Text color="green" mb="3">
+              {passwordSuccess}
+            </Text>
+          )}
 
-            <Card>
-              <Heading size="4" mb="4">
-                {t("profile.changePassword")}
-              </Heading>
-
-              {passwordError && (
-                <Text color="red" mb="3">
-                  {passwordError}
+          <form onSubmit={handlePasswordChange}>
+            <Flex direction="column" gap="3" className="ml-4">
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {t("profile.currentPassword")}
                 </Text>
-              )}
-              {passwordSuccess && (
-                <Text color="green" mb="3">
-                  {passwordSuccess}
+                <TextField.Input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setCurrentPassword(e.target.value)
+                  }
+                  required
+                />
+              </Flex>
+
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {t("profile.newPassword")}
                 </Text>
-              )}
+                <TextField.Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewPassword(e.target.value)
+                  }
+                  required
+                />
+              </Flex>
 
-              <form onSubmit={handlePasswordChange}>
-                <Flex direction="column" gap="3">
-                  <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">
-                      {t("profile.currentPassword")}
-                    </Text>
-                    <TextField.Input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setCurrentPassword(e.target.value)
-                      }
-                      required
-                    />
-                  </Flex>
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {t("profile.confirmNewPassword")}
+                </Text>
+                <TextField.Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setConfirmPassword(e.target.value)
+                  }
+                  required
+                />
+              </Flex>
 
-                  <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">
-                      {t("profile.newPassword")}
-                    </Text>
-                    <TextField.Input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setNewPassword(e.target.value)
-                      }
-                      required
-                    />
-                  </Flex>
-
-                  <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">
-                      {t("profile.confirmNewPassword")}
-                    </Text>
-                    <TextField.Input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setConfirmPassword(e.target.value)
-                      }
-                      required
-                    />
-                  </Flex>
-
-                  <Button type="submit" disabled={isPasswordLoading}>
-                    {isPasswordLoading
-                      ? t("common.savingChanges")
-                      : t("profile.changePasswordButton")}
-                  </Button>
-                </Flex>
-              </form>
-            </Card>
-          </Flex>
-        </div>
-      </div>
+              <Button type="submit" disabled={isPasswordLoading}>
+                {isPasswordLoading
+                  ? t("common.savingChanges")
+                  : t("profile.changePasswordButton")}
+              </Button>
+            </Flex>
+          </form>
+        </Card>
+      </Flex>
     </Box>
   );
 };

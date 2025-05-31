@@ -178,7 +178,7 @@ const MonitorDetail = () => {
           </Button>
         </Flex>
       </Flex>
-      <Box pt="4" className="detail-content">
+      <Box pt="4" >
         <Card>
           <Flex direction="column" gap="2" className="ml-4">
             <Heading size="4">{t("monitor.detailInfo")}</Heading>
@@ -198,7 +198,7 @@ const MonitorDetail = () => {
               <Text>{t("monitor.expectedStatus")}:</Text>
               <Text>{formatStatusCode(monitor.expected_status)}</Text>
               <Text>{t("monitor.createTime")}:</Text>
-              <Text>{new Date(monitor.created_at).toLocaleString()}</Text>
+              <Text>{monitor.created_at}</Text>
               <Text>{t("monitor.headers")}:</Text>
               <Text style={{ overflowWrap: "break-word" }}>
                 {typeof monitor.headers === "string"

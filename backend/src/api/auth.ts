@@ -5,46 +5,9 @@ import {
   registerUser,
   getCurrentUser,
 } from "../services/AuthService";
-import { VersionMetadata } from "../models/db";
+import { Bindings } from "../models/db";
+import { db } from "../config";
 
-// 导入 D1 数据库类型
-type Bindings = {
-  DB: D1Database;
-  CF_VERSION_METADATA?: VersionMetadata;
-};
-
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-  dump(): Promise<ArrayBuffer>;
-  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
-  exec<T = unknown>(query: string): Promise<D1Result<T>>;
-}
-
-interface D1PreparedStatement {
-  bind(...values: any[]): D1PreparedStatement;
-  first<T = unknown>(colName?: string): Promise<T>;
-  run<T = unknown>(): Promise<D1Result<T>>;
-  all<T = unknown>(): Promise<D1Result<T>>;
-  raw<T = unknown>(): Promise<T[]>;
-}
-
-interface D1Result<T = unknown> {
-  results?: T[];
-  success: boolean;
-  error?: string;
-  meta?: object;
-}
-
-// 用户类型定义
-interface User {
-  id: number;
-  username: string;
-  password: string;
-  email?: string;
-  role: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 const auth = new Hono<{ Bindings: Bindings }>();
 

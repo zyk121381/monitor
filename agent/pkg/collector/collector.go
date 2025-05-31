@@ -16,6 +16,7 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/xugou/agent/pkg/config"
 	"github.com/xugou/agent/pkg/model"
+	"github.com/xugou/agent/pkg/utils"
 )
 
 // Collector 定义数据收集器接口
@@ -51,6 +52,9 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*model.SystemInfo, erro
 	info.OS = hostInfo.OS
 	// 设置操作系统版本，格式化为更有意义的信息
 	info.Version = fmt.Sprintf("%s %s (%s)", hostInfo.Platform, hostInfo.PlatformVersion, hostInfo.KernelVersion)
+
+	// 获取本地IP地址
+	info.IPAddresses = utils.GetLocalIPs()
 
 	// 获取CPU信息
 	cpuPercent, err := cpu.Percent(time.Second, false)

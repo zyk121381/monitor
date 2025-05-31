@@ -9,7 +9,8 @@ type SystemInfo struct {
 	Hostname    string        `json:"hostname"`
 	Platform    string        `json:"platform"`
 	OS          string        `json:"os"`
-	Version     string        `json:"version"` // 操作系统版本
+	Version     string        `json:"version"`      // 操作系统版本
+	IPAddresses []string      `json:"ip_addresses"` // IP地址列表
 	Keepalive   int           `json:"keepalive"`
 	CPUInfo     CPUInfo       `json:"cpu"`
 	MemoryInfo  MemoryInfo    `json:"memory"`

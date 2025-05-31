@@ -345,9 +345,8 @@ const CreateMonitor = () => {
             <Button variant="secondary" onClick={() => navigate("/monitors")}>
               {t("monitor.form.cancel")}
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} onClick={handleSubmit}>
               {loading ? t("monitor.form.creating") : t("monitor.form.create")}
-              {!loading && <PlusIcon />}
             </Button>
           </Flex>
         </form>

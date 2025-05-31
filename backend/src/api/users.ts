@@ -16,7 +16,7 @@ users.get("/", async (c) => {
   try {
     const payload = c.get("jwtPayload");
 
-    const result = await getAllUsersService(c.env, payload.role);
+    const result = await getAllUsersService(payload.role);
 
     return c.json(
       { success: result.success, users: result.users, message: result.message },
@@ -34,12 +34,7 @@ users.get("/:id", async (c) => {
     const id = parseInt(c.req.param("id"));
     const payload = c.get("jwtPayload");
 
-    const result = await getUserByIdService(
-      c.env,
-      id,
-      payload.id,
-      payload.role
-    );
+    const result = await getUserByIdService(id, payload.id, payload.role);
 
     return c.json(
       { success: result.success, user: result.user, message: result.message },
@@ -57,7 +52,7 @@ users.post("/", async (c) => {
     const payload = c.get("jwtPayload");
     const userData = await c.req.json();
 
-    const result = await createUserService(c.env, userData, payload.role);
+    const result = await createUserService(userData, payload.role);
 
     return c.json(
       { success: result.success, user: result.user, message: result.message },
@@ -77,7 +72,6 @@ users.put("/:id", async (c) => {
     const updateData = await c.req.json();
 
     const result = await updateUserService(
-      c.env,
       id,
       updateData,
       payload.id,
@@ -100,7 +94,7 @@ users.delete("/:id", async (c) => {
     const id = parseInt(c.req.param("id"));
     const payload = c.get("jwtPayload");
 
-    const result = await deleteUserService(c.env, id, payload.id, payload.role);
+    const result = await deleteUserService(id, payload.id, payload.role);
 
     return c.json(
       { success: result.success, message: result.message },
@@ -120,7 +114,6 @@ users.post("/:id/change-password", async (c) => {
     const passwordData = await c.req.json();
 
     const result = await changePasswordService(
-      c.env,
       id,
       passwordData,
       payload.id,

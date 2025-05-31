@@ -38,21 +38,10 @@ export async function loginUser(
         2
       )
     );
-    console.log("env 中的所有键:", Object.keys(env));
-
-    if (env.CF_VERSION_METADATA) {
-      console.log("env.CF_VERSION_METADATA 存在");
-      console.log(
-        "CF_VERSION_METADATA 内容:",
-        JSON.stringify(env.CF_VERSION_METADATA, null, 2)
-      );
-    } else {
-      console.error("错误: env.CF_VERSION_METADATA 不存在");
-    }
 
     // 查找用户
     console.log("开始查找用户:", username);
-    const user = await repositories.getUserByUsername(env.DB, username);
+    const user = await repositories.getUserByUsername(username);
 
     if (!user) {
       console.log("用户不存在:", username);
@@ -132,7 +121,7 @@ export async function registerUser(
 ): Promise<{ success: boolean; message: string; user?: any }> {
   try {
     // 检查用户名是否已存在
-    const existingUser = await repositories.getUserByUsername(env.DB, username);
+    const existingUser = await repositories.getUserByUsername(username);
     if (existingUser) {
       return { success: false, message: "用户名已存在" };
     }
@@ -143,7 +132,6 @@ export async function registerUser(
 
     // 创建用户
     const newUser = await repositories.createUser(
-      env.DB,
       username,
       hashedPassword,
       email,
@@ -172,7 +160,7 @@ export async function getCurrentUser(
   userId: number
 ): Promise<{ success: boolean; message: string; user?: any }> {
   try {
-    const user = await repositories.getUserById(env.DB, userId);
+    const user = await repositories.getUserById(userId);
 
     if (!user) {
       return { success: false, message: "用户不存在" };

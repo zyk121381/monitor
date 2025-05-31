@@ -61,10 +61,10 @@ const UsersList = () => {
   };
 
   return (
-    <Box p="4">
+    <Box className="sm:px-6 lg:px-[8%]">
       <Flex justify="between" align="center" mb="4">
         <Heading size="6">{t("users.title")}</Heading>
-        <Button onClick={() => navigate("/users/create")}>
+        <Button variant="secondary" onClick={() => navigate("/users/create")}>
           {t("users.create")}
         </Button>
       </Flex>

@@ -35,8 +35,8 @@ const Dashboard = () => {
     setLoading(true);
     const [dashboardResponse] = await Promise.all([getDashboardData()]);
     if (dashboardResponse) {
-      setMonitors(dashboardResponse.monitors);
-      setAgents(dashboardResponse.agents);
+      setMonitors(dashboardResponse.monitors || []);
+      setAgents(dashboardResponse.agents || []);
     }
     setLoading(false);
   };
