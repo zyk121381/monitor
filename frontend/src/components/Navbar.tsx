@@ -22,6 +22,7 @@ import {
   CubeIcon,
   PieChartIcon,
   BellIcon,
+  HamburgerMenuIcon
 } from "@radix-ui/react-icons";
 import { useAuth } from "../providers/AuthProvider";
 import { useState, useEffect } from "react";
@@ -71,23 +72,112 @@ const Navbar = () => {
             py="2"
       
           >
-            {/* Logo 部分 */}
-            <Link to="/" >
-              <Flex align="center" gap="2">
-                <Box >
-                  <PieChartIcon width="20" height="20" />
-                </Box>
-                <Text size="4" weight="bold">
-                  XUGOU
-                </Text>
+            <Flex gap="2">
+              {/* 移动端屏幕菜单栏 */}
+              <Box className="lg:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button variant="ghost">
+                      <HamburgerMenuIcon width="20" height="20" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>
+                      <Link
+                        to="/dashboard"
+                        className={`nav-link ${
+                          isActive("/dashboard") ? "active" : ""
+                        }`}
+                      >
+                        <Flex gap="2" align="center">
+                          <DashboardIcon width="14" height="14" />
+                          <Text className="pl-2" size="2">{t("navbar.dashboard")}</Text>
+                        </Flex>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link
+                        to="/monitors"
+                        className={`nav-link ${
+                          isActive("/monitors") ? "active" : ""
+                        }`}
+                      >
+                        <Flex gap="2" align="center">
+                          <ActivityLogIcon width="14" height="14" />
+                          <Text className="pl-2" size="2">
+                            {t("navbar.apiMonitors")}
+                          </Text>
+                        </Flex>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link
+                        to="/agents"
+                        className={`nav-link ${
+                          isActive("/agents") ? "active" : ""
+                        }`}
+                      >
+                        <Flex gap="2" align="center">
+                          <CubeIcon width="14" height="14" />
+                          <Text className="pl-2" size="2">
+                            {t("navbar.agentMonitors")}
+                          </Text>
+                        </Flex>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link
+                        to="/status/config"
+                        className={`nav-link ${
+                          isActive("/status/config") ? "active" : ""
+                        }`}
+                      >
+                        <Flex gap="2" align="center">
+                          <PieChartIcon width="14" height="14" />
+                          <Text className="pl-2" size="2">{t("navbar.statusPage")}</Text>
+                        </Flex>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link
+                        to="/notifications"
+                        className={`nav-link ${
+                          isActive("/notifications") ? "active" : ""
+                        }`}
+                      >
+                        <Flex gap="2" align="center">
+                          <BellIcon width="14" height="14" />
+                          <Text className="pl-2" size="2">
+                            {t("navbar.notifications")}
+                          </Text>
+                        </Flex>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </Box>
+
+              {/* Logo 部分 */}
+              <Flex align="center">
+                <Link to="/" >
+                  <Flex align="center" gap="2">
+                    <Box >
+                      <PieChartIcon width="20" height="20" />
+                    </Box>
+                    <Text size="4" weight="bold">
+                      XUGOU
+                    </Text>
+                  </Flex>
+                </Link>
               </Flex>
-            </Link>
+            </Flex>
 
             {/* 导航链接 */}
             <Flex align="center" gap="2">
               {isAuthenticated ? (
                 <>
-                  <Flex  align="center">
+                  {/* 普通屏幕菜单栏 */}
+                  <Flex align="center" display={{ initial: "none", md: "flex" }}>
                     <Link
                       to="/dashboard"
                       className={`nav-link ${
@@ -173,7 +263,7 @@ const Navbar = () => {
                         gap="1"
                         className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                       >
-                        <Avatar>
+                        <Avatar className="border">
                           <AvatarImage
                             alt={user?.username}
                             width="32"
