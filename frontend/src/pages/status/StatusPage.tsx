@@ -131,7 +131,7 @@ const StatusPage = () => {
   return (
     <Theme appearance="light">
       <Box>
-        <div className="page-container sm:px-6 lg:px-[8%]">
+        <div className="page-container sm:px-6 lg:px-[8%] px-4">
           {/* 状态页标题区域 */}
           <Flex
             direction="column"
