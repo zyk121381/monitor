@@ -157,7 +157,7 @@ const Navbar = () => {
                 </DropdownMenu>
               </Box>
 
-              <Separator orientation="vertical" className="!h-6" />
+              <Separator orientation="vertical" className="!h-6 lg:hidden" />
 
               {/* Logo 部分 */}
               <Flex align="center" className="ml-2">
