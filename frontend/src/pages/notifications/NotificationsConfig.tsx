@@ -1762,13 +1762,13 @@ const NotificationsConfig = () => {
             {t("notifications.description")}
           </Text>
         </Box>
-
+        
         {loading ? (
           <Text>{t("common.loading")}...</Text>
         ) : (
           <Card>
             <Tabs defaultValue="global">
-              <TabsList>
+              <TabsList className="overflow-auto">
                 <TabsTrigger value="global">
                   {t("notifications.tabs.global")}
                 </TabsTrigger>
@@ -1785,7 +1785,6 @@ const NotificationsConfig = () => {
                   {t("notifications.tabs.specificAgents")}
                 </TabsTrigger>
               </TabsList>
-
               <Box pt="2" px="2">
                 <TabsContent value="global">
                   {renderGlobalSettingsTab()}

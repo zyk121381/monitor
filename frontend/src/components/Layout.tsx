@@ -18,12 +18,12 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <Theme appearance="light">
-      <Flex direction="column" className="px-4 min-h-[100vh]" >
+      <Flex direction="column" className="min-h-[100vh]" >
         {/* 顶部导航栏 */}
         <Navbar />
 
         {/* 主要内容 */}
-        <Box className="grow">{children}</Box>
+        <Box className="grow px-2">{children}</Box>
 
         {/* 页脚 */}
         <Box>

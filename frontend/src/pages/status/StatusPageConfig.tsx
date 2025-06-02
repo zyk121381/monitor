@@ -188,13 +188,13 @@ const StatusPageConfig = () => {
   return (
     <Container>
       <Box>
-        <Flex justify="between" align="center">
+        <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
           <Flex align="center">
             <Heading size="5" weight="medium">
               {t("statusPageConfig.title")}
             </Heading>
           </Flex>
-          <Flex align="center">
+          <Flex align="center" className="mt-2">
             <Button
               variant="secondary"
               className="mr-2"

@@ -70,7 +70,6 @@ const Navbar = () => {
             justify="between"
             align="center"
             py="2"
-      
           >
             <Flex gap="2" align="center">
               {/* 移动端屏幕菜单栏 */}
