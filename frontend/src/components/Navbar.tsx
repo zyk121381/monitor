@@ -72,7 +72,7 @@ const Navbar = () => {
             py="2"
       
           >
-            <Flex gap="2">
+            <Flex gap="2" align="center">
               {/* 移动端屏幕菜单栏 */}
               <Box className="lg:hidden">
                 <DropdownMenu>
@@ -157,8 +157,10 @@ const Navbar = () => {
                 </DropdownMenu>
               </Box>
 
+              <Separator orientation="vertical" className="!h-6" />
+
               {/* Logo 部分 */}
-              <Flex align="center">
+              <Flex align="center" className="ml-2">
                 <Link to="/" >
                   <Flex align="center" gap="2">
                     <Box >
@@ -249,12 +251,12 @@ const Navbar = () => {
                     </Link>
                   </Flex>
 
-                  <Separator orientation="vertical" />
+                  <Separator orientation="vertical" className="!h-6 hidden lg:block" />
 
                   {/* 语言选择器 */}
                   <LanguageSelector />
 
-                  <Separator orientation="vertical" />
+                  <Separator orientation="vertical" className="!h-6" />
 
                   <DropdownMenu>
                     <DropdownMenuTrigger>
