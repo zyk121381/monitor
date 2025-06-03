@@ -29,7 +29,7 @@ import { useAuth } from "../providers/AuthProvider";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "./LanguageSelector";
-import { canInstallPWA, promptPWAInstall } from "@/utils/pwaInstallHandler";
+import { promptPWAInstall } from "@/utils/pwaInstallHandler";
 
 const Navbar = () => {
   const navigate = useNavigate();
