@@ -250,7 +250,7 @@ const StatusPageConfig = () => {
       </Box>
       <Card className="mt-4">
         <Tabs defaultValue="general">
-          <TabsList>
+          <TabsList className="overflow-auto">
             <TabsTrigger value="general">
               {t("statusPageConfig.general")}
             </TabsTrigger>

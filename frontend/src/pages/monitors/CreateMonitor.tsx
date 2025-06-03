@@ -152,7 +152,7 @@ const CreateMonitor = () => {
           <Heading size="6">{t("monitor.form.title.create")}</Heading>
         </Flex>
       </Flex>
-      <Card className="mt-4">
+      <Card className="my-4 pr-4">
         <form onSubmit={handleSubmit}>
           <Box pt="2">
             <Flex direction="column" gap="2" className="ml-4">
