@@ -17,11 +17,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 /**
  * 检查 PWA 是否可以被安装。
+ * @warning 此函数已被注释掉，因为 PWA 安装可用性变化的时候，React 组件不知道怎么更新。后续再计划实现
  * @returns {boolean} 如果可以安装则返回 true，否则返回 false。
  */
-export const canInstallPWA = (): boolean => {
-  return !!deferredPrompt;
-};
+// export const canInstallPWA = (): boolean => {
+//   return !!deferredPrompt;
+// };
 
 /**
  * 触发 PWA 安装提示。
