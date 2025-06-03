@@ -6,7 +6,7 @@ import {
   monitorStatusHistory24h,
   monitorDailyStats,
 } from "../db/schema";
-import { eq, desc, asc, and, or, isNull, gte } from "drizzle-orm";
+import { eq, desc, asc, lt } from "drizzle-orm";
 
 /**
  * 监控相关的数据库操作
@@ -14,22 +14,27 @@ import { eq, desc, asc, and, or, isNull, gte } from "drizzle-orm";
 
 // 获取需要检查的监控列表
 export async function getMonitorsToCheck() {
-  // 这里的查询写的是有问题的，需要获取的是当前时间大于last_checked + interval的监控
-  // 但是interval是字符串，需要转换为数字
-  // 并且last_checked是字符串，需要转换为日期
-  const result = await db
+  
+  // 使用SQL表达式或自定义函数来处理日期计算
+  const allmonitors = await db
     .select()
     .from(monitors)
-    .where(
-      and(
-        eq(monitors.active, 1),
-        or(isNull(monitors.last_checked), gte(monitors.interval, 0))
-      )
-    );
+    .execute();
+    
+  // 在JavaScript中进行日期计算筛选
+  const now = new Date().getTime();
+  const monitorsToCheck = allmonitors.filter((monitor: Monitor) => {
+    if (!monitor.last_checked) return true; // 如果没有检查过，需要检查
+    
+    const lastCheckedTime = new Date(monitor.last_checked).getTime();
+    const intervalMs = (monitor.interval || 60) * 1000; // 转换为毫秒
+    
+    return now > (lastCheckedTime + intervalMs);
+  });
 
   // 解析所有监控的 headers 字段
-  if (result.results) {
-    result.results.forEach((monitor: Monitor) => {
+  if (monitorsToCheck) {
+    monitorsToCheck.forEach((monitor: Monitor) => {
       if (typeof monitor.headers === "string") {
         try {
           monitor.headers = JSON.parse(monitor.headers);
@@ -39,7 +44,7 @@ export async function getMonitorsToCheck() {
       }
     });
   }
-  return result;
+  return monitorsToCheck;
 }
 
 // 获取单个监控详情

@@ -45,8 +45,8 @@ export async function getAgentDetail(agentId: number) {
   const { token, ...rest } = agent;
 
   return {
-      ...rest,
-      ip_addresses: getFormattedIPAddresses(agent.ip_addresses as any),
+    ...rest,
+    ip_addresses: getFormattedIPAddresses(agent.ip_addresses as any),
   };
 }
 
@@ -96,7 +96,7 @@ export async function updateAgentService(
 
     // 执行更新
     const updatedAgent = await AgentRepository.updateAgent(agent);
-  
+
     return {
       success: true,
       message: "客户端信息已更新",
@@ -120,7 +120,7 @@ export async function updateAgentService(
  * @param agentId 客户端ID
  * @returns 删除结果
  */
-export async function deleteAgentService( agentId: number) {
+export async function deleteAgentService(agentId: number) {
   try {
     // 获取客户端信息
     const agent = await AgentRepository.getAgentById(agentId);
@@ -266,9 +266,7 @@ export async function registerAgentService(
  * @param status 客户端指标
  * @returns 更新结果
  */
-export async function updateAgentStatusService(
-  status: any
-) {
+export async function updateAgentStatusService(status: any) {
   try {
     const statusData = Array.isArray(status) ? status : [status];
     const norlmalInfo = {
@@ -304,7 +302,7 @@ export async function updateAgentStatusService(
       agent.status = norlmalInfo.status;
 
       console.log("update agent info: ", agent);
-  
+
       await AgentRepository.updateAgent(agent);
     }
 
@@ -361,20 +359,18 @@ export async function getAgentById(id: number) {
   return await AgentRepository.getAgentById(id);
 }
 
-export async function getActiveAgents(env: any) {
+export async function getActiveAgents() {
   return await AgentRepository.getActiveAgents();
 }
 
-export async function setAgentInactive(env: any, id: number) {
+export async function setAgentInactive(id: number) {
   return await AgentRepository.setAgentInactive(id);
 }
 
-export async function getAgentMetrics( agentId: number) {
+export async function getAgentMetrics(agentId: number) {
   return await AgentRepository.getAgentMetrics(agentId);
 }
 
-export async function getLatestAgentMetrics(
-  agentId: number
-) {
+export async function getLatestAgentMetrics(agentId: number) {
   return await AgentRepository.getLatestAgentMetrics(agentId);
 }

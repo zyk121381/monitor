@@ -110,14 +110,11 @@ users.delete("/:id", async (c) => {
 users.post("/:id/change-password", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const payload = c.get("jwtPayload");
     const passwordData = await c.req.json();
 
     const result = await changePasswordService(
       id,
       passwordData,
-      payload.id,
-      payload.role
     );
 
     return c.json(

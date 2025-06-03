@@ -1,4 +1,3 @@
-import { Bindings } from "../models/db";
 import { Agent, Metrics } from "../models/agent";
 import { agents, agentMetrics24h } from "../db/schema";
 import { db } from "../config";
@@ -111,10 +110,11 @@ export async function getAgentByToken(token: string) {
 
 // 获取活跃状态的客户端
 export async function getActiveAgents() {
-  return await db
-    .select("id", "name", "updated_at", "keepalive")
-    .from(agents)
-    .where(eq(agents.status, "active"));
+  const activeAgents = await db
+   .select()
+   .from(agents)
+   .where(eq(agents.status, "active"));
+  return activeAgents;
 }
 
 // 设置客户端为离线状态

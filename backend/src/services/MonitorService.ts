@@ -88,13 +88,15 @@ export async function checkMonitor(monitor: models.Monitor) {
     const status = isExpectedStatus ? "up" : "down";
 
     // 记录状态历史
-    await repositories.insertMonitorStatusHistory(
+    const res = await repositories.insertMonitorStatusHistory(
       monitor.id,
       status,
       responseTime,
       response.status,
       error
     );
+
+    console.log(`监控 ${monitor.name} (${monitor.url}) 检查完成. ${res}`);
 
     // 更新监控状态
     await repositories.updateMonitorStatus(monitor.id, status, responseTime);

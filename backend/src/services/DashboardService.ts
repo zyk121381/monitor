@@ -17,7 +17,7 @@ export async function getDashboardData() {
     });
   }
   return {
-    monitors: monitors.monitors,
+    monitors: monitors,
     agents: agents,
   };
 }

@@ -1,5 +1,6 @@
 import { compare, hash } from "bcryptjs";
 import * as repositories from "../repositories";
+import { error } from "console";
 
 export async function getAllUsersService(userRole: string) {
   try {
@@ -213,40 +214,28 @@ export async function changePasswordService(
   passwordData: {
     currentPassword?: string;
     newPassword: string;
-  },
-  currentUserId: number,
-  userRole: string
+  }
 ) {
   try {
-    // 检查权限（仅允许用户本人或管理员）
-    if (userRole !== "admin" && currentUserId !== id) {
-      return { success: false, message: "无权修改此用户密码", status: 403 };
-    }
-
-    // 管理员可以不提供当前密码
-    if (userRole !== "admin" && !passwordData.currentPassword) {
-      return { success: false, message: "必须提供当前密码", status: 400 };
-    }
-
     if (!passwordData.newPassword) {
-      return { success: false, message: "必须提供新密码", status: 400 };
+      throw error("new password is required");
     }
 
     // 获取用户
     const user = await repositories.getFullUserById(id);
 
     if (!user) {
-      return { success: false, message: "用户不存在", status: 404 };
+      throw error("user not found");
     }
 
     // 非管理员需要验证当前密码
-    if (userRole !== "admin" && passwordData.currentPassword) {
+    if (passwordData.currentPassword) {
       const isPasswordValid = await compare(
         passwordData.currentPassword,
         user.password
       );
       if (!isPasswordValid) {
-        return { success: false, message: "当前密码不正确", status: 400 };
+       throw error("current password is invalid");
       }
     }
 
@@ -259,6 +248,6 @@ export async function changePasswordService(
     return { success: true, message: "密码已更新", status: 200 };
   } catch (error) {
     console.error("修改密码错误:", error);
-    return { success: false, message: "修改密码失败", status: 500 };
+    return { success: false, message: error, status: 500 };
   }
 }

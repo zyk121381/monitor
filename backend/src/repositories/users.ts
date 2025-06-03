@@ -173,7 +173,7 @@ export async function updateUserPassword(id: number, hashedPassword: string) {
     .where(eq(users.id, id))
     .returning();
 
-  if (!result.success) {
+  if (!result) {
     throw new Error("更新密码失败");
   }
 

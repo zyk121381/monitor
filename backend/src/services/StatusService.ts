@@ -137,8 +137,6 @@ export async function getStatusPagePublicData() {
   // 获取所有配置
   const configsResult = await repositories.getAllStatusPageConfigs();
 
-  console.log("configsResult", configsResult);
-
   if (!configsResult || configsResult.length === 0) {
     console.log("没有找到任何配置");
 
@@ -160,14 +158,11 @@ export async function getStatusPagePublicData() {
     config.id as number
   );
 
-  console.log("selectedMonitors", selectedMonitors);
 
   // 获取选中的客户端
   const selectedAgents = await repositories.getSelectedAgents(
     config.id as number
   );
-
-  console.log("selectedAgents", selectedAgents);
 
   // 获取监控项详细信息
   let monitors: any[] = [];

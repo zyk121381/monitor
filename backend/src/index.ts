@@ -71,6 +71,8 @@ export default {
   // 添加定时任务，每分钟执行一次监控检查和客户端状态检查
   async scheduled(event: any, env: any, ctx: any) {
     try {
+      // 初始化 drizzle 实例
+      config.initDb(env);
       await jobs.runScheduledTasks(event, env, ctx);
     } catch (error) {
       console.error("定时任务执行出错:", error);

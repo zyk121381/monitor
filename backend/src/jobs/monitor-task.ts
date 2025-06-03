@@ -13,28 +13,24 @@ const monitorTask = new Hono<{ Bindings: Bindings }>();
 async function checkMonitors(c: any) {
   try {
     console.log("开始执行监控检查...");
-    // 获取当前时间
-    const now = new Date();
 
     // 查询需要检查的监控
     const monitors = await getMonitorsToCheck();
 
-    console.log(`找到 ${monitors?.results?.length || 0} 个需要检查的监控`);
+    console.log(`找到 ${monitors?.length || 0} 个需要检查的监控`);
 
-    if (!monitors.results || monitors.results.length === 0) {
+    if (!monitors || monitors.length === 0) {
       return { success: true, message: "没有需要检查的监控", checked: 0 };
     }
 
     // 检查每个监控
     const results = await Promise.all(
-      monitors.results.map(async (monitorItem: any) => {
-        // 确保正确的类型转换
-        const monitor = monitorItem as Monitor;
+      monitors.map(async (monitor: Monitor) => {  
+        console.log(`开始检查监控: ${monitor.name} (ID: ${monitor.id})`);
         const checkResult = await checkMonitor(monitor);
-
         // 处理通知
+        console.log(`检查完成，状态: ${checkResult}`);
         await handleMonitorNotification(c, monitor, checkResult);
-
         return checkResult;
       })
     );

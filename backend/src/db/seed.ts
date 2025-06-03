@@ -58,9 +58,8 @@ export async function createAdminUser(): Promise<void> {
   // 如果不存在管理员用户，则创建一个
   if (adminUser.length === 0) {
     console.log("创建管理员用户...");
-    // 密码: admin123
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash("admin123", salt);
+
+    const hashedPassword = await bcrypt.hash("admin123", 10);
     const now = new Date().toISOString();
 
     await db.insert(users).values({
