@@ -230,7 +230,7 @@ const Navbar = () => {
                     </Link>
 
                     <Button onClick={promptPWAInstall} variant="ghost">
-                      <Flex gap="2" align="center">
+                      <Flex gap="1" align="center">
                         <DownloadIcon width="14" height="14" />
                         <Text className="pl-2" size="2">
                           {t("navbar.installApp")}
