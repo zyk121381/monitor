@@ -29,6 +29,7 @@ import { useAuth } from "../providers/AuthProvider";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "./LanguageSelector";
+import { canInstallPWA, promptPWAInstall } from "@/utils/pwaInstallHandler";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -117,6 +118,14 @@ const Navbar = () => {
                             <BellIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
                               {t("navbar.notifications")}
+                            </Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={promptPWAInstall}>
+                          <Flex gap="2" align="center">
+                            <DownloadIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">
+                              {t("navbar.installApp")}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
@@ -219,6 +228,15 @@ const Navbar = () => {
                         </Text>
                       </Button>
                     </Link>
+
+                    <Button onClick={promptPWAInstall} variant="ghost">
+                      <Flex gap="2" align="center">
+                        <DownloadIcon width="14" height="14" />
+                        <Text className="pl-2" size="2">
+                          {t("navbar.installApp")}
+                        </Text>
+                      </Flex>
+                    </Button>
                   </Flex>
 
                   <Separator orientation="vertical" className="!h-6 hidden lg:block" />

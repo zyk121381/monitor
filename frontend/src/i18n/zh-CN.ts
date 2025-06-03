@@ -6,6 +6,7 @@ const zhCN = {
     "navbar.agentMonitors": "客户端监控",
     "navbar.statusPage": "状态页",
     "navbar.notifications": "通知",
+    "navbar.installApp": "安装应用",
     "navbar.userManagement": "用户管理",
     "navbar.profile": "个人资料",
     "navbar.logout": "退出登录",
