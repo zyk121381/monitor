@@ -146,7 +146,7 @@ const MonitorDetail = () => {
 
   return (
     <Container className="sm:px-6 lg:px-[8%]">
-      <Flex justify="between" align="center">
+      <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }} gap="4">
         <Flex align="center" gap="2">
           <Button variant="secondary" onClick={() => navigate("/monitors")}>
             <ArrowLeftIcon />
@@ -178,7 +178,7 @@ const MonitorDetail = () => {
           </Button>
         </Flex>
       </Flex>
-      <Box pt="4" >
+      <Flex py="4" gap="4" direction="column" >
         <Card>
           <Flex direction="column" gap="2" className="ml-4">
             <Heading size="4">{t("monitor.detailInfo")}</Heading>
@@ -213,7 +213,7 @@ const MonitorDetail = () => {
           </Flex>
         </Card>
         {/* 添加响应时间图表 */}
-        <Card>
+        <Card className="pr-4">
           <Flex direction="column" gap="2" className="ml-4">
             <Heading size="4">{t("monitor.oneDayHistory")}</Heading>
             <Box>
@@ -221,7 +221,7 @@ const MonitorDetail = () => {
             </Box>
           </Flex>
         </Card>
-        <Card>
+        <Card className="pr-4">
           <Flex direction="column" gap="2" className="ml-4">
             <Heading size="4">{t("monitor.MonthsHistory")}</Heading>
             <Box>
@@ -229,7 +229,7 @@ const MonitorDetail = () => {
             </Box>
           </Flex>
         </Card>
-      </Box>
+      </Flex>
     </Container>
   );
 };

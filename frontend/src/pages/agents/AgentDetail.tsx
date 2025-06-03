@@ -196,7 +196,7 @@ const AgentDetail = () => {
 
   return (
     <Container size="4">
-      <Flex justify="between" align="center">
+      <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }} gap="4">
         <Flex align="center" gap="2">
           <Button variant="secondary" onClick={() => navigate("/agents")}>
             <ArrowLeftIcon />
@@ -234,7 +234,7 @@ const AgentDetail = () => {
           </Button>
         </Flex>
       </Flex>
-      <Box pt="3">
+      <Box py="3">
         <Grid columns={{ initial: "1" }} gap="4">
           {/* 系统信息卡片 */}
           <Card>
@@ -380,7 +380,7 @@ const AgentDetail = () => {
           </Card>
 
           {/* Agent 资源信息卡片 */}
-          <Card>
+          <Card className="pr-4">
             <Flex direction="column" gap="2" className="ml-4">
               <Heading size="3">{t("agent.metrics")}</Heading>
               <AgentCard

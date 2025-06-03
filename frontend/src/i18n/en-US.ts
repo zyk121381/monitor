@@ -6,6 +6,7 @@ const enUS = {
     "navbar.agentMonitors": "Agent Monitors",
     "navbar.statusPage": "Status Page",
     "navbar.notifications": "Notifications",
+    "navbar.installApp": "Install App",
     "navbar.userManagement": "User Management",
     "navbar.profile": "Profile",
     "navbar.logout": "Logout",

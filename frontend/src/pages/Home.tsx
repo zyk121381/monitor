@@ -34,9 +34,11 @@ const Home = () => {
 
           <Flex gap="4" mt="4">
             {isAuthenticated ? (
-              <Button asChild>
-                <Link to="/dashboard">{t("home.getStarted")}</Link>
-              </Button>
+              <>
+                <Button asChild>
+                  <Link to="/dashboard">{t("home.getStarted")}</Link>
+                </Button>
+              </>
             ) : (
               <>
                 <Button asChild>

@@ -114,7 +114,7 @@ const EditAgent = () => {
             </Heading>
           </Flex>
         </Flex>
-        <Card>
+        <Card className="mt-4 pr-4">
           <form onSubmit={handleSubmit}>
             <Flex direction="column" gap="2" className="ml-4">
               <Box mb="4">

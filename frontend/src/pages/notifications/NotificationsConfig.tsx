@@ -631,8 +631,8 @@ const NotificationsConfig = () => {
             </Button>
           </Flex>
 
-          <Card>
-            <Box p="2">
+          <Box>
+            <Flex py="2" direction="column" gap="2">
               <Text className="text-gray-600 mb-3">
                 {t("notifications.channels.description")}
               </Text>
@@ -642,12 +642,12 @@ const NotificationsConfig = () => {
                   {t("notifications.channels.noChannels")}
                 </Text>
               ) : (
-                <Flex direction="column" gap="1">
+                <Flex direction="column" gap="2">
                   {channels.map((channel) => (
-                    <Card key={channel.id}>
+                    <Card key={channel.id} className="px-2">
                       <Flex className="justify-between items-center">
-                        <Flex direction="column" gap="1">
-                          <Flex gap="2" align="center">
+                        <Flex direction="column" gap="1" className="grow">
+                          <Flex gap="2" align="center" className="break-all">
                             <Text className="text-lg">{channel.name}</Text>
                             {channel.type === "telegram" &&
                               channel.config &&
@@ -715,8 +715,8 @@ const NotificationsConfig = () => {
                   ))}
                 </Flex>
               )}
-            </Box>
-          </Card>
+            </Flex>
+          </Box>
         </Box>
       </Flex>
     );
@@ -742,8 +742,8 @@ const NotificationsConfig = () => {
             </Button>
           </Flex>
 
-          <Card>
-            <Box p="3">
+          <Box>
+            <Box>
               <Text size="2" color="gray" mb="3">
                 {t("notifications.templates.description")}
               </Text>
@@ -755,7 +755,7 @@ const NotificationsConfig = () => {
               ) : (
                 <Flex direction="column" gap="3">
                   {templates.map((template) => (
-                    <Card key={template.id}>
+                    <Card key={template.id} className="px-4">
                       <Flex direction="column" gap="3">
                         <Flex justify="between" align="center">
                           <Flex gap="2" align="center">
@@ -801,7 +801,7 @@ const NotificationsConfig = () => {
                 </Flex>
               )}
             </Box>
-          </Card>
+          </Box>
         </Box>
       </Flex>
     );
@@ -823,9 +823,9 @@ const NotificationsConfig = () => {
             {t("notifications.settings.monitors")}
           </Text>
 
-          <Card>
+          <Card className="mt-2">
             <Box p="1">
-              <Flex direction="column" gap="1">
+              <Flex direction="column" gap="1" className="px-2">
                 <Flex justify="between" align="center">
                   <Box>
                     <Text className="text-base">
@@ -844,7 +844,7 @@ const NotificationsConfig = () => {
                 </Flex>
 
                 {settings.monitors.enabled && (
-                  <Box pl="1">
+                  <Box pl="4">
                     <Flex direction="column" gap="3">
                       <Flex align="center" gap="2">
                         <Switch
@@ -891,14 +891,14 @@ const NotificationsConfig = () => {
         </Box>
 
         {/* 全局客户端通知设置 */}
-        <Box p="1">
+        <Box>
           <Text className="text-lg mb-2">
             {t("notifications.settings.agents")}
           </Text>
 
-          <Card>
+          <Card className="mt-2">
             <Box p="1">
-              <Flex direction="column" gap="4">
+              <Flex direction="column" gap="4" className="px-2">
                 <Flex justify="between" align="center">
                   <Box>
                     <Text className="text-base">
@@ -1102,7 +1102,7 @@ const NotificationsConfig = () => {
           };
 
           return (
-            <Card key={monitorId}>
+            <Card key={monitorId} className="px-4">
               <Flex direction="column" gap="3">
                 <Flex justify="between" align="center">
                   <Box>
@@ -1216,7 +1216,7 @@ const NotificationsConfig = () => {
           };
 
           return (
-            <Card key={agentId}>
+            <Card key={agentId} className="px-4">
               <Flex direction="column" gap="3">
                 <Flex justify="between" align="center">
                   <Box>
@@ -1762,13 +1762,13 @@ const NotificationsConfig = () => {
             {t("notifications.description")}
           </Text>
         </Box>
-
+        
         {loading ? (
           <Text>{t("common.loading")}...</Text>
         ) : (
-          <Card>
+          <Card className="mb-4">
             <Tabs defaultValue="global">
-              <TabsList>
+              <TabsList className="overflow-auto">
                 <TabsTrigger value="global">
                   {t("notifications.tabs.global")}
                 </TabsTrigger>
@@ -1785,7 +1785,6 @@ const NotificationsConfig = () => {
                   {t("notifications.tabs.specificAgents")}
                 </TabsTrigger>
               </TabsList>
-
               <Box pt="2" px="2">
                 <TabsContent value="global">
                   {renderGlobalSettingsTab()}

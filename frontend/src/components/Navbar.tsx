@@ -22,11 +22,14 @@ import {
   CubeIcon,
   PieChartIcon,
   BellIcon,
+  HamburgerMenuIcon,
+  DownloadIcon
 } from "@radix-ui/react-icons";
 import { useAuth } from "../providers/AuthProvider";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "./LanguageSelector";
+import { promptPWAInstall } from "@/utils/pwaInstallHandler";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -69,25 +72,93 @@ const Navbar = () => {
             justify="between"
             align="center"
             py="2"
-      
           >
-            {/* Logo 部分 */}
-            <Link to="/" >
-              <Flex align="center" gap="2">
-                <Box >
-                  <PieChartIcon width="20" height="20" />
-                </Box>
-                <Text size="4" weight="bold">
-                  XUGOU
-                </Text>
+            <Flex gap="2" align="center">
+              {/* 移动端屏幕菜单栏 */}
+              { isAuthenticated ? (
+                <>  
+                  <Box className="lg:hidden">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Flex className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                          <HamburgerMenuIcon width="20" height="20" />
+                        </Flex>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                          <Flex gap="2" align="center">
+                            <DashboardIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">{t("navbar.dashboard")}</Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/monitors")}>
+                          <Flex gap="2" align="center">
+                            <ActivityLogIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">
+                              {t("navbar.apiMonitors")}
+                            </Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/agents")}>
+                          <Flex gap="2" align="center">
+                            <CubeIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">
+                              {t("navbar.agentMonitors")}
+                            </Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/status/config")}>
+                          <Flex gap="2" align="center">
+                            <PieChartIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">{t("navbar.statusPage")}</Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/notifications")}>
+                          <Flex gap="2" align="center">
+                            <BellIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">
+                              {t("navbar.notifications")}
+                            </Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={promptPWAInstall}>
+                          <Flex gap="2" align="center">
+                            <DownloadIcon width="14" height="14" />
+                            <Text className="pl-2" size="2">
+                              {t("navbar.installApp")}
+                            </Text>
+                          </Flex>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </Box>
+
+                  <Separator orientation="vertical" className="!h-6 lg:hidden" />
+                </>
+              ) : null }
+
+
+              {/* Logo 部分 */}
+              <Flex align="center" className="ml-3">
+                <Link to="/" >
+                  <Flex align="center" gap="2">
+                    <Box >
+                      <PieChartIcon width="20" height="20" />
+                    </Box>
+                    <Text size="4" weight="bold">
+                      XUGOU
+                    </Text>
+                  </Flex>
+                </Link>
               </Flex>
-            </Link>
+            </Flex>
 
             {/* 导航链接 */}
             <Flex align="center" gap="2">
               {isAuthenticated ? (
                 <>
-                  <Flex  align="center">
+                  {/* 普通屏幕菜单栏 */}
+                  <Flex align="center" display={{ initial: "none", md: "flex" }}>
                     <Link
                       to="/dashboard"
                       className={`nav-link ${
@@ -157,14 +228,23 @@ const Navbar = () => {
                         </Text>
                       </Button>
                     </Link>
+
+                    <Button onClick={promptPWAInstall} variant="ghost">
+                      <Flex gap="1" align="center">
+                        <DownloadIcon width="14" height="14" />
+                        <Text className="pl-2" size="2">
+                          {t("navbar.installApp")}
+                        </Text>
+                      </Flex>
+                    </Button>
                   </Flex>
 
-                  <Separator orientation="vertical" />
+                  <Separator orientation="vertical" className="!h-6 hidden lg:block" />
 
                   {/* 语言选择器 */}
                   <LanguageSelector />
 
-                  <Separator orientation="vertical" />
+                  <Separator orientation="vertical" className="!h-6" />
 
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -173,7 +253,7 @@ const Navbar = () => {
                         gap="1"
                         className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                       >
-                        <Avatar>
+                        <Avatar className="border">
                           <AvatarImage
                             alt={user?.username}
                             width="32"
@@ -230,7 +310,7 @@ const Navbar = () => {
                   {/* 语言选择器 */}
                   <LanguageSelector />
 
-                  <Separator orientation="vertical" />
+                  <Separator orientation="vertical" className="!h-6" />
 
                   <Button variant="ghost" onClick={() => navigate("/login")}>
                     {t("navbar.login")}

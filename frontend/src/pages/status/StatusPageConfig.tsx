@@ -188,13 +188,13 @@ const StatusPageConfig = () => {
   return (
     <Container>
       <Box>
-        <Flex justify="between" align="center">
+        <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
           <Flex align="center">
             <Heading size="5" weight="medium">
               {t("statusPageConfig.title")}
             </Heading>
           </Flex>
-          <Flex align="center">
+          <Flex align="center" className="mt-2">
             <Button
               variant="secondary"
               className="mr-2"
@@ -250,7 +250,7 @@ const StatusPageConfig = () => {
       </Box>
       <Card className="mt-4">
         <Tabs defaultValue="general">
-          <TabsList>
+          <TabsList className="overflow-auto">
             <TabsTrigger value="general">
               {t("statusPageConfig.general")}
             </TabsTrigger>

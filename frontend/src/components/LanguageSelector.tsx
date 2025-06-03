@@ -23,7 +23,7 @@ const LanguageSelector: React.FC = () => {
           className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <GlobeIcon width="14" height="14" />
-          <Text size="2">
+          <Text size="2" className="hidden sm:block">
             {currentLanguage === "zh-CN" ? "中文" : "English"}
           </Text>
         </Flex>

@@ -200,7 +200,7 @@ const MonitorsList = () => {
 
   return (
     <Container className="sm:px-6 lg:px-[8%]">
-      <Flex justify="between" align="center">
+      <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
         <Heading size="6">{t("monitors.pageTitle")}</Heading>
         <Flex className="mt-4 space-x-2">
           <Tabs defaultValue="grid">
@@ -231,7 +231,7 @@ const MonitorsList = () => {
         </Flex>
       </Flex>
 
-      <Container className="mt-4 space-x-2">
+      <Container className="my-4 space-x-2">
         {monitors.length === 0 ? (
           <Card>
             <Flex

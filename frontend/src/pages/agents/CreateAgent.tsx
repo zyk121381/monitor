@@ -83,7 +83,7 @@ const CreateAgent = () => {
           <Heading size="6">{t("agent.form.title.create")}</Heading>
         </Flex>
       </Flex>
-      <Card className="mt-4">
+      <Card className="my-4 pr-4">
         <Flex direction="column" gap="2" className="ml-4">
           {/* 提示信息 */}
           <Box>
@@ -98,9 +98,9 @@ const CreateAgent = () => {
             <Text as="label" size="2" weight="bold">
               {t("agent.add.serverAddress")}
             </Text>
-            <Flex gap="2">
+            <Flex gap="2" align="center">
               <Text className="token-display">{serverUrl}</Text>
-              <Button variant="secondary" onClick={handleCopyServerUrl}>
+              <Button variant="secondary" onClick={handleCopyServerUrl} className="ml-2">
                 {serverUrlCopied ? <CheckIcon /> : <CopyIcon />}
                 {serverUrlCopied ? t("common.copied") : t("common.copy")}
               </Button>
@@ -119,8 +119,8 @@ const CreateAgent = () => {
               <Text>{t("agent.add.generatingToken")}</Text>
             ) : (
               <>
-                <Flex gap="2">
-                  <Text className="token-display">{token}</Text>
+                <Flex gap="2" align="center">
+                  <Text className="token-display break-all">{token}</Text>
                   <Button variant="secondary" onClick={handleCopyToken}>
                     {tokenCopied ? <CheckIcon /> : <CopyIcon />}
                     {tokenCopied ? t("common.copied") : t("common.copy")}

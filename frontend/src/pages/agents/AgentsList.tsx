@@ -302,9 +302,9 @@ const AgentsList = () => {
 
   return (
     <Container size="4">
-      <Flex justify="between" align="center">
+      <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
         <Heading size="6">{t("agents.pageTitle")}</Heading>
-        <Flex gap="3">
+        <Flex className="mt-4 space-x-2">
           <Tabs defaultValue="card">
             <TabsList>
               <TabsTrigger
@@ -350,7 +350,7 @@ const AgentsList = () => {
         </Flex>
       </Flex>
 
-      <Box className="mt-4 space-x-2">
+      <Box className="my-4 space-x-2">
         {agents.length === 0 ? (
           <Card>
             <Flex
