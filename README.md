@@ -69,12 +69,15 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 ## ⭐ 支持一下作者
 
 - 给项目点个 Star，分享给您的朋友
-- 通过 Buy Me a Coffee 支持我的持续开发
+- 请作者喝点
 
 <div align="center">
   <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" height="51">
   </a>
+      <a href="https://tiny-bush-0bef.realyourdad.workers.dev/" target="_blank">
+      <img src="https://img.shields.io/badge/Buy_Me_A_Coke-FF5E5B?style=for-the-badge&logo=coca-cola&logoColor=white" alt="Buy Me A Coke" width="200" height="51" style="border-radius: 8px;" />
+    </a>
 </div>
 
 ## 🤝 贡献
