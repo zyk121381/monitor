@@ -350,7 +350,7 @@ const AgentsList = () => {
         </Flex>
       </Flex>
 
-      <Box className="mt-4 space-x-2">
+      <Box className="my-4 space-x-2">
         {agents.length === 0 ? (
           <Card>
             <Flex

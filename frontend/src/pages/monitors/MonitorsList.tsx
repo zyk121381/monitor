@@ -231,7 +231,7 @@ const MonitorsList = () => {
         </Flex>
       </Flex>
 
-      <Container className="mt-4 space-x-2">
+      <Container className="my-4 space-x-2">
         {monitors.length === 0 ? (
           <Card>
             <Flex

@@ -22,7 +22,8 @@ import {
   CubeIcon,
   PieChartIcon,
   BellIcon,
-  HamburgerMenuIcon
+  HamburgerMenuIcon,
+  DownloadIcon
 } from "@radix-ui/react-icons";
 import { useAuth } from "../providers/AuthProvider";
 import { useState, useEffect } from "react";
