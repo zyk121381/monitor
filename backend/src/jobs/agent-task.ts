@@ -7,12 +7,11 @@ import {
 } from "../services";
 import { shouldSendNotification, sendNotification } from "../services";
 import { Hono } from "hono";
-import { Bindings } from "../models/db";
 import { db } from "../config";
-import { eq } from "drizzle-orm";
-import { notificationSettings } from "../db/schema";
+import { eq,lt } from "drizzle-orm";
+import { notificationSettings,agentMetrics24h } from "../db/schema";
 
-const agentTask = new Hono<{ Bindings: Bindings }>();
+const agentTask = new Hono<{}>();
 
 interface AgentResult {
   id: number;
@@ -299,9 +298,7 @@ export default {
 
     if (hour % 6 === 0 && minute === 5) {
       console.log("定时任务: 正在清理 metrics 24h 表数据...");
-      await env.DB.prepare("DELETE FROM agent_metrics_24h WHERE timestamp < ?")
-        .bind(yesterday)
-        .run();
+      await db.delete(agentMetrics24h).where(lt(agentMetrics24h.timestamp, yesterday));
     }
 
     return result;

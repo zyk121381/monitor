@@ -29,7 +29,7 @@ async function checkMonitors(c: any) {
         console.log(`开始检查监控: ${monitor.name} (ID: ${monitor.id})`);
         const checkResult = await checkMonitor(monitor);
         // 处理通知
-        console.log(`检查完成，状态: ${checkResult}`);
+        console.log(`检查完成，状态: ${checkResult.status}`);
         await handleMonitorNotification(c, monitor, checkResult);
         return checkResult;
       })

@@ -88,7 +88,7 @@ export async function checkMonitor(monitor: models.Monitor) {
     const status = isExpectedStatus ? "up" : "down";
 
     // 记录状态历史
-    const res = await repositories.insertMonitorStatusHistory(
+    await repositories.insertMonitorStatusHistory(
       monitor.id,
       status,
       responseTime,
@@ -96,7 +96,7 @@ export async function checkMonitor(monitor: models.Monitor) {
       error
     );
 
-    console.log(`监控 ${monitor.name} (${monitor.url}) 检查完成. ${res}`);
+    console.log(`监控 ${monitor.name} (${monitor.url}) 检查完成.`);
 
     // 更新监控状态
     await repositories.updateMonitorStatus(monitor.id, status, responseTime);

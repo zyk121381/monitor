@@ -1,7 +1,10 @@
 // 导出所有定时任务
 import monitorTask from "./monitor-task";
 import agentTask from "./agent-task";
-import { Bindings } from "../models/db";
+import { db } from "../config";
+import * as schema from "../db/schema";
+import { lt } from "drizzle-orm";
+
 // 统一的定时任务处理函数
 export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
   try {
@@ -18,7 +21,7 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
     const minute = now.getMinutes();
     if (dayOfMonth === 1 && hour === 0 && minute === 30) {
       console.log("每月1号零点30分执行清理任务...");
-      await cleanupOldRecords(env.DB);
+      await cleanupOldRecords();
     }
   } catch (error) {
     console.error("定时任务执行出错:", error);
@@ -26,27 +29,21 @@ export const runScheduledTasks = async (event: any, env: any, ctx: any) => {
 };
 
 // 清理30天以前的历史记录
-export async function cleanupOldRecords(db: Bindings["DB"]) {
+export async function cleanupOldRecords() {
   console.log("开始清理30天以前的历史记录...");
 
   // 清理30天以前的 monitor_daily_stats
-  await db.prepare(
-      `
-      DELETE FROM monitor_daily_stats
-      WHERE date < datetime('now', '-30 days')
-    `
-    )
-    .run();
+  const now = new Date();
+  now.setDate(now.getDate() - 30);
+  const dateStr = now.toISOString().split("T")[0];
+  await db.delete(schema.monitorDailyStats).where(
+    lt(schema.monitorDailyStats.date, dateStr)
+  )
 
   // 清理通知历史记录
-  await db
-    .prepare(
-      `
-      DELETE FROM notification_history 
-      WHERE sent_at < datetime('now', '-30 days')
-    `
-    )
-    .run();
+  await db.delete(schema.notificationHistory).where(
+    lt(schema.notificationHistory.sent_at, dateStr)
+  )
 
   return {
     success: true,
