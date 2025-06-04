@@ -79,8 +79,8 @@ export async function updateAgent(
 ) {
   agent.updated_at = new Date().toISOString();
   
-  // 从 agent 对象中排除 id 属性，避免更新主键
-  const { id, ...updateData } = agent;
+  // 从 agent 对象中排除 id 等索引相关属性，避免更新主键
+  const { id, token, created_by, ...updateData } = agent;
 
   try {
     // 确保 updateData 中不包含 id
