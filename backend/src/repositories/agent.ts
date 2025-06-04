@@ -79,8 +79,12 @@ export async function updateAgent(
 ) {
   agent.updated_at = new Date().toISOString();
   
+  // 从 agent 对象中排除 id 等索引相关属性，避免更新主键
+  const { id, token, created_by, ...updateData } = agent;
+
   try {
-    const updatedAgent = await db.update(agents).set(agent).where(eq(agents.id, agent.id)).returning();
+    // 确保 updateData 中不包含 id
+    const updatedAgent = await db.update(agents).set(updateData).where(eq(agents.id, id)).returning();
     return updatedAgent[0];
   } catch (error) {
     console.error("更新客户端失败:", error);
