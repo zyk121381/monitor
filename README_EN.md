@@ -75,13 +75,22 @@ Sponsor me in any way you can:
 
 <div align="center">
   <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" height="51">
   </a>
+      <a href="https://tiny-bush-0bef.realyourdad.workers.dev/" target="_blank">
+      <img src="https://img.shields.io/badge/Buy_Me_A_Coke-FF5E5B?style=for-the-badge&logo=coca-cola&logoColor=white" alt="Buy Me A Coke" width="200" height="51" style="border-radius: 8px;" />
+    </a>
 </div>
 
 ## 🤝 Contribution
 
 All forms of contributions are welcome, whether it's new features, bug fixes, or documentation improvements.
+
+## 🏢 Sponsorship
+
+Thanks to the following sponsors for supporting the development of XUGOU:
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
 
 ## 📄 License
 

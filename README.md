@@ -84,6 +84,12 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 欢迎所有形式的贡献，无论是新功能、bug 修复还是文档改进。
 
+## 🏢 赞助
+
+感谢以下赞助商支持 XUGOU 的开发：
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+
 ## 📄 开源协议
 
 本项目采用 MIT 协议开源，详见 [LICENSE](./LICENSE) 文件。
