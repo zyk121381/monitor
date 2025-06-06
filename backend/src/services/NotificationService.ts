@@ -511,7 +511,7 @@ export async function sendNotification(
     // 过滤掉不存在的渠道
     const validChannels = channels.filter(
       (ch): ch is models.NotificationChannel => ch !== null
-    );
+    )
 
     console.log(
       `[发送通知] 有效渠道数量: ${validChannels.length}，类型分布:`,
@@ -651,13 +651,16 @@ export async function shouldSendNotification(
 
   // 获取此对象的特定设置
   const specificSettings = await repositories.getSpecificSettings(type, id);
+  
   console.log(
     `[通知触发检查] 获取到特定设置数量: ${
       specificSettings ? specificSettings.length : 0
     }`
   );
 
-  let targetSettings = specificSettings;
+  let targetSettings = specificSettings.filter(
+    (setting: models.NotificationSettings) => setting.enabled
+  );
   // 如果没有特定设置，使用全局设置
   if (targetSettings.length === 0) {
     const globalSettings = await repositories.getGlobalSettings();
