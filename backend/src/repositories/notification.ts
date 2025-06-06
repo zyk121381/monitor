@@ -12,7 +12,7 @@ import {
   notificationSettings,
   notificationHistory,
 } from "../db/schema";
-import { eq, desc, asc, and, count } from "drizzle-orm";
+import { eq, desc, asc, and, count, isNull } from "drizzle-orm";
 
 // 获取所有通知渠道
 export const getNotificationChannels = async (): Promise<
@@ -33,7 +33,7 @@ export const getNotificationChannelById = async (
     .select()
     .from(notificationChannels)
     .where(eq(notificationChannels.id, id));
-  return result;
+  return result[0];
 };
 
 // 创建通知渠道
@@ -61,36 +61,7 @@ export const updateNotificationChannel = async (
     Omit<NotificationChannel, "id" | "created_at" | "updated_at">
   >
 ): Promise<boolean> => {
-  const sets: string[] = [];
-  const values: any[] = [];
-
-  if (channel.name !== undefined) {
-    sets.push("name = ?");
-    values.push(channel.name);
-  }
-
-  if (channel.type !== undefined) {
-    sets.push("type = ?");
-    values.push(channel.type);
-  }
-
-  if (channel.config !== undefined) {
-    sets.push("config = ?");
-    values.push(channel.config);
-  }
-
-  if (channel.enabled !== undefined) {
-    sets.push("enabled = ?");
-    values.push(channel.enabled ? 1 : 0);
-  }
-
-  if (sets.length === 0) {
-    return false;
-  }
-
-  sets.push("updated_at = CURRENT_TIMESTAMP");
-  values.push(id);
-
+  
   const result = await db
     .update(notificationChannels)
     .set({
@@ -102,7 +73,7 @@ export const updateNotificationChannel = async (
     })
     .where(eq(notificationChannels.id, id));
 
-  return result.length > 0;
+  return result.success;
 };
 
 // 删除通知渠道
@@ -274,10 +245,10 @@ export const getGlobalSettings = async (): Promise<{
     .select()
     .from(notificationSettings)
     .where(eq(notificationSettings.target_type, "global-agent"));
-
+    
   return {
-    monitorSettings,
-    agentSettings,
+    monitorSettings: monitorSettings[0],
+    agentSettings: agentSettings[0],
   };
 };
 
@@ -307,6 +278,8 @@ export const getSpecificSettings = async (
 export const createOrUpdateSettings = async (
   settings: Omit<NotificationSettings, "id" | "created_at" | "updated_at">
 ): Promise<number> => {
+  // 确保target_id为0时使用isNull，否则使用eq
+  const condition = settings.target_id === 0 ? isNull(notificationSettings.target_id) : eq(notificationSettings.target_id, settings.target_id);
   // 先检查是否已存在相同的设置
   const existingSettings = await db
     .select()
@@ -314,31 +287,13 @@ export const createOrUpdateSettings = async (
     .where(
       and(
         eq(notificationSettings.target_type, settings.target_type),
-        eq(notificationSettings.target_id, settings.target_id)
+        condition
       )
     );
 
-  if (existingSettings) {
-    // 如果存在则更新
-    const sets: string[] = [];
-    const values: any[] = [];
-
-    // 动态构建UPDATE语句
-    Object.entries(settings).forEach(([key, value]) => {
-      if (key !== "target_type" && key !== "target_id") {
-        sets.push(`${key} = ?`);
-
-        if (typeof value === "boolean") {
-          values.push(value ? 1 : 0);
-        } else {
-          values.push(value);
-        }
-      }
-    });
-
-    sets.push("updated_at = CURRENT_TIMESTAMP");
-    values.push(existingSettings.id);
-
+  if (existingSettings.length === 1) {
+    const existingSetting = existingSettings[0];
+    // 如果已存在则更新
     await db
       .update(notificationSettings)
       .set({
@@ -355,29 +310,16 @@ export const createOrUpdateSettings = async (
         channels: settings.channels,
         updated_at: new Date().toISOString(),
       })
-      .where(eq(notificationSettings.id, existingSettings.id));
-
+      .where(eq(notificationSettings.id, existingSetting.id));
     return existingSettings.id;
   } else {
     // 如果不存在则创建
-    const keys: string[] = [];
-    const placeholders: string[] = [];
-    const values: any[] = [];
-
-    Object.entries(settings).forEach(([key, value]) => {
-      keys.push(key);
-      placeholders.push("?");
-
-      if (typeof value === "boolean") {
-        values.push(value ? 1 : 0);
-      } else {
-        values.push(value);
-      }
-    });
-
     const result = await db
       .insert(notificationSettings)
       .values({
+        user_id: settings.user_id,
+        target_type: settings.target_type,
+        target_id: settings.target_id,
         enabled: settings.enabled ? 1 : 0,
         on_down: settings.on_down ? 1 : 0,
         on_recovery: settings.on_recovery ? 1 : 0,

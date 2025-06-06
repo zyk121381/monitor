@@ -8,7 +8,7 @@ import {
 import { shouldSendNotification, sendNotification } from "../services";
 import { Hono } from "hono";
 import { db } from "../config";
-import { eq,lt } from "drizzle-orm";
+import { and, eq,lt } from "drizzle-orm";
 import { notificationSettings,agentMetrics24h } from "../db/schema";
 
 const agentTask = new Hono<{}>();
@@ -168,23 +168,29 @@ export async function handleAgentThresholdNotification(
     const settings = await db
       .select()
       .from(notificationSettings)
-      .where(eq(notificationSettings.target_type, "agent"))
-      .where(eq(notificationSettings.target_id, agentId))
-      .where(eq(notificationSettings.enabled, 1))
-      .limit(1);
+      .where(
+        and(
+          eq(notificationSettings.enabled, 1),
+          eq(notificationSettings.target_id, agentId),
+          eq(notificationSettings.target_type, "agent")
+        )
+      );
 
     // 如果没有特定设置，查询全局设置
-    const globalSettings = !settings
+    const globalSettings = settings.length === 0
       ? await db
           .select()
           .from(notificationSettings)
-          .where(eq(notificationSettings.target_type, "global-agent"))
-          .where(eq(notificationSettings.enabled, 1))
-          .limit(1)
+          .where(
+            and(
+              eq(notificationSettings.enabled, 1),
+              eq(notificationSettings.target_type, "global-agent")
+            )
+          )
       : null;
-
+    
     // 使用特定设置或全局设置
-    const finalSettings = settings || globalSettings;
+    const finalSettings = settings.length === 0 ? globalSettings?.[0] : settings[0];
 
     if (!finalSettings) {
       console.log(
