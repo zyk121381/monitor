@@ -32,7 +32,11 @@ export async function getAgentMetricsByIds(agentIds: number[]) {
 
 // 获取单个客户端详情
 export async function getAgentById(id: number) {
-  const agent = await db.select().from(agents).where(eq(agents.id, id)).limit(1);
+  const agent = await db
+    .select()
+    .from(agents)
+    .where(eq(agents.id, id))
+    .limit(1);
   return agent[0];
 }
 
@@ -53,19 +57,22 @@ export async function createAgent(
   // 将 ipAddresses 数组转换为 JSON 字符串
   const ipAddressesJson = ipAddresses ? JSON.stringify(ipAddresses) : null;
 
-  const result = await db.insert(agents).values({
-    name,
-    token,
-    created_by: createdBy,
-    status,
-    created_at: now,
-    updated_at: now,
-    hostname,
-    ip_addresses: ipAddressesJson,
-    os,
-    version,
-    keepalive,
-  }).returning();
+  const result = await db
+    .insert(agents)
+    .values({
+      name,
+      token,
+      created_by: createdBy,
+      status,
+      created_at: now,
+      updated_at: now,
+      hostname,
+      ip_addresses: ipAddressesJson,
+      os,
+      version,
+      keepalive,
+    })
+    .returning();
 
   if (!result) {
     throw new Error("创建客户端失败");
@@ -74,17 +81,19 @@ export async function createAgent(
 }
 
 // 更新客户端信息
-export async function updateAgent(
-  agent: Agent
-) {
+export async function updateAgent(agent: Agent) {
   agent.updated_at = new Date().toISOString();
-  
+
   // 从 agent 对象中排除 id 等索引相关属性，避免更新主键
   const { id, token, created_by, ...updateData } = agent;
 
   try {
     // 确保 updateData 中不包含 id
-    const updatedAgent = await db.update(agents).set(updateData).where(eq(agents.id, id)).returning();
+    const updatedAgent = await db
+      .update(agents)
+      .set(updateData)
+      .where(eq(agents.id, id))
+      .returning();
     return updatedAgent[0];
   } catch (error) {
     console.error("更新客户端失败:", error);
@@ -94,12 +103,13 @@ export async function updateAgent(
 
 // 删除客户端
 export async function deleteAgent(id: number) {
-  // 先删除关联的指标数据
-  await db.delete(agentMetrics24h).where(eq(agentMetrics24h.agent_id, id));
-
-  const result = await db.delete(agents).where(eq(agents.id, id));
-
-  if (!result.success) {
+  try {
+    // 先删除关联的指标数据
+    await db.delete(agentMetrics24h).where(eq(agentMetrics24h.agent_id, id));
+    // 再删除客户端
+    await db.delete(agents).where(eq(agents.id, id));
+  } catch (error) {
+    console.error("删除客户端失败:", error);
     throw new Error("删除客户端失败");
   }
 
@@ -115,9 +125,9 @@ export async function getAgentByToken(token: string) {
 // 获取活跃状态的客户端
 export async function getActiveAgents() {
   const activeAgents = await db
-   .select()
-   .from(agents)
-   .where(eq(agents.status, "active"));
+    .select()
+    .from(agents)
+    .where(eq(agents.status, "active"));
   return activeAgents;
 }
 
@@ -133,7 +143,9 @@ export async function setAgentInactive(id: number) {
 
 // 插入客户端资源指标
 export async function insertAgentMetrics(metrics: Metrics[]) {
-  return await db.batch(metrics.map(metric => db.insert(agentMetrics24h).values(metric)));
+  return await db.batch(
+    metrics.map((metric) => db.insert(agentMetrics24h).values(metric))
+  );
 }
 
 // 获取指定客户端资源指标

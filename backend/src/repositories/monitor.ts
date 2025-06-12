@@ -14,22 +14,18 @@ import { eq, desc, asc, lt } from "drizzle-orm";
 
 // 获取需要检查的监控列表
 export async function getMonitorsToCheck() {
-  
   // 使用SQL表达式或自定义函数来处理日期计算
-  const allmonitors = await db
-    .select()
-    .from(monitors)
-    .execute();
-    
+  const allmonitors = await db.select().from(monitors).execute();
+
   // 在JavaScript中进行日期计算筛选
   const now = new Date().getTime();
   const monitorsToCheck = allmonitors.filter((monitor: Monitor) => {
     if (!monitor.last_checked) return true; // 如果没有检查过，需要检查
-    
+
     const lastCheckedTime = new Date(monitor.last_checked).getTime();
     const intervalMs = (monitor.interval || 60) * 1000; // 转换为毫秒
-    
-    return now > (lastCheckedTime + intervalMs);
+
+    return now > lastCheckedTime + intervalMs;
   });
 
   // 解析所有监控的 headers 字段
