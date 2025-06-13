@@ -511,7 +511,7 @@ export async function sendNotification(
     // 过滤掉不存在的渠道
     const validChannels = channels.filter(
       (ch): ch is models.NotificationChannel => ch !== null
-    )
+    );
 
     console.log(
       `[发送通知] 有效渠道数量: ${validChannels.length}，类型分布:`,
@@ -651,7 +651,7 @@ export async function shouldSendNotification(
 
   // 获取此对象的特定设置
   const specificSettings = await repositories.getSpecificSettings(type, id);
-  
+
   console.log(
     `[通知触发检查] 获取到特定设置数量: ${
       specificSettings ? specificSettings.length : 0
@@ -776,4 +776,30 @@ export async function shouldSendNotification(
   }
 
   return { shouldSend, channels };
+}
+
+/**
+ * 删除通知设置
+ * @param type 通知类型
+ * @param id 通知设置ID
+ */
+export async function deleteNotificationSettings(
+  type: "monitor" | "agent",
+  id: number
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    console.log(`[删除通知设置] 开始删除${type}通知设置，ID=${id}`);
+    // 执行删除操作
+    await repositories.deleteNotificationSettings(type, id);
+  } catch (error) {
+    console.error("[删除通知设置] 删除通知设置失败:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "删除通知设置失败",
+    };
+  }
+  return {
+    success: true,
+    message: `${type}通知设置删除成功`,
+  };
 }
