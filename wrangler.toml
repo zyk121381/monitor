@@ -5,14 +5,14 @@ compatibility_flags = ["nodejs_compat"]
 
 minify = true # 生产环境压缩代码
 
-# 添加定时触发器，每分钟执行一次监控检查
-[triggers]
-crons = ["* * * * *"]
-
 # 设置自定义域名
 routes = [
   { pattern = "xugou.mdzz.uk", custom_domain = true }
 ]
+
+# 添加定时触发器，每分钟执行一次监控检查
+[triggers]
+crons = ["* * * * *"]
 
 [[d1_databases]]
 binding = "DB"
