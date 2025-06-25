@@ -11,6 +11,33 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"), // __dirname 指向 vite.config.ts 文件所在的目录
     },
   },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          // 将 lucide-react 图标单独打包
+          'lucide-icons': ['lucide-react'],
+          // 将主要的 React 相关库打包
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // 将 UI 组件库打包
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+        },
+      },
+      // 限制并发处理的文件数量
+      maxParallelFileOps: 3,
+    },
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
+    // 增加文件监听限制
+    chunkSizeWarningLimit: 1000,
+    // 使用 esbuild 进行压缩（更快）
+    minify: 'esbuild',
+    // 减少构建时的内存使用
+    target: 'esnext',
+    sourcemap: false,
+  },
   server: {
     proxy: {
       "/api": {
