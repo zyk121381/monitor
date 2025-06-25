@@ -4,6 +4,9 @@
 .pnp.js
 node_modules/
 
+.wrangler
+xugou.wiki
+
 # --- Project Specific: Agent ---
 # Build artifacts for the agent project
 /agent/xugou-agent

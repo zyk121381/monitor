@@ -7,6 +7,12 @@ import { getJwtSecret } from "../utils/jwt";
  * 验证请求中的JWT令牌并将解码的payload存入上下文
  */
 export const jwtMiddleware = async (c: Context, next: Next) => {
+  // 跳过所有非 API 路径的认证检查（用于静态文件服务）
+  if (!c.req.path.startsWith("/api/")) {
+    return next();
+  }
+
+  // 跳过特定的 API 端点
   if (
     (c.req.path.endsWith("/status") ||
       c.req.path.endsWith("/register") ||

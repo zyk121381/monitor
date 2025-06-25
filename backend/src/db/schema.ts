@@ -1,4 +1,4 @@
-import { int, sqliteTable, text, real, primaryKey } from "drizzle-orm/sqlite-core";
+import { int, sqliteTable, text, real, primaryKey, index } from "drizzle-orm/sqlite-core";
 
 // 用户表
 export const users = sqliteTable("users", {
@@ -40,7 +40,10 @@ export const monitorStatusHistory24h = sqliteTable("monitor_status_history_24h",
   response_time: int("response_time"),
   status_code: int("status_code"),
   error: text("error")
-});
+}, (table) => ({
+  // monitor_id 和 timestamp 的联合索引，用于优化按监控项和时间查询的性能
+  monitorTimestampIdx: index("monitor_status_history_24h_monitor_timestamp_idx").on(table.monitor_id, table.timestamp)
+}));
 
 // 监控每日统计表
 export const monitorDailyStats = sqliteTable("monitor_daily_stats", {
@@ -55,7 +58,9 @@ export const monitorDailyStats = sqliteTable("monitor_daily_stats", {
   max_response_time: int("max_response_time").default(0),
   availability: real("availability").default(0),
   created_at: text("created_at").notNull()
-});
+}, (table) => ({
+  monitorDateIdx: index("monitor_daily_stats_monitor_id_date_idx").on(table.monitor_id, table.date)
+}));
 
 // 客户端表
 export const agents = sqliteTable("agents", {
@@ -90,7 +95,10 @@ export const agentMetrics24h = sqliteTable("agent_metrics_24h", {
   load_15: real("load_15"),
   disk_metrics: text("disk_metrics"),
   network_metrics: text("network_metrics")
-});
+}, (table) => ({
+  // agent_id 和 timestamp 的联合索引，用于优化按代理和时间查询的性能
+  agentTimestampIdx: index("agent_metrics_24h_agent_timestamp_idx").on(table.agent_id, table.timestamp)
+}));
 
 // 状态页配置表
 export const statusPageConfig = sqliteTable("status_page_config", {

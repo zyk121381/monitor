@@ -15,6 +15,13 @@
       "when": 1749736889133,
       "tag": "0001_fluffy_pestilence",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1750852918387,
+      "tag": "0002_public_domino",
+      "breakpoints": true
     }
   ]
 }

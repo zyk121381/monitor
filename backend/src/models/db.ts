@@ -14,6 +14,11 @@ export interface D1PreparedStatement {
   raw<T = unknown>(): Promise<T[]>;
 }
 
+// Cloudflare Workers Fetcher 类型定义
+export interface Fetcher {
+  fetch(input: RequestInfo, init?: RequestInit): Promise<Response>;
+}
+
 // 扩展D1Result meta属性的类型
 export interface D1Meta {
   last_row_id?: number;
@@ -39,4 +44,5 @@ export interface VersionMetadata {
 export type Bindings = {
   DB: D1Database;
   CF_VERSION_METADATA?: VersionMetadata;
+  ASSETS: Fetcher;
 };

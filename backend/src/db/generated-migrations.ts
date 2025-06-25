@@ -198,5 +198,29 @@ CREATE TABLE IF NOT EXISTS \`users\` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS \`users_username_unique\` ON \`users\` (\`username\`);`
+  },
+  {
+    name: "0001_fluffy_pestilence.sql",
+    sql: `ALTER TABLE \`agents\` DROP COLUMN \`cpu_usage\`;
+--> statement-breakpoint
+ALTER TABLE \`agents\` DROP COLUMN \`memory_total\`;
+--> statement-breakpoint
+ALTER TABLE \`agents\` DROP COLUMN \`memory_used\`;
+--> statement-breakpoint
+ALTER TABLE \`agents\` DROP COLUMN \`disk_total\`;
+--> statement-breakpoint
+ALTER TABLE \`agents\` DROP COLUMN \`disk_used\`;
+--> statement-breakpoint
+ALTER TABLE \`agents\` DROP COLUMN \`network_rx\`;
+--> statement-breakpoint
+ALTER TABLE \`agents\` DROP COLUMN \`network_tx\`;`
+  },
+  {
+    name: "0002_public_domino.sql",
+    sql: `CREATE INDEX IF NOT EXISTS \`agent_metrics_24h_agent_timestamp_idx\` ON \`agent_metrics_24h\` (\`agent_id\`,\`timestamp\`);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS \`monitor_daily_stats_monitor_id_date_idx\` ON \`monitor_daily_stats\` (\`monitor_id\`,\`date\`);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS \`monitor_status_history_24h_monitor_timestamp_idx\` ON \`monitor_status_history_24h\` (\`monitor_id\`,\`timestamp\`);`
   }
 ];

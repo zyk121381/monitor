@@ -29,6 +29,47 @@ app.route("/api/users", api.users);
 app.route("/api/status", api.status);
 app.route("/api/notifications", api.notifications);
 app.route("/api/dashboard", api.dashboard);
+
+// 静态文件路由 - 处理所有非 API 请求，返回前端应用
+app.get("*", async (c) => {
+  const url = new URL(c.req.url);
+  
+  // 如果是 API 路由，跳过静态文件处理
+  if (url.pathname.startsWith("/api/")) {
+    return c.notFound();
+  }
+  
+  try {
+    // 尝试获取请求的静态文件
+    const asset = await c.env.ASSETS.fetch(c.req.url);
+    
+    // 如果文件存在，直接返回
+    if (asset.status === 200) {
+      return asset;
+    }
+    
+    // 如果文件不存在，返回 index.html 以支持 React Router
+    const indexUrl = new URL("/index.html", c.req.url);
+    const indexAsset = await c.env.ASSETS.fetch(indexUrl.toString());
+    
+    if (indexAsset.status === 200) {
+      // 设置正确的 Content-Type
+      const response = new Response(indexAsset.body, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-cache"
+        }
+      });
+      return response;
+    }
+    
+    return c.notFound();
+  } catch (error) {
+    console.error("静态文件服务错误:", error);
+    return c.text("Internal Server Error", 500);
+  }
+});
 // 数据库状态标志，用于记录数据库初始化状态
 let dbInitialized = false;
 

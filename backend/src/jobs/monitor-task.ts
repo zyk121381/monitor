@@ -4,7 +4,11 @@ import { Monitor } from "../models/monitor";
 import { getMonitorsToCheck, checkMonitor } from "../services";
 import { shouldSendNotification, sendNotification } from "../services";
 import { db } from "../config";
-import { monitorDailyStats, monitorStatusHistory24h,monitors } from "../db/schema";
+import {
+  monitorDailyStats,
+  monitorStatusHistory24h,
+  monitors,
+} from "../db/schema";
 import { and, gte, lte } from "drizzle-orm";
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
@@ -25,7 +29,7 @@ async function checkMonitors(c: any) {
 
     // 检查每个监控
     const results = await Promise.all(
-      monitors.map(async (monitor: Monitor) => {  
+      monitors.map(async (monitor: Monitor) => {
         console.log(`开始检查监控: ${monitor.name} (ID: ${monitor.id})`);
         const checkResult = await checkMonitor(monitor);
         // 处理通知
@@ -166,12 +170,12 @@ async function generateDailyStats(c: any) {
     // 一次性获取所有监控
     const monitorsResult = await db.select().from(monitors);
 
-    if (!monitorsResult.results || monitorsResult.results.length === 0) {
+    if (!monitorsResult || monitorsResult.length === 0) {
       console.log("没有找到监控");
       return { success: true, message: "没有监控", processed: 0 };
     }
 
-    const allMonitors = monitorsResult.results as Monitor[];
+    const allMonitors = monitorsResult as Monitor[];
     console.log(`找到 ${allMonitors.length} 个监控`);
 
     // 创建监控ID列表
@@ -191,14 +195,13 @@ async function generateDailyStats(c: any) {
           lte(monitorStatusHistory24h.timestamp, endTime)
         )
       );
- 
 
-    if (!historyResult.results || historyResult.results.length === 0) {
+    if (!historyResult || historyResult.length === 0) {
       console.log(`在 ${dateStr} 没有找到任何监控历史记录`);
       return { success: true, message: "没有历史记录", processed: 0 };
     }
 
-    console.log(`找到 ${historyResult.results.length} 条历史记录`);
+    console.log(`找到 ${historyResult.length} 条历史记录`);
 
     // 按监控ID分组处理数据
     const statsMap = new Map();
@@ -219,7 +222,7 @@ async function generateDailyStats(c: any) {
     }
 
     // 处理所有历史记录
-    for (const record of historyResult.results) {
+    for (const record of historyResult) {
       const monitorId = record.monitor_id;
 
       if (!statsMap.has(monitorId)) continue;
@@ -306,12 +309,14 @@ async function generateDailyStats(c: any) {
 
     // 从 24h 表中删除已处理的数据
     console.log(`开始从24小时热表删除已处理的数据`);
-    await db.delete(monitorStatusHistory24h).where(
-      and(
-        gte(monitorStatusHistory24h.timestamp, startTime),
-        lte(monitorStatusHistory24h.timestamp, endTime)
-      )
-    );
+    await db
+      .delete(monitorStatusHistory24h)
+      .where(
+        and(
+          gte(monitorStatusHistory24h.timestamp, startTime),
+          lte(monitorStatusHistory24h.timestamp, endTime)
+        )
+      );
     console.log(`从24小时热表删除已处理的数据完成`);
 
     return {
@@ -341,9 +346,10 @@ export default {
     const hour = now.getUTCHours();
     const minute = now.getUTCMinutes();
 
-    if (hour === 0 && minute === 5) {
+    if (hour == 0 && minute == 5) {
       // 生成每日监控统计数据
       const statsResult = await generateDailyStats(c);
+      console.log("生成每日监控统计测试");
       if (statsResult.error) {
         console.error("生成每日监控统计数据时出错:", statsResult.error);
       }
