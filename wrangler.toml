@@ -19,9 +19,6 @@ binding = "DB"
 database_name = "xugou_db"
 database_id = "32a2ca5f-3a77-4b08-965e-804612557880"
 
-[build]
-command = "npm run build"
-
 [assets]
 binding = "ASSETS"
 directory = "frontend/dist"

@@ -3,18 +3,15 @@
   "version": "1.0.0",
   "description": "Xugou monitoring system",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:backend": "npm run dev --workspace=backend",
-    "build:frontend": "npm run build --workspace=frontend",
-    "build:backend": "npm run build --workspace=backend",
-    "db:generate": "npm run db:generate --workspace=backend",
-    "build": "npm run db:generate && npm run build:frontend && npm run build:backend",
+    "dev:frontend": "cd frontend && pnpm run dev",
+    "dev:backend": "cd backend && pnpm run dev",
+    "build:frontend": "cd frontend && pnpm run build",
+    "build:backend": "cd backend && pnpm run build",
+    "generate": "cd backend && pnpm run db:generate",
+    "build": "pnpm run generate && pnpm run build:frontend && pnpm run build:backend",
     "deploy": "wrangler deploy",
-    "preview": "npm run build && npm run dev --workspace=backend"
+    "dev:preview": "pnpm run build && cd backend && pnpm run dev",
+    "preview": "cd backend && pnpm run dev"
   }
 }
