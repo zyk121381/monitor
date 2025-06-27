@@ -222,5 +222,9 @@ ALTER TABLE \`agents\` DROP COLUMN \`network_tx\`;`
 CREATE INDEX IF NOT EXISTS \`monitor_daily_stats_monitor_id_date_idx\` ON \`monitor_daily_stats\` (\`monitor_id\`,\`date\`);
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS \`monitor_status_history_24h_monitor_timestamp_idx\` ON \`monitor_status_history_24h\` (\`monitor_id\`,\`timestamp\`);`
+  },
+  {
+    name: "0003_reflective_random.sql",
+    sql: `CREATE INDEX IF NOT EXISTS \`monitor_status_history_24h_timestamp_idx\` ON \`monitor_status_history_24h\` (\`timestamp\`);`
   }
 ];

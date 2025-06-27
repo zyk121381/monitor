@@ -42,7 +42,9 @@ export const monitorStatusHistory24h = sqliteTable("monitor_status_history_24h",
   error: text("error")
 }, (table) => ({
   // monitor_id 和 timestamp 的联合索引，用于优化按监控项和时间查询的性能
-  monitorTimestampIdx: index("monitor_status_history_24h_monitor_timestamp_idx").on(table.monitor_id, table.timestamp)
+  monitorTimestampIdx: index("monitor_status_history_24h_monitor_timestamp_idx").on(table.monitor_id, table.timestamp),
+  // timestamp 单独索引，用于优化按时间排序和范围查询的性能
+  timestampIdx: index("monitor_status_history_24h_timestamp_idx").on(table.timestamp)
 }));
 
 // 监控每日统计表
