@@ -60,7 +60,7 @@ Default username: admin  Default password: admin123
 
 ### Video Tutorial
 
-[![XUGOU Video Tutorial](https://img.youtube.com/vi/jisEpcqDego/0.jpg)](https://youtu.be/J7_xtsJIYiM)
+[![XUGOU Video Tutorial](https://img.youtube.com/vi/jisEpcqDego/0.jpg)](https://youtu.be/w2by-7jDCM0)
 
 ## FAQ
 
