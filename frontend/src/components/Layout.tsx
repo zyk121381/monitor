@@ -36,7 +36,7 @@ const Layout = ({ children }: LayoutProps) => {
               <Flex gap="3" mt="2" direction={{ initial: "column", sm: "row" }}>
                 <Button variant="link" asChild>
                   <a
-                    href="https://zaunist.com"
+                    href="https://www.valerianblog.link"
                     target="_blank"
                     rel="noopener noreferrer"
                   
@@ -51,22 +51,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </Button>
                 <Button variant="link" asChild>
                   <a
-                    href="https://www.youtube.com/@zaunist"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                
-                  >
-                    <FontAwesomeIcon
-                      icon={faYoutube}
-                      size="lg"
-                  
-                    />
-                    <Text size="2">{t("footer.youtube")}</Text>
-                  </a>
-                </Button>
-                <Button variant="link" asChild>
-                  <a
-                    href="https://mail.mdzz.uk"
+                    href="https://feedback.valerianblog.link"
                     target="_blank"
                     rel="noopener noreferrer"
                   
