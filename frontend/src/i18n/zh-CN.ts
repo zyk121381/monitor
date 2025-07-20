@@ -10,7 +10,7 @@ const zhCN = {
     "navbar.userManagement": "用户管理",
     "navbar.profile": "个人资料",
     "navbar.logout": "退出登录",
-    "navbar.login": "登录",
+    "navbar.login": "关于",
     "navbar.loggedInAs": "已登录为",
 
     // 通用按钮和提示
