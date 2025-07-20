@@ -190,7 +190,7 @@ export async function createDefaultStatusPage(): Promise<void> {
     await db.insert(statusPageConfig).values({
       user_id: userId,
       title: "系统状态",
-      description: "实时监控系统运行状态",
+      description: "实时监控系统运行状态(每5min更新一次)",
       logo_url: "",
       custom_css: "",
       created_at: now,
