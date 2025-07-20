@@ -10,7 +10,7 @@ const enUS = {
     "navbar.userManagement": "User Management",
     "navbar.profile": "Profile",
     "navbar.logout": "Logout",
-    "navbar.login": "Login",
+    "navbar.login": "About",
     "navbar.loggedInAs": "Logged in as",
 
     // Common buttons and prompts
@@ -78,9 +78,9 @@ const enUS = {
     "home.learnMore": "Learn More",
     "home.features.title": "Features",
     "home.features.monitoring": "Real-time Monitoring",
-    "home.features.monitoring.desc": "Real-time monitoring of APIs and agents",
+    "home.features.monitoring.desc": "Real-time monitoring of services and agents",
     "home.features.alerts": "Alert Notifications",
-    "home.features.alerts.desc": "Notify you promptly when monitoring anomalies occur",
+    "home.features.alerts.desc": "Notify my promptly when monitoring anomalies occur",
     "home.features.dashboard": "Visual Dashboard",
     "home.features.dashboard.desc": "Intuitive display of monitoring data and statistics",
     "home.features.statusPage": "Status Page",
