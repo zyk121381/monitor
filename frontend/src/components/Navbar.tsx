@@ -301,7 +301,7 @@ const Navbar = () => {
                           <ExitIcon width="14" height="14" />
                           <Text size="2">{t("navbar.logout")}</Text>
                         </Flex>
-                      </DropdownMenuItem>
+                      </DropdownMenuItem>服务状态
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </>
@@ -312,7 +312,7 @@ const Navbar = () => {
 
                   <Separator orientation="vertical" className="!h-6" />
 
-                  <Button variant="ghost" onClick={() => navigate("/login")}>
+                  <Button variant="ghost" onClick={() => navigate("/status")}>
                     {t("navbar.login")}
                   </Button>
                 </Flex>
