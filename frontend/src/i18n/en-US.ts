@@ -535,7 +535,7 @@ const enUS = {
     "register.error.tryAgain": "Registration failed, please try again later",
 
     // Footer
-    "footer.copyright": "© {year} XUGOU. All rights reserved.",
+    "footer.copyright": "Copyright © {year} Revelation.",
     "footer.blog": "Blog",
     "footer.youtube": "YouTube Channel",
     "footer.tempMail": "Feedback",
