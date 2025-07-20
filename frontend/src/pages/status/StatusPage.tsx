@@ -41,7 +41,7 @@ const StatusPage = () => {
     // 设置定时刷新，每3分钟更新数据
     const intervalId = setInterval(() => {
       fetchData();
-    }, 180000);
+    }, 300000);
     return () => clearInterval(intervalId);
   }, []);
 
