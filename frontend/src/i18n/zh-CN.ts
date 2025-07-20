@@ -62,8 +62,8 @@ const zhCN = {
     "language.enUS": "English",
 
     // 首页
-    "home.title": "欢迎使用 XUGOU",
-    "home.subtitle": "简单易用的监控平台",
+    "home.title": "欢迎使用 Revelation",
+    "home.subtitle": "服务监控平台",
     "home.getStarted": "开始使用",
     "home.learnMore": "了解更多",
     "home.features.title": "功能特点",
@@ -518,10 +518,10 @@ const zhCN = {
     "register.error.tryAgain": "注册失败，请稍后再试",
 
     // 页脚
-    "footer.copyright": "© {year} XUGOU. 保留所有权利。",
+    "footer.copyright": "Copyright © {year} Revelation.",
     "footer.blog": "博客",
     "footer.youtube": "油管频道",
-    "footer.tempMail": "24小时临时邮箱",
+    "footer.tempMail": "反馈",
 
     // AgentCard 组件
     "agentCard.receivedData": "AgentCard接收到的客户端数据",
