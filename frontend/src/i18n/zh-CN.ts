@@ -359,8 +359,8 @@ const zhCN = {
     // 状态页
     "statusPage.title": "系统状态",
     "statusPage.allOperational": "所有系统正常运行",
-    "statusPage.apiServices": "API服务状态",
-    "statusPage.agentStatus": "客户端监控状态",
+    "statusPage.apiServices": "部分公共服务状态",
+    "statusPage.agentStatus": "部分服务器监控状态",
 
     // 状态页配置
     "statusPageConfig.title": "状态页配置",
