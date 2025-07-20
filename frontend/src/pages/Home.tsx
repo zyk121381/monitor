@@ -46,7 +46,7 @@ const Home = () => {
                 </Button>
                 <Button asChild>
                   <a
-                    href="https://github.com/zaunist/xugou"
+                    href="https://www.valerianblog.link/"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
