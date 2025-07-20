@@ -42,7 +42,7 @@ const Home = () => {
             ) : (
               <>
                 <Button asChild>
-                  <Link to="/login">{t("home.getStarted")}</Link>
+                  <Link to="/status">{t("home.getStarted")}</Link>
                 </Button>
                 <Button asChild>
                   <a
