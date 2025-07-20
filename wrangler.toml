@@ -7,8 +7,7 @@ minify = true # 生产环境压缩代码
 
 # 设置自定义域名
 routes = [
-  { pattern = "xugou.mdzz.uk", custom_domain = true },
-  { pattern = "api.xugou.mdzz.uk", custom_domain = true }
+  { pattern = "monitor-cf.revelation.qzz.io", custom_domain = true }
 ]
 
 # 添加定时触发器，每分钟执行一次监控检查
@@ -17,8 +16,8 @@ crons = ["* * * * *"]
 
 [[d1_databases]]
 binding = "DB"
-database_name = "xugou_db"
-database_id = "32a2ca5f-3a77-4b08-965e-804612557880"
+database_name = "monitor"
+database_id = "bfa3c8b5-0a53-4c7c-a3b7-8c12d987465e"
 
 [assets]
 binding = "ASSETS"
