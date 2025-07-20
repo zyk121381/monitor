@@ -72,8 +72,8 @@ const enUS = {
     "language.enUS": "English",
 
     // Home page
-    "home.title": "Welcome to XUGOU",
-    "home.subtitle": "A simple and easy-to-use monitoring platform",
+    "home.title": "Welcome to Revelation",
+    "home.subtitle": "Services monitoring platform",
     "home.getStarted": "Get Started",
     "home.learnMore": "Learn More",
     "home.features.title": "Features",
@@ -538,7 +538,7 @@ const enUS = {
     "footer.copyright": "© {year} XUGOU. All rights reserved.",
     "footer.blog": "Blog",
     "footer.youtube": "YouTube Channel",
-    "footer.tempMail": "24-hour Temporary Email",
+    "footer.tempMail": "Feedback",
 
     // AgentCard Component
     "agentCard.receivedData": "AgentCard received client data",
